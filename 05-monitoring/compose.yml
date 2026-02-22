@@ -1,16 +1,4 @@
 services:
-    # --- WHAT'S UP DOCKER ---
-  wud:
-    image: fmartinou/whats-up-docker:latest
-    container_name: wud
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 4765:3000
-    environment:
-      - WUD_WATCH_INTERVAL=1h
-    restart: unless-stopped
-
   # --- UPTIME KUMA ---
   uptime-kuma:
     image: louislam/uptime-kuma:2
@@ -36,7 +24,7 @@ services:
       - ${MEDIA_DATA_DIR}/musique:/musiques
       - ${MEDIA_DATA_DIR}/films:/films
       - ${MEDIA_DATA_DIR}/series:/series
-      - /root/.ssh:/root/.ssh:ro
+      - ${SSH_DATA_DIR}:/root/.ssh:ro
       - ${APPS_DATA_DIR}:/apps_config
     networks:
       - lefrigo-net

@@ -20,6 +20,7 @@ services:
   # --- BENTOPDF ---
   bentopdf:
     image: ghcr.io/alam00000/bentopdf-simple:2.2.1
+    container_name: bentopdf
     ports:
       - "3250:8080"
     restart: unless-stopped
@@ -47,40 +48,9 @@ services:
       retries: 3
       start_period: 20s
 
-  # --- CONVERTX ---
-  convertx:
-    image: ghcr.io/c4illin/convertx
-    restart: unless-stopped
-    ports:
-      - "3467:3000"
-    networks:
-      - lefrigo-net
-    environment:
-      - ALLOW_UNAUTHENTICATED=true
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.convertx.rule=Host(`converter.le-frigo.fr`)"
-      - "traefik.http.routers.convertx.service=convertx"
-      - "traefik.http.routers.convertx.entrypoints=websecure"
-      - "traefik.http.routers.convertx.tls.certresolver=myresolver"
-      - "traefik.http.routers.convertx.middlewares=authentik@docker"
-      - "traefik.http.services.convertx.loadbalancer.server.port=3000"
-    deploy:
-      resources:
-        limits:
-          cpus: '1.00'
-          memory: 1G
-        reservations:
-          memory: 256M
-    healthcheck:
-      test: ["CMD", "bun", "-e", "await fetch('http://127.0.0.1:3000')"]
-      interval: 1m
-      timeout: 5s
-      retries: 3
-      start_period: 20s
-
   ntfy:
     image: binwiederhier/ntfy
+    container_name: ntfy
     command:
       - serve
     environment:
