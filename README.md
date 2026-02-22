@@ -53,6 +53,8 @@ Productivity and utility services.
 
 - pgAdmin: Graphical administration for Postgres.
 
+- Jellyseerr: Ask movie or series publc interface
+
 ### 05-Monitoring
 Health and safety services.
 
