@@ -1,0 +1,66 @@
+services:
+    # --- WHAT'S UP DOCKER ---
+  wud:
+    image: fmartinou/whats-up-docker:latest
+    container_name: wud
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 4765:3000
+    environment:
+      - WUD_WATCH_INTERVAL=1h
+    restart: unless-stopped
+
+  # --- UPTIME KUMA ---
+  uptime-kuma:
+    image: louislam/uptime-kuma:2
+    container_name: uptime-kuma
+    restart: unless-stopped
+    volumes:
+      - ${APPS_DATA_DIR}/uptime_kuma:/app/data
+    ports:
+      - "9876:3001"
+  
+  # --- BACKREST ---
+  backrest:
+    image: garethgeorge/backrest:latest
+    container_name: backrest
+    user: 0:0
+    environment:
+      - BACKREST_CONFIG=/config/config.json
+      - BACKREST_DATA=/data
+    volumes:
+      - ${APPS_DATA_DIR}/backrest/config:/config
+      - ${APPS_DATA_DIR}/backrest/cache:/root/.cache/restic
+      - ${APPS_DATA_DIR}/backrest/data:/data
+      - ${MEDIA_DATA_DIR}/musique:/musiques
+      - ${MEDIA_DATA_DIR}/films:/films
+      - ${MEDIA_DATA_DIR}/series:/series
+      - /root/.ssh:/root/.ssh:ro
+      - ${APPS_DATA_DIR}:/apps_config
+    networks:
+      - lefrigo-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backrest.rule=Host(`backup.le-frigo.fr`)"
+      - "traefik.http.routers.backrest.entrypoints=websecure"
+      - "traefik.http.routers.backrest.tls.certresolver=myresolver"
+      - "traefik.http.routers.backrest.middlewares=authentik@docker"
+      - "traefik.http.services.backrest.loadbalancer.server.port=9898"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 2G
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:9898/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+networks:
+  lefrigo-net:
+    external: true
