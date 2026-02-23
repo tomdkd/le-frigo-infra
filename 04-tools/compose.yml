@@ -94,10 +94,12 @@ services:
 
   # --- FILEBROWSER ---
   filebrowser:
-    image: filebrowser/filebrowser:latest
+    image: gtstef/filebrowser:stable
     container_name: filebrowser
     user: "${PUID}:${PGID}"
     restart: unless-stopped
+    ports:
+      - 8000:8080
     volumes:
       - ${MEDIA_DATA_DIR}:/srv/data
       - ${MEDIA_DATA_DIR}:/srv/media
@@ -114,17 +116,11 @@ services:
           cpus: '0.10'
           memory: 128M
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 3s
+      start_period: 10s
       retries: 3
-    command: [ 
-      "--address", "0.0.0.0", 
-      "--noauth",
-      "--port", "8080", 
-      "--database", "/database/filebrowser.db", 
-      "--root", "/srv" 
-    ]
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.filebrowser.rule=Host(`files.le-frigo.fr`)"
