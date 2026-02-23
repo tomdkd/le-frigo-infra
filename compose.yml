@@ -1,5 +1,6 @@
 services:
   docker-proxy:
+    image: tecnativa/docker-socket-proxy
     container_name: docker-proxy
     environment:
       - CONTAINERS=1
@@ -10,17 +11,16 @@ services:
       - AUTH=1
       - INFO=1
       - EVENTS=1
-    image: tecnativa/docker-socket-proxy
     networks:
       - dockhand-internal
     privileged: True
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
   dockhand:
-    container_name: dockhand
-    environment:
-      - DOCKER_HOST=tcp://docker-proxy:2375
     image: fnsys/dockhand:latest
+    container_name: dockhand
+    volumes:
+      - ${APPS_DATA_DIR}/dockhand/data:/app/data
     networks:
       - dockhand-internal
       - lefrigo-net

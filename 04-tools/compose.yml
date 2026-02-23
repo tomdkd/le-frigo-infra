@@ -96,15 +96,15 @@ services:
   filebrowser:
     image: gtstef/filebrowser:stable
     container_name: filebrowser
-    user: "${PUID}:${PGID}"
+    #user: "${PUID}:${PGID}"
     restart: unless-stopped
     ports:
-      - 8000:8080
+      - 8000:80
     volumes:
-      - ${MEDIA_DATA_DIR}:/srv/data
-      - ${MEDIA_DATA_DIR}:/srv/media
-      - ${APPS_DATA_DIR}/filebrowser/config:/config
-      - ${APPS_DATA_DIR}/filebrowser/database:/database
+      - ${MEDIA_DATA_DIR}:/folder/data
+      - ${MEDIA_DATA_DIR}:/folder/media
+      - ${APPS_DATA_DIR}/filebrowser/database:/home/filebrowser/data
+      - ${APPS_DATA_DIR}/filebrowser/tmp:/home/filebrowser/tmp
     networks:
       - lefrigo-net
     deploy:
@@ -116,7 +116,7 @@ services:
           cpus: '0.10'
           memory: 128M
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
       interval: 30s
       timeout: 3s
       start_period: 10s
