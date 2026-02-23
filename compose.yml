@@ -1,0 +1,35 @@
+services:
+  docker-proxy:
+    container_name: docker-proxy
+    environment:
+      - CONTAINERS=1
+      - IMAGES=1
+      - NETWORKS=1
+      - VOLUMES=1
+      - POST=1
+      - AUTH=1
+      - INFO=1
+      - EVENTS=1
+    image: tecnativa/docker-socket-proxy
+    networks:
+      - dockhand-internal
+    privileged: True
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+  dockhand:
+    container_name: dockhand
+    environment:
+      - DOCKER_HOST=tcp://docker-proxy:2375
+    image: fnsys/dockhand:latest
+    networks:
+      - dockhand-internal
+      - lefrigo-net
+    ports:
+      - '3000:3000'
+
+networks:
+  dockhand-internal:
+    name: dockhand-internal
+  lefrigo-net:
+    driver: bridge
+    name: lefrigo-net
