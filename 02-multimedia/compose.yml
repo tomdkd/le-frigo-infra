@@ -80,7 +80,10 @@ services:
       - REDIS_HOSTNAME=${REDIS_HOSTNAME}
       - TZ=Europe/Paris
     depends_on:
-      - immich-db
+      immich-db:
+        condition: service_healthy
+      immich-machine-learning:
+        condition: service_healthy
     networks:
       - lefrigo-net
     labels:

@@ -3,6 +3,8 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
+    ports:
+     - "5050:8080"
     restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: ${ADMIN_EMAIL}
@@ -96,7 +98,6 @@ services:
   filebrowser:
     image: gtstef/filebrowser:stable
     container_name: filebrowser
-    #user: "${PUID}:${PGID}"
     restart: unless-stopped
     ports:
       - 8000:80
@@ -133,6 +134,8 @@ services:
     image: bellamy/wallos:latest
     container_name: wallos
     restart: unless-stopped
+    ports:
+      - 8282:80/tcp
     environment:
       - TZ=Europe/Paris
     volumes:

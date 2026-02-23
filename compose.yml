@@ -11,6 +11,7 @@ services:
       - AUTH=1
       - INFO=1
       - EVENTS=1
+      - PORT=1
     networks:
       - dockhand-internal
     privileged: True

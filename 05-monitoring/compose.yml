@@ -14,6 +14,8 @@ services:
     image: garethgeorge/backrest:latest
     container_name: backrest
     user: 0:0
+    ports:
+      - "9898:9898"
     environment:
       - BACKREST_CONFIG=/config/config.json
       - BACKREST_DATA=/data

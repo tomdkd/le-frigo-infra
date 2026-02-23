@@ -25,7 +25,7 @@ services:
     ports:
       - 8080:8080
       - 9696:9696
-      - 8000:8000
+      - 8001:8000
     restart: always
     networks:
       - lefrigo-net
@@ -107,6 +107,8 @@ services:
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
+    ports:
+      - 7878:7878
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -145,6 +147,8 @@ services:
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
+    ports:
+      - 8989:8989
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
