@@ -3,6 +3,7 @@ services:
   uptime-kuma:
     image: louislam/uptime-kuma:2
     container_name: uptime-kuma
+    user: "${PUID}:${PGID}"
     restart: unless-stopped
     volumes:
       - ${APPS_DATA_DIR}/uptime_kuma:/app/data
@@ -13,7 +14,7 @@ services:
   backrest:
     image: garethgeorge/backrest:latest
     container_name: backrest
-    user: 0:0
+    user: "0:0"
     ports:
       - "9898:9898"
     environment:

@@ -3,6 +3,7 @@ services:
   gluetun:
     image: qmcgaw/gluetun
     container_name: gluetun
+    user: "0:0"
     cap_add:
       - NET_ADMIN
     devices:
@@ -12,7 +13,8 @@ services:
       - VPN_TYPE=wireguard
       - WIREGUARD_PRIVATE_KEY=${VPN_WG_PRIVATE_KEY}
       - WIREGUARD_ADDRESSES=${VPN_WG_ADDRESS}
-      - SERVER_COUNTRIES=${VPN_COUNTRY}
+      #- SERVER_COUNTRIES=${VPN_COUNTRY}
+      - SERVER_NAMES=BE#61
       - OPENVPN_USER=${OPENVPN_USER}
       - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
       - VPN_PORT_FORWARDING=on
@@ -21,7 +23,8 @@ services:
       - HEALTH_RESTART_VPN=no
       - HEALTH_INITIAL_DELAY=30s
       - DNS_SERVER=on
-      - DNS_ADDRESS=1.1.1.1
+      - DNS_ADDRESS=8.8.8.8
+      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
     ports:
       - 8080:8080
       - 9696:9696
@@ -54,7 +57,7 @@ services:
       - TZ=Europe/Paris
       - WEBUI_PORT=8080
     volumes:
-      - ${APPS_DATA_DIR}/qbittorrent/config:/config
+      - ${APPS_DATA_DIR}/qbitorrent/config:/config
       - ${MEDIA_DATA_DIR}:/data
     depends_on:
       gluetun:
@@ -122,6 +125,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.radarr.rule=Host(`radarr.le-frigo.fr`)"
+      - "traefik.http.routers.radarr.service=radarr"
       - "traefik.http.routers.radarr.entrypoints=websecure"
       - "traefik.http.routers.radarr.tls.certresolver=myresolver"
       - "traefik.http.routers.radarr.middlewares=authentik@docker"
@@ -162,6 +166,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sonarr.rule=Host(`sonarr.le-frigo.fr`)"
+      - "traefik.http.routers.sonarr.service=sonarr"
       - "traefik.http.routers.sonarr.entrypoints=websecure"
       - "traefik.http.routers.sonarr.tls.certresolver=myresolver"
       - "traefik.http.routers.sonarr.middlewares=authentik@docker"

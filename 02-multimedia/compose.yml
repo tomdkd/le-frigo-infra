@@ -3,36 +3,65 @@ services:
   jellyfin:
     image: jellyfin/jellyfin
     container_name: jellyfin
-    user: "3008:568"
+    user: "${PUID}:${PGID}"
     restart: unless-stopped
     ports:
       - 8096:8096/tcp
       - 7359:7359/udp
     networks:
       - lefrigo-net
+    environment:
+      - JELLYFIN_PublishedServerUrl=https://stream.le-frigo.fr
     volumes:
       - ${APPS_DATA_DIR}/jellyfin/config:/config
       - ${APPS_DATA_DIR}/jellyfin/cache:/cache
-      - ${MEDIA_DATA_DIR}/films:/films
-      - ${MEDIA_DATA_DIR}/series:/series:ro
+      - type: bind
+        source: ${MEDIA_DATA_DIR}/films
+        target: /films
+      - type: bind
+        source: ${MEDIA_DATA_DIR}/series
+        target: /series
+        read_only: true
+      - type: bind
+        source: ${MEDIA_DATA_DIR}/stuck_in_yesterday
+        target: /stuck_in_yesterday
+        read_only: true
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.jellyfin.rule=Host(`stream.le-frigo.fr`)"
-      - "traefik.http.routers.jellyfin.entrypoints=websecure"
-      - "traefik.http.routers.jellyfin.tls.certresolver=myresolver"
-      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+      - "traefik.http.routers.jellyfin-router.rule=Host(`stream.le-frigo.fr`)"
+      - "traefik.http.routers.jellyfin-router.entrypoints=websecure"
+      - "traefik.http.routers.jellyfin-router.tls.certresolver=myresolver"
+      - "traefik.http.routers.jellyfin-router.service=jellyfin-svc"
+      - "traefik.http.services.jellyfin-svc.loadbalancer.server.port=8096"
+      - "traefik.docker.network=lefrigo-net"
+    deploy:
+      resources:
+        limits:
+          cpus: '4.00'
+          memory: 8G
+        reservations:
+          memory: 2G 
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8096/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # --- NAVIDROME ---
   navidrome:
     image: deluan/navidrome:0.60.3
     container_name: navidrome
-    user: "3007:568"
+    user: "${PUID}:${PGID}"
     ports:
       - "4533:4533"
     restart: unless-stopped
     environment:
       - ND_BASEURL=https://musique.le-frigo.fr
       - ND_REVERSEPROXY=true
+      - ND_EXTAUTH_TRUSTEDSOURCES=172.16.0.0/12,192.168.1.0/24
+      - ND_EXTAUTH_USERHEADER=X-Authentik-Username
+      - ND_LOGLEVEL=debug
     volumes:
       - ${APPS_DATA_DIR}/navidrome/data:/data
       - ${MEDIA_DATA_DIR}/musique:/music:ro
@@ -40,33 +69,77 @@ services:
       - lefrigo-net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.navidrome.rule=Host(`musique.le-frigo.fr`) && !PathPrefix(`/rest`)"
-      - "traefik.http.routers.navidrome.entrypoints=websecure"
-      - "traefik.http.routers.navidrome.tls.certresolver=myresolver"
-      - "traefik.http.routers.navidrome.middlewares=authentik@docker"
+      # --- ROUTEUR 1 : Interface Web (Protégée) ---
+      - "traefik.http.routers.navidrome-ui.rule=Host(`musique.le-frigo.fr`) && !PathPrefix(`/rest`)"
+      - "traefik.http.routers.navidrome-ui.entrypoints=websecure"
+      - "traefik.http.routers.navidrome-ui.tls=true"
+      - "traefik.http.routers.navidrome-ui.tls.certresolver=myresolver"
+      - "traefik.http.routers.navidrome-ui.middlewares=authentik@docker"
+      - "traefik.http.routers.navidrome-ui.service=navidrome-svc"
+
+      # --- ROUTEUR 2 : API Subsonic (Ouverte) ---
+      - "traefik.http.routers.navidrome-api.rule=Host(`musique.le-frigo.fr`) && PathPrefix(`/rest`)"
+      - "traefik.http.routers.navidrome-api.entrypoints=websecure"
+      - "traefik.http.routers.navidrome-api.tls=true"
+      - "traefik.http.routers.navidrome-api.tls.certresolver=myresolver"
+      - "traefik.http.routers.navidrome-api.service=navidrome-svc"
+      - "traefik.http.services.navidrome-svc.loadbalancer.server.port=4533"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1G
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:4533/ping || exit 1"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
   # --- KAVITA ---
   kavita:
-    image: jvmilazz0/kavita:latest
+    image: lscr.io/linuxserver/kavita:latest
     container_name: kavita
-    user: "3008:568"
     restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Paris
     volumes:
-      - ${MEDIA_DATA_DIR}/mangas:/mangas
-      - ${MEDIA_DATA_DIR}/livres:/books
-      - ${APPS_DATA_DIR}/kavita/config:/kavita/config
+      - ${MEDIA_DATA_DIR}/books:/data:ro
+      - ${APPS_DATA_DIR}/kavita/config:/config
     networks:
       - lefrigo-net
+    ports:
+      - "5000:5000"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.kavita.rule=Host(`manga.le-frigo.fr`)"
+      - "traefik.http.routers.kavita.rule=Host(`books.le-frigo.fr`)"
+      - "traefik.http.routers.kavita.service=kavita"
       - "traefik.http.routers.kavita.entrypoints=websecure"
       - "traefik.http.routers.kavita.tls.certresolver=myresolver"
+      - "traefik.http.services.kavita.loadbalancer.server.port=5000"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/api/health || exit 1"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # --- IMMICH ---
   immich-server:
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
     container_name: immich_server
+    user: "${PUID}:${PGID}"
     ports:
       - '2283:2283'
     volumes:
@@ -79,6 +152,8 @@ services:
       - DB_DATABASE_NAME=${DB_DATABASE_NAME}
       - REDIS_HOSTNAME=${REDIS_HOSTNAME}
       - TZ=Europe/Paris
+    healthcheck:
+      disable: false
     depends_on:
       immich-db:
         condition: service_healthy
@@ -88,9 +163,11 @@ services:
       - lefrigo-net
     labels:
       - "traefik.enable=true"
+      - "traefik.http.routers.immich.service=immich"
       - "traefik.http.routers.immich.rule=Host(`photos.le-frigo.fr`)"
       - "traefik.http.routers.immich.entrypoints=websecure"
       - "traefik.http.routers.immich.tls.certresolver=myresolver"
+      - "traefik.http.services.immich.loadbalancer.server.port=2283"
 
   immich-machine-learning:
     container_name: immich_machine_learning
@@ -114,6 +191,7 @@ services:
   immich-db:
     image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
     container_name: immich_postgres
+    user: "${PUID}:${PGID}"
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_USER: ${DB_USERNAME}
@@ -121,10 +199,14 @@ services:
       POSTGRES_INITDB_ARGS: '--data-checksums'
       DB_STORAGE_TYPE: 'HDD'
     volumes:
-      - ${APPS_DATA_DIR}/immich/postgres:/var/lib/postgresql/data
+      - ${APPS_DATA_DIR}/immich:/var/lib/postgresql/data
     shm_size: 128mb
     healthcheck:
-      disable: false
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     restart: always
     networks:
       - lefrigo-net

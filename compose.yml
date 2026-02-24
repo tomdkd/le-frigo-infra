@@ -20,6 +20,7 @@ services:
   dockhand:
     image: fnsys/dockhand:latest
     container_name: dockhand
+    user: "1000:1000"
     volumes:
       - ${APPS_DATA_DIR}/dockhand/data:/app/data
     networks:

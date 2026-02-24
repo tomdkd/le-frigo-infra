@@ -1,7 +1,7 @@
 services:
   # --- PGADMIN ---
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:latest
     container_name: pgadmin
     ports:
      - "5050:8080"
@@ -9,15 +9,11 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${ADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${ADMIN_PASSWORD}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_LISTEN_PORT: 8080
+    volumes:
+     - ${APPS_DATA_DIR}/pgadmin/data:/var/lib/pgadmin
     networks:
       - lefrigo-net
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.le-frigo.fr`)"
-      - "traefik.http.routers.pgadmin.entrypoints=websecure"
-      - "traefik.http.routers.pgadmin.tls.certresolver=myresolver"
-      - "traefik.http.routers.pgadmin.middlewares=authentik@docker"
 
   # --- BENTOPDF ---
   bentopdf:
@@ -63,7 +59,7 @@ services:
       - NTFY_AUTH_DEFAULT_ACCESS=deny-all
       - NTFY_ATTACHMENT_CACHE_DIR=/var/lib/ntfy/attachments
       - NTFY_ENABLE_LOGIN=true
-    user: 3005:568
+    user: "${PUID}:${PGID}"
     volumes:
       - ${APPS_DATA_DIR}/ntfy/cache:/var/cache/ntfy
       - ${APPS_DATA_DIR}/ntfy/storage:/var/lib/ntfy
@@ -96,16 +92,20 @@ services:
 
   # --- FILEBROWSER ---
   filebrowser:
-    image: gtstef/filebrowser:stable
+    image: filebrowser/filebrowser:latest
     container_name: filebrowser
     restart: unless-stopped
+    user: "${PUID}:${PGID}"
     ports:
-      - 8000:80
+      - 8081:8080
+    environment:
+      - UID=${PUID}
+      - GID=${PGID}
     volumes:
-      - ${MEDIA_DATA_DIR}:/folder/data
-      - ${MEDIA_DATA_DIR}:/folder/media
-      - ${APPS_DATA_DIR}/filebrowser/database:/home/filebrowser/data
-      - ${APPS_DATA_DIR}/filebrowser/tmp:/home/filebrowser/tmp
+      - ${APPS_DATA_DIR}:/srv/data
+      - ${APPS_DATA_DIR}:/srv/apps
+      - ${APPS_DATA_DIR}/filebrowser/database:/database
+      - ${APPS_DATA_DIR}/filebrowser/config:/config
     networks:
       - lefrigo-net
     deploy:
@@ -117,16 +117,23 @@ services:
           cpus: '0.10'
           memory: 128M
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
       interval: 30s
-      timeout: 3s
-      start_period: 10s
+      timeout: 5s
       retries: 3
+    command: [ 
+      "--address", "0.0.0.0", 
+      "--noauth",
+      "--port", "8080", 
+      "--database", "/database/filebrowser.db", 
+      "--root", "/srv" 
+    ]
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.filebrowser.rule=Host(`files.le-frigo.fr`)"
       - "traefik.http.routers.filebrowser.entrypoints=websecure"
       - "traefik.http.routers.filebrowser.tls.certresolver=myresolver"
+      - "traefik.http.services.filebrowser.loadbalancer.server.port=8080"
       - "traefik.http.routers.filebrowser.middlewares=authentik@docker"
 
   # --- WALLOS ---
@@ -148,7 +155,7 @@ services:
       - "traefik.http.routers.wallos.rule=Host(`wallos.le-frigo.fr`)"
       - "traefik.http.routers.wallos.entrypoints=websecure"
       - "traefik.http.routers.wallos.tls.certresolver=myresolver"
-      - "traefik.http.routers.wallos.middlewares=authentik@docker"
+      - "traefik.http.services.wallos.loadbalancer.server.port=80"
 
   jellyseerr:
     image: ghcr.io/seerr-team/seerr:latest
