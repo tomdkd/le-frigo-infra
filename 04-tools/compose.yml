@@ -102,7 +102,7 @@ services:
       - UID=${PUID}
       - GID=${PGID}
     volumes:
-      - ${APPS_DATA_DIR}:/srv/data
+      - ${MEDIA_DATA_DIR}:/srv/data
       - ${APPS_DATA_DIR}:/srv/apps
       - ${APPS_DATA_DIR}/filebrowser/database:/database
       - ${APPS_DATA_DIR}/filebrowser/config:/config
@@ -229,6 +229,37 @@ services:
       - "traefik.http.routers.outline.entrypoints=websecure"
       - "traefik.http.routers.outline.tls.certresolver=myresolver"
       - "traefik.http.services.outline.loadbalancer.server.port=3421"
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - 8123:8123
+    environment:
+      - TZ=Europe/Paris
+    user: "${PUID}:${PGID}"
+    volumes:
+      - ${APPS_DATA_DIR}/homeassistant/config:/config
+      - ${APPS_DATA_DIR}/homeassistant/storage:/var/lib/homeassistant
+      - /run/dbus:/run/dbus:ro
+    networks:
+      - lefrigo-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
 networks:
   lefrigo-net:
