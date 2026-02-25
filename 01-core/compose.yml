@@ -27,6 +27,24 @@ services:
       resources:
         limits:
           memory: 1024M
+  
+  # --- DOCKER PROXY FOR APPLICATIONS ---
+  docker-proxy-read:
+    container_name: docker-proxy-read
+    environment:
+      - CONTAINERS=1
+      - NETWORKS=1
+      - EVENTS=1
+      - VERSION=1
+      - IMAGES=1
+      - INFO=1
+      - PING=1
+    image: tecnativa/docker-socket-proxy
+    networks:
+      - lefrigo-net
+    privileged: True
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
   # --- REVERSE PROXY ---
   traefik:
@@ -38,12 +56,9 @@ services:
       - no-new-privileges:true
     networks:
       - lefrigo-net
-      - dockhand-internal
     ports:
       - 81:80
       - 444:443
-    environment:
-      - DOCKER_HOST=tcp://docker-proxy:2375
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${APPS_DATA_DIR}/traefik/acme.json:/acme.json
@@ -54,7 +69,7 @@ services:
       - --log.level=INFO
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
-      - --providers.docker.endpoint=tcp://docker-proxy:2375
+      - --providers.docker.endpoint=tcp://docker-proxy-read:2375
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --entrypoints.web.http.redirections.entryPoint.to=websecure
@@ -145,7 +160,7 @@ services:
       postgres-common:
         condition: service_healthy
     environment:
-      - DOCKER_HOST=tcp://docker-proxy:2375
+      - DOCKER_HOST=tcp://docker-proxy-read:2375
       - AUTHENTIK_POSTGRESQL__HOST=postgres-common
       - AUTHENTIK_POSTGRESQL__USER=${POSTGRES_USER}
       - AUTHENTIK_POSTGRESQL__NAME=authentik
@@ -161,7 +176,6 @@ services:
     volumes:
       - ${APPS_DATA_DIR}/authentik/certs:/certs
     networks:
-      - dockhand-internal
       - lefrigo-net
     deploy:
       resources:
@@ -193,6 +207,4 @@ services:
 
 networks:
   lefrigo-net:
-    external: true
-  dockhand-internal:
     external: true
