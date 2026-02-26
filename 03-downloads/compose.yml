@@ -45,6 +45,14 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.torrent.rule=Host(`torrent.le-frigo.fr`)"
+      - "traefik.http.routers.torrent.service=torrent"
+      - "traefik.http.routers.torrent.entrypoints=websecure"
+      - "traefik.http.routers.torrent.tls.certresolver=myresolver"
+      - "traefik.http.routers.torrent.middlewares=authentik@docker"
+      - "traefik.http.services.torrent.loadbalancer.server.port=8080"
 
   # --- QBitorrent ---
   qbittorrent:
