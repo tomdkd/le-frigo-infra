@@ -22,7 +22,6 @@ services:
       - FIREWALL_OUTBOUND_SUBNETS=192.168.1.0/24,172.16.0.0/12
       - HEALTH_RESTART_VPN=no
       - HEALTH_INITIAL_DELAY=30s
-      - DNS_SERVER=on
       - DNS_ADDRESS=8.8.8.8
       - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
     ports:
