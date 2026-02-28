@@ -261,6 +261,31 @@ services:
           cpus: '0.25'
           memory: 256M
 
+  convertx: 
+    image: ghcr.io/c4illin/convertx
+    container_name: convertx
+    restart: unless-stopped
+    ports:
+      - "3444:3000"
+    environment:
+      - ACCOUNT_REGISTRATION=false 
+      - JWT_SECRET=votre-longue-phrase-secrete
+      - HTTP_ALLOWED=false
+      - ALLOW_UNAUTHENTICATED=false
+      - AUTO_DELETE_EVERY_N_HOURS=24 
+    volumes:
+      - convertx:/app/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.convertx.service=convertx"
+      - "traefik.http.routers.convertx.rule=Host(`convertx.le-frigo.fr`)"
+      - "traefik.http.routers.convertx.entrypoints=websecure"
+      - "traefik.http.routers.convertx.tls.certresolver=myresolver"
+      - "traefik.http.services.convertx.loadbalancer.server.port=3000"
+
 networks:
   lefrigo-net:
     external: true
+
+volumes:
+  convertx:
