@@ -235,7 +235,11 @@ services:
       - lefrigo-net
     restart: always
     healthcheck:
+<<<<<<< HEAD
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:80/health || exit 1"]
+=======
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+>>>>>>> b36dfce953cfd346aef851ab85da78dd2b0b52ec
       interval: 30s
       timeout: 10s
       retries: 3
