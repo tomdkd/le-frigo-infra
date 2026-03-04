@@ -182,6 +182,7 @@ services:
       - "traefik.http.routers.jellyseerr.entrypoints=websecure"
       - "traefik.http.routers.jellyseerr.tls.certresolver=myresolver"
       - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
+      - "traefik.http.routers.jellyseerr.middlewares=error-pages-middleware@docker"
     networks:
       - lefrigo-net
     deploy:
