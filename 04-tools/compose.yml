@@ -182,7 +182,6 @@ services:
       - "traefik.http.routers.jellyseerr.entrypoints=websecure"
       - "traefik.http.routers.jellyseerr.tls.certresolver=myresolver"
       - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
-      - "traefik.http.routers.jellyseerr.middlewares=error-pages-middleware@docker"
     networks:
       - lefrigo-net
     deploy:
@@ -261,6 +260,38 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
+
+  changedetection:
+    image: ghcr.io/dgtlmoon/changedetection.io:latest
+    container_name: changedetection
+    restart: unless-stopped
+    user: "${PUID}:${PGID}"
+    networks:
+      - lefrigo-net
+    volumes:
+      - ${APPS_DATA_DIR}/changedetection:/datastore
+    environment:
+      - BASE_URL=https://watch.le-frigo.fr
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - PLAYWRIGHT_DRIVER_URL=ws://changedetection-browser:3000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.changedetection.rule=Host(`watch.le-frigo.fr`)"
+      - "traefik.http.routers.changedetection.entrypoints=websecure"
+      - "traefik.http.routers.changedetection.tls.certresolver=myresolver"
+      - "traefik.http.routers.changedetection.middlewares=authentik@docker"
+
+  playwright:
+    image: browserless/chrome:latest
+    container_name: changedetection-browser
+    restart: unless-stopped
+    networks:
+      - lefrigo-net
+    environment:
+      - SCREEN_WIDTH=1920
+      - SCREEN_HEIGHT=1080
+      - SCREEN_DEPTH=24
 
 networks:
   lefrigo-net:
