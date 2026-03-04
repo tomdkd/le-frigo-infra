@@ -22,7 +22,7 @@ services:
   
   # --- BACKREST ---
   backrest:
-    image: garethgeorge/backrest:latest
+    image: garethgeorge/backrest:v1.12.0
     container_name: backrest
     user: "0:0"
     ports:
