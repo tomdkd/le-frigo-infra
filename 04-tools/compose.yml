@@ -157,40 +157,40 @@ services:
       - "traefik.http.routers.wallos.tls.certresolver=myresolver"
       - "traefik.http.services.wallos.loadbalancer.server.port=80"
 
-  # jellyseerr:
-  #   image: ghcr.io/seerr-team/seerr:latest
-  #   init: true
-  #   user: "${PUID}:${PGID}"
-  #   container_name: jellyseerr
-  #   ports:
-  #     - 5055:5055
-  #   volumes:
-  #     - ${APPS_DATA_DIR}/jellyseer/config:/app/config
-  #   healthcheck:
-  #     test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
-  #     start_period: 20s
-  #     timeout: 3s
-  #     interval: 15s
-  #     retries: 3
-  #   restart: unless-stopped
-  #   environment:
-  #     - LOG_LEVEL=debug
-  #     - TZ=Europe/Paris
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.jellyseerr.rule=Host(`jellyseerr.le-frigo.fr`)"
-  #     - "traefik.http.routers.jellyseerr.entrypoints=websecure"
-  #     - "traefik.http.routers.jellyseerr.tls.certresolver=myresolver"
-  #     - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
-  #   networks:
-  #     - lefrigo-net
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '1.00'
-  #         memory: 1G
-  #       reservations:
-  #         memory: 512M
+  jellyseerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    init: true
+    user: "${PUID}:${PGID}"
+    container_name: jellyseerr
+    ports:
+      - 5055:5055
+    volumes:
+      - ${APPS_DATA_DIR}/jellyseer/config:/app/config
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3
+    restart: unless-stopped
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=Europe/Paris
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyseerr.rule=Host(`jellyseerr.le-frigo.fr`)"
+      - "traefik.http.routers.jellyseerr.entrypoints=websecure"
+      - "traefik.http.routers.jellyseerr.tls.certresolver=myresolver"
+      - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
+    networks:
+      - lefrigo-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 1G
+        reservations:
+          memory: 512M
 
   # --- OUTLINE ---
   outline:
