@@ -28,6 +28,7 @@ services:
       - 8080:8080
       - 9696:9696
       - 8001:8000
+      - 8715:8715
     restart: always
     networks:
       - lefrigo-net
@@ -192,6 +193,25 @@ services:
       retries: 3
       start_period: 40s
     depends_on:
+      prowlarr:
+        condition: service_healthy
+
+  ygege:
+    image: uwucode/ygege:latest
+    container_name: ygege
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: "info"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:$${BIND_PORT:-8715}/health || exit 1"]
+      interval: 1m30s
+      timeout: 20s
+      retries: 3
+      start_period: 10s
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
       prowlarr:
         condition: service_healthy
 
