@@ -130,11 +130,19 @@ services:
     ]
     labels:
       - "traefik.enable=true"
+      # --- Router 1 ---
+      - "traefik.http.routers.filebrowser-public.rule=Host(`files.le-frigo.fr`) && (PathPrefix(`/share`) || PathPrefix(`/static`) || PathPrefix(`/api/public`))"
+      - "traefik.http.routers.filebrowser-public.entrypoints=websecure"
+      - "traefik.http.routers.filebrowser-public.tls.certresolver=myresolver"
+      - "traefik.http.routers.filebrowser-public.priority=100"
+      # --- Router 2 ---
       - "traefik.http.routers.filebrowser.rule=Host(`files.le-frigo.fr`)"
       - "traefik.http.routers.filebrowser.entrypoints=websecure"
       - "traefik.http.routers.filebrowser.tls.certresolver=myresolver"
-      - "traefik.http.services.filebrowser.loadbalancer.server.port=8080"
+      - "traefik.http.routers.filebrowser.priority=1"
       - "traefik.http.routers.filebrowser.middlewares=authentik@docker"
+      # --- common ---
+      - "traefik.http.services.filebrowser.loadbalancer.server.port=8080"
 
   # --- WALLOS ---
   wallos:
