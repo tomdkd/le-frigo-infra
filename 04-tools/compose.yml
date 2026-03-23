@@ -239,21 +239,39 @@ services:
       - "traefik.http.services.outline.loadbalancer.server.port=3421"
 
 
-  # --- XBACKBONE ---
-  xbackbone:
-    image: lscr.io/linuxserver/xbackbone:latest
-    container_name: xbackbone
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=Europe/Paris
-    volumes:
-      - ${APPS_DATA_DIR}/xbackbone/config:/config
-      - ${MEDIA_DATA_DIR}/data/Lucie:/data
-    ports:
-      - 8000:80
-      # - 443:443
+  # --- SFTPGO ---
+  sftpgo:
+    image: drakkan/sftpgo:latest
+    container_name: sftpgo
     restart: unless-stopped
+    user: "${PUID}:${PGID}"
+    ports:
+      - "8082:8080"
+      - "2022:2022"
+    environment:
+      - SFTPGO_HTTPD__BIND_PORT=8080
+      - SFTPGO_HTTPD__PROXY_ALLOWED_PROXIES=127.0.0.1/32,172.16.0.0/12,192.168.0.0/16
+      - SFTPGO_HTTPD__EXTERNAL_SERVICES_ADDRESS=https://transfer.le-frigo.fr
+    volumes:
+      - ${APPS_DATA_DIR}/sftpgo/data:/var/lib/sftpgo
+      - ${APPS_DATA_DIR}/sftpgo/config:/var/lib/sftpgo/config
+      - ${MEDIA_DATA_DIR}:/srv/sftpgo/data
+    networks:
+      - lefrigo-net
+    labels:
+      - "traefik.enable=true"
+      # --- Routeur 1 : Les partages publics (SANS SSO) ---
+      - "traefik.http.routers.sftpgo-public.rule=Host(`transfer.le-frigo.fr`) && (PathPrefix(`/web/client/pubshares`) || PathPrefix(`/static`))"
+      - "traefik.http.routers.sftpgo-public.entrypoints=websecure"
+      - "traefik.http.routers.sftpgo-public.tls.certresolver=myresolver"
+      - "traefik.http.routers.sftpgo-public.priority=100"
+      # --- Routeur 2 : L'admin et le reste (AVEC SSO) ---
+      - "traefik.http.routers.sftpgo.rule=Host(`transfer.le-frigo.fr`)"
+      - "traefik.http.routers.sftpgo.entrypoints=websecure"
+      - "traefik.http.routers.sftpgo.tls.certresolver=myresolver"
+      - "traefik.http.routers.sftpgo.priority=1"
+      - "traefik.http.routers.sftpgo.middlewares=authentik@docker"
+      - "traefik.http.services.sftpgo.loadbalancer.server.port=8080"
 
 networks:
   lefrigo-net:
