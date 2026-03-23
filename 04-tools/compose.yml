@@ -238,6 +238,23 @@ services:
       - "traefik.http.routers.outline.tls.certresolver=myresolver"
       - "traefik.http.services.outline.loadbalancer.server.port=3421"
 
+
+  # --- XBACKBONE ---
+  xbackbone:
+    image: lscr.io/linuxserver/xbackbone:latest
+    container_name: xbackbone
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Paris
+    volumes:
+      - ${APPS_DATA_DIR}/xbackbone/config:/config
+      - ${MEDIA_DATA_DIR}/data/Lucie:/data
+    ports:
+      - 8000:80
+      # - 443:443
+    restart: unless-stopped
+
 networks:
   lefrigo-net:
     external: true
