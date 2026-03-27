@@ -273,6 +273,16 @@ services:
       - "traefik.http.routers.sftpgo.middlewares=authentik@docker"
       - "traefik.http.services.sftpgo.loadbalancer.server.port=8080"
 
+  metube:
+    image: alexta69/metube
+    container_name: metube
+    user: "${PUID}:${PGID}"
+    restart: unless-stopped
+    ports:
+      - "7000:8081"
+    volumes:
+      - ${MEDIA_DATA_DIR}/youtube_downloads:/downloads
+
 networks:
   lefrigo-net:
     external: true
