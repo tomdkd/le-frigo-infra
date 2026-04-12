@@ -318,3 +318,6 @@ services:
 networks:
   lefrigo-net:
     external: true
+
+volumes:
+  changedetection-data:
