@@ -37,6 +37,11 @@ services:
       - ${MEDIA_DATA_DIR}/musique:/musiques
       - ${MEDIA_DATA_DIR}/films:/films
       - ${MEDIA_DATA_DIR}/series:/series
+      - ${MEDIA_DATA_DIR}/audiobooks:/audiobooks
+      - ${MEDIA_DATA_DIR}/books:/books
+      - ${MEDIA_DATA_DIR}/photos:/photos
+      - ${MEDIA_DATA_DIR}/roms/roms:/roms
+      - ${MEDIA_DATA_DIR}/stuck_in_yesterday:/stuck_in_yesterday
       - ${SSH_DATA_DIR}:/root/.ssh:ro
       - ${APPS_DATA_DIR}:/apps_config
     networks:
