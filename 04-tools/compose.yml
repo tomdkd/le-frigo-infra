@@ -266,6 +266,30 @@ services:
       - "traefik.http.routers.n8n.priority=1"
       - "traefik.http.routers.n8n.middlewares=authentik@docker"
 
+  homeassistant:
+    container_name: homeassistant
+    image: ghcr.io/home-assistant/home-assistant:stable
+    ports:
+      - "8123:8123"
+    volumes:
+      - ${APPS_DATA_DIR}/homeassistant/config:/config
+      - ${APPS_DATA_DIR}/homeassistant/storage:/var/lib/homeassistant
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    restart: unless-stopped
+    privileged: true
+    networks:
+      - lefrigo-net
+    environment:
+      TZ: Europe/Paris
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homeassistant.service=homeassistant"
+      - "traefik.http.routers.homeassistant.rule=Host(`house.le-frigo.fr`)"
+      - "traefik.http.routers.homeassistant.entrypoints=websecure"
+      - "traefik.http.routers.homeassistant.tls.certresolver=myresolver"
+      - "traefik.http.services.homeassistant.loadbalancer.server.port=8123"
+      - "traefik.http.routers.homeassistant.priority=1"
 
   # --- SFTPGO ---
   # sftpgo:
