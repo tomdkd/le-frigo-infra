@@ -235,73 +235,27 @@ services:
       - lefrigo-net
     restart: always
 
-  # --- ROMM ---
-  # romm:
-  #   image: rommapp/romm:latest
-  #   container_name: romm
-  #   restart: unless-stopped
-  #   user: "${PUID}:${PGID}"
-  #   environment:
-  #     - TZ=Europe/Paris
-  #     - DB_HOST=romm-db
-  #     - DB_NAME=romm
-  #     - DB_USER=${MARIADB_USER}
-  #     - DB_PASSWD=${MARIADB_PASSWORD}
-  #     - ROMM_AUTH_SECRET_KEY=${ROMM_AUTH_SECRET_KEY}
-  #     - SCREENSCRAPER_USER=${SCREENSCRAPER_USER}
-  #     - SCREENSCRAPER_PASSWORD=${SCREENSCRAPER_PASSWORD}
-  #     - HASHEOUS_API_ENABLED=true
-  #     - OIDC_ENABLED=true
-  #     - OIDC_PROVIDER=LeFrigo
-  #     - OIDC_CLIENT_ID=${ROMM_OIDC_CLIENT_ID}
-  #     - OIDC_CLIENT_SECRET=${ROMM_OIDC_CLIENT_SECRET}
-  #     - OIDC_REDIRECT_URI=https://romm.le-frigo.fr/api/oauth/openid
-  #     - OIDC_SERVER_APPLICATION_URL=https://auth.le-frigo.fr/application/o/romm
-  #     - OIDC_REGISTRATION_ENABLED=true
-  #     - DISABLE_USERPASS_LOGIN=true
-  #   volumes:
-  #     - ${MEDIA_DATA_DIR}/roms:/romm/library
-  #     - ${APPS_DATA_DIR}/romm/redis:/redis-data
-  #     - ${APPS_DATA_DIR}/romm/resources:/romm/resources
-  #     - ${APPS_DATA_DIR}/romm/assets:/romm/assets
-  #     - ${APPS_DATA_DIR}/romm/config:/romm/config
-  #   ports:
-  #     - 8005:8080
-  #   depends_on:
-  #     romm-db:
-  #       condition: service_healthy
-  #       restart: true
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.romm.service=romm"
-  #     - "traefik.http.routers.romm.rule=Host(`romm.le-frigo.fr`)"
-  #     - "traefik.http.routers.romm.entrypoints=websecure"
-  #     - "traefik.http.routers.romm.tls.certresolver=myresolver"
-  #     - "traefik.http.services.romm.loadbalancer.server.port=8080"
-  #   networks:
-  #     - lefrigo-net
-
-  # romm-db:
-  #   image: mariadb:latest
-  #   container_name: romm-db
-  #   restart: unless-stopped
-  #   user: "${PUID}:${PGID}"
-  #   environment:
-  #     - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
-  #     - MARIADB_DATABASE=romm
-  #     - MARIADB_USER=${MARIADB_USER}
-  #     - MARIADB_PASSWORD=${MARIADB_PASSWORD}
-  #   volumes:
-  #     - ${APPS_DATA_DIR}/romm/mysql:/var/lib/mysql
-  #   healthcheck:
-  #     test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-  #     start_period: 30s
-  #     start_interval: 10s
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #   networks:
-  #     - lefrigo-net
+  komga:
+    image: gotson/komga
+    container_name: komga
+    volumes:
+      - ${APPS_DATA_DIR}/komga/config:/config
+      - ${MEDIA_DATA_DIR}/books:/data:ro
+    ports:
+      - 25600:25600
+    user: "${PUID}:${PGID}"
+    environment:
+      - TZ=Europe/Paris
+    restart: unless-stopped
+    networks:
+      - lefrigo-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.komga.rule=Host(`komga.le-frigo.fr`)"
+      - "traefik.http.routers.komga.entrypoints=websecure"
+      - "traefik.http.routers.komga.tls.certresolver=myresolver"
+      - "traefik.http.routers.komga.service=komga"
+      - "traefik.http.services.komga.loadbalancer.server.port=25600"
 
 volumes:
   model-cache:
