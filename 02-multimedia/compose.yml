@@ -235,28 +235,6 @@ services:
       - lefrigo-net
     restart: always
 
-  komga:
-    image: gotson/komga
-    container_name: komga
-    volumes:
-      - ${APPS_DATA_DIR}/komga/config:/config
-      - ${MEDIA_DATA_DIR}/books:/data:ro
-    ports:
-      - 25600:25600
-    user: "${PUID}:${PGID}"
-    environment:
-      - TZ=Europe/Paris
-    restart: unless-stopped
-    networks:
-      - lefrigo-net
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.komga.rule=Host(`komga.le-frigo.fr`)"
-      - "traefik.http.routers.komga.entrypoints=websecure"
-      - "traefik.http.routers.komga.tls.certresolver=myresolver"
-      - "traefik.http.routers.komga.service=komga"
-      - "traefik.http.services.komga.loadbalancer.server.port=25600"
-
 volumes:
   model-cache:
   mysql_data:
