@@ -1,0 +1,31 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    volumes:
+      - ${APPS_DATA_DIR}/ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+    networks:
+      - lefrigo-net
+
+  anythingllm:
+    image: mintplexlabs/anythingllm:latest
+    container_name: anythingllm
+    user: "0:0"
+    ports:
+      - "3001:3001"
+    environment:
+      - STORAGE_DIR=/app/server/storage
+    volumes:
+      - ${APPS_DATA_DIR}/anythingllm:/app/server/storage
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    networks:
+      - lefrigo-net
+
+networks:
+  lefrigo-net:
+    external: true
