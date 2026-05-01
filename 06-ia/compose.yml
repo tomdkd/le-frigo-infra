@@ -10,21 +10,32 @@ services:
     networks:
       - lefrigo-net
 
-  anythingllm:
-    image: mintplexlabs/anythingllm:latest
-    container_name: anythingllm
-    user: "0:0"
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: always
     ports:
-      - "3001:3001"
-    environment:
-      - STORAGE_DIR=/app/server/storage
+      - "5111:8080"
     volumes:
-      - ${APPS_DATA_DIR}/anythingllm:/app/server/storage
-    depends_on:
-      - ollama
-    restart: unless-stopped
+      - ${APPS_DATA_DIR}/open-webui:/app/backend/data
     networks:
       - lefrigo-net
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY}
+      WEBUI_AUTH_TRUSTED_EMAIL_HEADER: X-authentik-email
+      WEBUI_AUTH_TRUSTED_NAME_HEADER: X-authentik-name
+      ENABLE_SIGNUP: "True"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ia.rule=Host(`ia.le-frigo.fr`)"
+      - "traefik.http.routers.ia.service=ia"
+      - "traefik.http.routers.ia.entrypoints=websecure"
+      - "traefik.http.routers.ia.tls.certresolver=myresolver"
+      - "traefik.http.routers.ia.middlewares=authentik@docker"
+      - "traefik.http.services.ia.loadbalancer.server.port=8080"
 
 networks:
   lefrigo-net:
