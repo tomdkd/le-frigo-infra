@@ -310,6 +310,20 @@ services:
       - "traefik.http.services.mealie.loadbalancer.server.port=9000"
       - "traefik.http.routers.mealie.priority=1"
 
+  code-server:
+    image: lscr.io/linuxserver/code-server:latest
+    container_name: code-server
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Paris
+    volumes:
+      - ${APPS_DATA_DIR}/code-server/config:/config
+      - ${APPS_DATA_DIR}:/projects
+    ports:
+      - 8443:8443
+    restart: unless-stopped
+
 networks:
   lefrigo-net:
     external: true
