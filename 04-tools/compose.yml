@@ -264,12 +264,51 @@ services:
       - "traefik.http.routers.vaultwarden.service=vaultwarden-svc"
       - "traefik.http.services.vaultwarden-svc.loadbalancer.server.port=80"
       - "traefik.docker.network=lefrigo-net"
-      # 3. Middlewares (Le coupable probable est ici)
-      # On définit le middleware ET on l'applique avec le suffixe @docker
+      # 3. Middleware de Sécurité
       - "traefik.http.routers.vaultwarden.middlewares=vw-security@docker"
       - "traefik.http.middlewares.vw-security.headers.sslRedirect=true"
       - "traefik.http.middlewares.vw-security.headers.stsSeconds=31536000"
       - "traefik.http.middlewares.vw-security.headers.forceSTSHeader=true"
+
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:v3.16.0 # 
+    container_name: mealie
+    restart: always
+    ports:
+        - "9925:9000"
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
+    volumes:
+      - ${APPS_DATA_DIR}/mealie/data:/app/data/
+    networks:
+      - lefrigo-net
+    environment:
+      - "ALLOW_SIGNUP=false"
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=Europe/Paris"
+      - "BASE_URL=https://mealie.le-frigo.fr"
+      - "DB_ENGINE=postgres"
+      - "POSTGRES_USER=${POSTGRES_MEALIE_USER}"
+      - "POSTGRES_PASSWORD=${POSTGRES_MEALIE_PASSWORD}"
+      - "POSTGRES_SERVER=postgres-common"
+      - "POSTGRES_PORT=5432"
+      - "POSTGRES_DB=mealie"
+      - "OIDC_AUTH_ENABLED=true"
+      - "OIDC_SIGNUP_ENABLED=true"
+      - "OIDC_CONFIGURATION_URL=https://auth.le-frigo.fr/application/o/mealie/.well-known/openid-configuration"
+      - "OIDC_CLIENT_ID=${MEALIE_OIDC_ID}"
+      - "OIDC_CLIENT_SECRET=${MEALIE_OIDC_SECRET}"
+      - "OIDC_AUTO_REDIRECT=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mealie.rule=Host(`mealie.le-frigo.fr`)"
+      - "traefik.http.routers.mealie.entrypoints=websecure"
+      - "traefik.http.routers.mealie.tls.certresolver=myresolver"
+      - "traefik.http.services.mealie.loadbalancer.server.port=9000"
+      - "traefik.http.routers.mealie.priority=1"
 
 networks:
   lefrigo-net:
