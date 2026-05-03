@@ -222,7 +222,7 @@ services:
       # - ${MEDIA_DATA_DIR}/podcasts:/podcasts
       - ${APPS_DATA_DIR}/audiobookshelf/config:/config
       - ${APPS_DATA_DIR}/audiobookshelf/metadata:/metadata
-      - ${MEDIA_DATA_DIR}/books:/data:ro
+      - ${MEDIA_DATA_DIR}/books:/data
     environment:
       - TZ=Europe/Paris
     labels:
