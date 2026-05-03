@@ -215,6 +215,40 @@ services:
       prowlarr:
         condition: service_healthy
 
+  shelfmark:
+    image: ghcr.io/calibrain/shelfmark:latest
+    container_name: shelfmark
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: Europe/Paris
+    ports:
+      - 8084:8084
+    restart: unless-stopped
+    volumes:
+      - ${MEDIA_DATA_DIR}/books:/books
+      - ${APPS_DATA_DIR}/shelfmark/config:/config
+      - ${MEDIA_DATA_DIR}:/data
+    networks:
+      - lefrigo-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.shelfmark.rule=Host(`shelfmark.le-frigo.fr`)"
+      - "traefik.http.routers.shelfmark.service=shelfmark"
+      - "traefik.http.routers.shelfmark.entrypoints=websecure"
+      - "traefik.http.routers.shelfmark.tls.certresolver=myresolver"
+      - "traefik.http.services.shelfmark.loadbalancer.server.port=8084"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1G
+        reservations:
+          memory: 256M
+    depends_on:
+      prowlarr:
+        condition: service_healthy
+
 networks:
   lefrigo-net:
     external: true
