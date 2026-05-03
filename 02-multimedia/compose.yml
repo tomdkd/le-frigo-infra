@@ -99,41 +99,41 @@ services:
       start_period: 20s
 
   # --- KAVITA ---
-  kavita:
-    image: lscr.io/linuxserver/kavita:latest
-    container_name: kavita
-    restart: unless-stopped
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=Europe/Paris
-    volumes:
-      - ${MEDIA_DATA_DIR}/books:/data:ro
-      - ${APPS_DATA_DIR}/kavita/config:/config
-    networks:
-      - lefrigo-net
-    ports:
-      - "5000:5000"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.kavita.rule=Host(`books.le-frigo.fr`)"
-      - "traefik.http.routers.kavita.service=kavita"
-      - "traefik.http.routers.kavita.entrypoints=websecure"
-      - "traefik.http.routers.kavita.tls.certresolver=myresolver"
-      - "traefik.http.services.kavita.loadbalancer.server.port=5000"
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 2G
-        reservations:
-          memory: 512M
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5000/api/health || exit 1"]
-      interval: 1m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+  # kavita:
+  #   image: lscr.io/linuxserver/kavita:latest
+  #   container_name: kavita
+  #   restart: unless-stopped
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=Europe/Paris
+  #   volumes:
+  #     - ${MEDIA_DATA_DIR}/books:/data:ro
+  #     - ${APPS_DATA_DIR}/kavita/config:/config
+  #   networks:
+  #     - lefrigo-net
+  #   ports:
+  #     - "5000:5000"
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.kavita.rule=Host(`books.le-frigo.fr`)"
+  #     - "traefik.http.routers.kavita.service=kavita"
+  #     - "traefik.http.routers.kavita.entrypoints=websecure"
+  #     - "traefik.http.routers.kavita.tls.certresolver=myresolver"
+  #     - "traefik.http.services.kavita.loadbalancer.server.port=5000"
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1.0'
+  #         memory: 2G
+  #       reservations:
+  #         memory: 512M
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -f http://localhost:5000/api/health || exit 1"]
+  #     interval: 1m
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 30s
 
   # --- IMMICH ---
   immich-server:
@@ -218,10 +218,11 @@ services:
       - 8085:80
     user: "${PUID}:${PGID}"
     volumes:
-      - ${MEDIA_DATA_DIR}/audiobooks:/audiobooks
-      - ${MEDIA_DATA_DIR}/podcasts:/podcasts
+      # - ${MEDIA_DATA_DIR}/audiobooks:/audiobooks
+      # - ${MEDIA_DATA_DIR}/podcasts:/podcasts
       - ${APPS_DATA_DIR}/audiobookshelf/config:/config
       - ${APPS_DATA_DIR}/audiobookshelf/metadata:/metadata
+      - ${MEDIA_DATA_DIR}/books:/data:ro
     environment:
       - TZ=Europe/Paris
     labels:
