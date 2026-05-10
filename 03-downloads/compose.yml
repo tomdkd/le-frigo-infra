@@ -26,9 +26,7 @@ services:
       - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
     ports:
       - 8080:8080
-      - 9696:9696
       - 8001:8000
-      - 8715:8715
     restart: always
     networks:
       - lefrigo-net
@@ -89,11 +87,14 @@ services:
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
-    network_mode: "service:gluetun"
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=Europe/Paris
+    networks:
+      - lefrigo-net
+    ports:
+      - 9696:9696
     volumes:
       - ${APPS_DATA_DIR}/prowlarr:/config
     depends_on:
@@ -145,9 +146,9 @@ services:
       resources:
         limits:
           cpus: '1.00'
-          memory: 1G
+          memory: 2G
         reservations:
-          memory: 256M
+          memory: 512M
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:7878/ || exit 1"]
       interval: 1m
@@ -183,9 +184,9 @@ services:
       resources:
         limits:
           cpus: '1.00'
-          memory: 1G
+          memory: 2G
         reservations:
-          memory: 256M
+          memory: 512M
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:8989/ || exit 1"]
       interval: 1m
@@ -202,13 +203,16 @@ services:
     restart: unless-stopped
     environment:
       LOG_LEVEL: "info"
+    networks:
+      - lefrigo-net
+    ports:
+      - 8715:8715
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://localhost:$${BIND_PORT:-8715}/health || exit 1"]
       interval: 1m30s
       timeout: 20s
       retries: 3
       start_period: 10s
-    network_mode: "service:gluetun"
     depends_on:
       gluetun:
         condition: service_healthy
