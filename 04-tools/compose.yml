@@ -211,6 +211,26 @@ services:
       - 8443:8443
     restart: unless-stopped
 
+  nextcloud:
+    image: lscr.io/linuxserver/nextcloud:latest
+    container_name: nextcloud
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Paris
+    volumes:
+      - ${APPS_DATA_DIR}/nextcloud/config:/config
+      - ${MEDIA_DATA_DIR}/cloud:/data
+    restart: unless-stopped
+    networks:
+      - lefrigo-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nextcloud.rule=Host(`cloud.le-frigo.fr`)"
+      - "traefik.http.routers.nextcloud.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud.tls.certresolver=myresolver"
+      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
+
 networks:
   lefrigo-net:
     external: true
