@@ -197,30 +197,6 @@ services:
       - lefrigo-net
     restart: always
 
-  # --- POLARIS ---
-  polaris:
-    image: registry.gitlab.com/connectical/container/polaris:latest
-    container_name: polaris
-    ports:
-      - 5010:5050
-    user: "${PUID}:${PGID}"
-    volumes:
-      - ${APPS_DATA_DIR}/polaris/data:/var/lib/polaris
-      - ${APPS_DATA_DIR}/polaris/cache:/var/cache/polaris
-      - ${MEDIA_DATA_DIR}/musique:/music
-    environment:
-      - TZ=Europe/Paris
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.polaris.service=polaris"
-      - "traefik.http.routers.polaris.rule=Host(`polaris.le-frigo.fr`)"
-      - "traefik.http.routers.polaris.entrypoints=websecure"
-      - "traefik.http.routers.polaris.tls.certresolver=myresolver"
-      - "traefik.http.services.polaris.loadbalancer.server.port=5050"
-    networks:
-      - lefrigo-net
-    restart: always
-
 volumes:
   model-cache:
   mysql_data:
