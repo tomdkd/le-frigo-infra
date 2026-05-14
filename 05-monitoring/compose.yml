@@ -1,35 +1,30 @@
+---
 services:
   # --- UPTIME KUMA ---
   uptime-kuma:
     image: louislam/uptime-kuma:2
     container_name: uptime-kuma
-    user: "${PUID}:${PGID}"
+    user: ${PUID}:${PGID}
     restart: unless-stopped
-    volumes:
-      - ${APPS_DATA_DIR}/uptime_kuma:/app/data
-    ports:
-      - "9876:3001"
-    networks:
-      - lefrigo-net
+    volumes: ['${APPS_DATA_DIR}/uptime_kuma:/app/data']
+    ports: [9876:3001]
+    networks: [lefrigo-net]
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.kuma.rule=Host(`kuma.le-frigo.fr`)"
-      - "traefik.http.routers.kuma.service=kuma"
-      - "traefik.http.routers.kuma.entrypoints=websecure"
-      - "traefik.http.routers.kuma.tls.certresolver=myresolver"
-      - "traefik.http.routers.kuma.middlewares=authentik@docker"
-      - "traefik.http.services.kuma.loadbalancer.server.port=3001"
-  
+      - traefik.enable=true
+      - traefik.http.routers.kuma.rule=Host(`kuma.le-frigo.fr`)
+      - traefik.http.routers.kuma.service=kuma
+      - traefik.http.routers.kuma.entrypoints=websecure
+      - traefik.http.routers.kuma.tls.certresolver=myresolver
+      - traefik.http.routers.kuma.middlewares=authentik@docker
+      - traefik.http.services.kuma.loadbalancer.server.port=3001
+
   # --- BACKREST ---
   backrest:
     image: garethgeorge/backrest:v1.12.0
     container_name: backrest
-    user: "0:0"
-    ports:
-      - "9898:9898"
-    environment:
-      - BACKREST_CONFIG=/config/config.json
-      - BACKREST_DATA=/data
+    user: 0:0
+    ports: [9898:9898]
+    environment: [BACKREST_CONFIG=/config/config.json, BACKREST_DATA=/data]
     volumes:
       - ${APPS_DATA_DIR}/backrest/config:/config
       - ${APPS_DATA_DIR}/backrest/cache:/root/.cache/restic
@@ -44,15 +39,14 @@ services:
       - ${MEDIA_DATA_DIR}/stuck_in_yesterday:/stuck_in_yesterday
       - ${SSH_DATA_DIR}:/root/.ssh:ro
       - ${APPS_DATA_DIR}:/apps_config
-    networks:
-      - lefrigo-net
+    networks: [lefrigo-net]
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.backrest.rule=Host(`backup.le-frigo.fr`)"
-      - "traefik.http.routers.backrest.entrypoints=websecure"
-      - "traefik.http.routers.backrest.tls.certresolver=myresolver"
-      - "traefik.http.routers.backrest.middlewares=authentik@docker"
-      - "traefik.http.services.backrest.loadbalancer.server.port=9898"
+      - traefik.enable=true
+      - traefik.http.routers.backrest.rule=Host(`backup.le-frigo.fr`)
+      - traefik.http.routers.backrest.entrypoints=websecure
+      - traefik.http.routers.backrest.tls.certresolver=myresolver
+      - traefik.http.routers.backrest.middlewares=authentik@docker
+      - traefik.http.services.backrest.loadbalancer.server.port=9898
     deploy:
       resources:
         limits:
@@ -61,29 +55,23 @@ services:
         reservations:
           memory: 256M
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:9898/ || exit 1"]
+      test: [CMD-SHELL, wget -q --spider http://localhost:9898/ || exit 1]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 20s
-
   tailscale:
     image: tailscale/tailscale:latest
     container_name: tailscale
-    user: "0:0"
+    user: 0:0
     hostname: le-frigo-nas
     restart: unless-stopped
     network_mode: host
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
+    cap_add: [NET_ADMIN, NET_RAW]
     volumes:
       - ${APPS_DATA_DIR}/tailscale/state:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
-    environment:
-      - TS_AUTHKEY=${TS_AUTHKEY}
-      - TS_STATEFUL_CONFIG=true
-
+    environment: ['TS_AUTHKEY=${TS_AUTHKEY}', TS_STATEFUL_CONFIG=true]
 networks:
   lefrigo-net:
     external: true
