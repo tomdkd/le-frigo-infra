@@ -8,10 +8,10 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Envoyer le message de notification
+      - name: Send notification
         run: |
           curl -X POST -H 'Content-type: application/json' \
           --data '{
-            "text": "👤 *${{ github.event.pull_request.user.login }}* a créé la PR : *${{ github.event.pull_request.title }}*\n🔗 Lien : ${{ github.event.pull_request.html_url }}"
+            "content": "👤 **${{ github.event.pull_request.user.login }}** a créé la PR : **${{ github.event.pull_request.title }}**\n🔗 Lien : ${{ github.event.pull_request.html_url }}"
           }' \
           ${{ secrets.MESSAGING_WEBHOOK_URL }}
