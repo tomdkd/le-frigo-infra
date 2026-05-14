@@ -67,6 +67,23 @@ services:
       retries: 3
       start_period: 20s
 
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: tailscale
+    user: "0:0"
+    hostname: le-frigo-nas
+    restart: unless-stopped
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - ${APPS_DATA_DIR}/tailscale/state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATEFUL_CONFIG=true
+
 networks:
   lefrigo-net:
     external: true
