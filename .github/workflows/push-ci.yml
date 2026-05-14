@@ -1,0 +1,33 @@
+name: CI LeFrigo - Infrastructure validation
+
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+
+      - name: YAML Linting
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: .
+          config_data: |
+            extends: default
+            rules:
+              line-length: disable
+              document-start: disable
+
+      - name: Docker Compose validation
+        run: |
+          for file in $(find . -name "docker-compose.yml" -o -name "compose.yml"); do
+            echo "Processing $file..."
+            docker compose -f "$file" config -q || exit 1
+          done
