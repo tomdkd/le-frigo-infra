@@ -1,15 +1,14 @@
+---
 name: Notification Pull Request
-
 on:
   pull_request:
     types: [opened]
-
 jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
       - name: Send notification
-        run: |
+        run: |-
           curl -X POST -H 'Content-type: application/json' \
           --data '{
             "content": "👤 **${{ github.event.pull_request.user.login }}** a créé la PR : **${{ github.event.pull_request.title }}**\n🔗 Lien : ${{ github.event.pull_request.html_url }}"

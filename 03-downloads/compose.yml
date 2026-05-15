@@ -1,19 +1,18 @@
+---
 services:
   # --- GLUETUN ---
   gluetun:
     image: qmcgaw/gluetun
     container_name: gluetun
-    user: "0:0"
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun:/dev/net/tun
+    user: 0:0
+    cap_add: [NET_ADMIN]
+    devices: [/dev/net/tun:/dev/net/tun]
     environment:
       - VPN_SERVICE_PROVIDER=${VPN_PROVIDER}
       - VPN_TYPE=wireguard
       - WIREGUARD_PRIVATE_KEY=${VPN_WG_PRIVATE_KEY}
       - WIREGUARD_ADDRESSES=${VPN_WG_ADDRESS}
-      #- SERVER_COUNTRIES=${VPN_COUNTRY}
+      # - SERVER_COUNTRIES=${VPN_COUNTRY}
       - SERVER_NAMES=LT#38
       - OPENVPN_USER=${OPENVPN_USER}
       - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
@@ -23,13 +22,12 @@ services:
       - HEALTH_RESTART_VPN=no
       - HEALTH_INITIAL_DELAY=30s
       - DNS_ADDRESS=8.8.8.8
-      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
-    ports:
-      - 8080:8080
-      - 8001:8000
+      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data
+        "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences
+        2>&1'
+    ports: [8080:8080, 8001:8000]
     restart: always
-    networks:
-      - lefrigo-net
+    networks: [lefrigo-net]
     deploy:
       resources:
         limits:
@@ -38,25 +36,25 @@ services:
         reservations:
           memory: 128M
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- https://google.com || exit 1"]
+      test: [CMD-SHELL, wget -qO- https://google.com || exit 1]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 20s
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.torrent.rule=Host(`torrent.le-frigo.fr`)"
-      - "traefik.http.routers.torrent.service=torrent"
-      - "traefik.http.routers.torrent.entrypoints=websecure"
-      - "traefik.http.routers.torrent.tls.certresolver=myresolver"
-      - "traefik.http.routers.torrent.middlewares=authentik@docker"
-      - "traefik.http.services.torrent.loadbalancer.server.port=8080"
+      - traefik.enable=true
+      - traefik.http.routers.torrent.rule=Host(`torrent.le-frigo.fr`)
+      - traefik.http.routers.torrent.service=torrent
+      - traefik.http.routers.torrent.entrypoints=websecure
+      - traefik.http.routers.torrent.tls.certresolver=myresolver
+      - traefik.http.routers.torrent.middlewares=authentik@docker
+      - traefik.http.services.torrent.loadbalancer.server.port=8080
 
   # --- QBitorrent ---
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
-    network_mode: "service:gluetun"
+    network_mode: service:gluetun
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -77,7 +75,7 @@ services:
         reservations:
           memory: 512M
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/ || exit 1"]
+      test: [CMD-SHELL, wget -q --spider http://localhost:8080/ || exit 1]
       interval: 1m
       timeout: 10s
       retries: 3
@@ -87,16 +85,10 @@ services:
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=Europe/Paris
-    networks:
-      - lefrigo-net
-    ports:
-      - 9696:9696
-    volumes:
-      - ${APPS_DATA_DIR}/prowlarr:/config
+    environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
+    networks: [lefrigo-net]
+    ports: [9696:9696]
+    volumes: ['${APPS_DATA_DIR}/prowlarr:/config']
     depends_on:
       gluetun:
         condition: service_healthy
@@ -109,7 +101,7 @@ services:
         reservations:
           memory: 256M
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:9696/ || exit 1"]
+      test: [CMD-SHELL, wget -q --spider http://localhost:9696/ || exit 1]
       interval: 1m
       timeout: 10s
       retries: 3
@@ -119,26 +111,19 @@ services:
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
-    ports:
-      - 7878:7878
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=Europe/Paris
-    volumes:
-      - ${APPS_DATA_DIR}/radarr:/config
-      - ${MEDIA_DATA_DIR}:/data
+    ports: [7878:7878]
+    environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
+    volumes: ['${APPS_DATA_DIR}/radarr:/config', '${MEDIA_DATA_DIR}:/data']
     restart: always
-    networks:
-      - lefrigo-net
+    networks: [lefrigo-net]
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.radarr.rule=Host(`radarr.le-frigo.fr`)"
-      - "traefik.http.routers.radarr.service=radarr"
-      - "traefik.http.routers.radarr.entrypoints=websecure"
-      - "traefik.http.routers.radarr.tls.certresolver=myresolver"
-      - "traefik.http.routers.radarr.middlewares=authentik@docker"
-      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
+      - traefik.enable=true
+      - traefik.http.routers.radarr.rule=Host(`radarr.le-frigo.fr`)
+      - traefik.http.routers.radarr.service=radarr
+      - traefik.http.routers.radarr.entrypoints=websecure
+      - traefik.http.routers.radarr.tls.certresolver=myresolver
+      - traefik.http.routers.radarr.middlewares=authentik@docker
+      - traefik.http.services.radarr.loadbalancer.server.port=7878
     depends_on:
       prowlarr:
         condition: service_healthy
@@ -150,7 +135,7 @@ services:
         reservations:
           memory: 512M
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:7878/ || exit 1"]
+      test: [CMD-SHELL, wget -q --spider http://localhost:7878/ || exit 1]
       interval: 1m
       timeout: 10s
       retries: 3
@@ -160,26 +145,19 @@ services:
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
-    ports:
-      - 8989:8989
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=Europe/Paris
-    volumes:
-      - ${APPS_DATA_DIR}/sonarr:/config
-      - ${MEDIA_DATA_DIR}:/data
+    ports: [8989:8989]
+    environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
+    volumes: ['${APPS_DATA_DIR}/sonarr:/config', '${MEDIA_DATA_DIR}:/data']
     restart: always
-    networks:
-      - lefrigo-net
+    networks: [lefrigo-net]
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.sonarr.rule=Host(`sonarr.le-frigo.fr`)"
-      - "traefik.http.routers.sonarr.service=sonarr"
-      - "traefik.http.routers.sonarr.entrypoints=websecure"
-      - "traefik.http.routers.sonarr.tls.certresolver=myresolver"
-      - "traefik.http.routers.sonarr.middlewares=authentik@docker"
-      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+      - traefik.enable=true
+      - traefik.http.routers.sonarr.rule=Host(`sonarr.le-frigo.fr`)
+      - traefik.http.routers.sonarr.service=sonarr
+      - traefik.http.routers.sonarr.entrypoints=websecure
+      - traefik.http.routers.sonarr.tls.certresolver=myresolver
+      - traefik.http.routers.sonarr.middlewares=authentik@docker
+      - traefik.http.services.sonarr.loadbalancer.server.port=8989
     deploy:
       resources:
         limits:
@@ -188,7 +166,7 @@ services:
         reservations:
           memory: 512M
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:8989/ || exit 1"]
+      test: [CMD-SHELL, wget -q --spider http://localhost:8989/ || exit 1]
       interval: 1m
       timeout: 10s
       retries: 3
@@ -196,19 +174,18 @@ services:
     depends_on:
       prowlarr:
         condition: service_healthy
-
   ygege:
     image: uwucode/ygege:latest
     container_name: ygege
     restart: unless-stopped
     environment:
-      LOG_LEVEL: "info"
-    networks:
-      - lefrigo-net
-    ports:
-      - 8715:8715
+      LOG_LEVEL: info
+    networks: [lefrigo-net]
+    ports: [8715:8715]
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail http://localhost:$${BIND_PORT:-8715}/health || exit 1"]
+      test:
+        - CMD-SHELL
+        - curl --fail http://localhost:$${BIND_PORT:-8715}/health || exit 1
       interval: 1m30s
       timeout: 20s
       retries: 3
@@ -218,7 +195,6 @@ services:
         condition: service_healthy
       prowlarr:
         condition: service_healthy
-
   shelfmark:
     image: ghcr.io/calibrain/shelfmark:latest
     container_name: shelfmark
@@ -226,22 +202,20 @@ services:
       PUID: ${PUID}
       PGID: ${PGID}
       TZ: Europe/Paris
-    ports:
-      - 8084:8084
+    ports: [8084:8084]
     restart: unless-stopped
     volumes:
       - ${MEDIA_DATA_DIR}/books:/books
       - ${APPS_DATA_DIR}/shelfmark/config:/config
       - ${MEDIA_DATA_DIR}:/data
-    networks:
-      - lefrigo-net
+    networks: [lefrigo-net]
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.shelfmark.rule=Host(`shelfmark.le-frigo.fr`)"
-      - "traefik.http.routers.shelfmark.service=shelfmark"
-      - "traefik.http.routers.shelfmark.entrypoints=websecure"
-      - "traefik.http.routers.shelfmark.tls.certresolver=myresolver"
-      - "traefik.http.services.shelfmark.loadbalancer.server.port=8084"
+      - traefik.enable=true
+      - traefik.http.routers.shelfmark.rule=Host(`shelfmark.le-frigo.fr`)
+      - traefik.http.routers.shelfmark.service=shelfmark
+      - traefik.http.routers.shelfmark.entrypoints=websecure
+      - traefik.http.routers.shelfmark.tls.certresolver=myresolver
+      - traefik.http.services.shelfmark.loadbalancer.server.port=8084
     deploy:
       resources:
         limits:
@@ -252,7 +226,6 @@ services:
     depends_on:
       prowlarr:
         condition: service_healthy
-
 networks:
   lefrigo-net:
     external: true
