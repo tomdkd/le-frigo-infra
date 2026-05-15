@@ -19,15 +19,10 @@ services:
   dockhand:
     image: fnsys/dockhand:latest
     container_name: dockhand
-    user: "1000:1000"
-    volumes:
-      - ./data/dockhand:/app/data
-    networks:
-      - dockhand-internal
-      - lefrigo-net
-    ports:
-      - '3000:3000'
-
+    user: 1000:1000
+    volumes: [./data/dockhand:/app/data]
+    networks: [dockhand-internal, lefrigo-net]
+    ports: [3000:3000]
 networks:
   dockhand-internal:
     name: dockhand-internal
