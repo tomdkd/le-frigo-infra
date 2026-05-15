@@ -1,3 +1,4 @@
+---
 services:
   # --- PGADMIN ---
   # pgadmin:
@@ -14,12 +15,10 @@ services:
   #    - ${APPS_DATA_DIR}/pgadmin/data:/var/lib/pgadmin
   #   networks:
   #     - lefrigo-net
-
   ntfy:
     image: binwiederhier/ntfy
     container_name: ntfy
-    command:
-      - serve
+    command: [serve]
     environment:
       - TZ=Europe/Paris
       - NTFY_BASE_URL=https://notification.le-frigo.fr
@@ -28,29 +27,30 @@ services:
       - NTFY_AUTH_DEFAULT_ACCESS=deny-all
       - NTFY_ATTACHMENT_CACHE_DIR=/var/lib/ntfy/attachments
       - NTFY_ENABLE_LOGIN=true
-    user: "${PUID}:${PGID}"
+    user: ${PUID}:${PGID}
     volumes:
       - ${APPS_DATA_DIR}/ntfy/cache:/var/cache/ntfy
       - ${APPS_DATA_DIR}/ntfy/storage:/var/lib/ntfy
-    ports:
-      - 3002:80
+    ports: [3002:80]
     healthcheck:
-        test: ["CMD-SHELL", "wget -q --tries=1 http://localhost:80/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1"]
-        interval: 60s
-        timeout: 10s
-        retries: 3
-        start_period: 40s
+      test:
+        - CMD-SHELL
+        - wget -q --tries=1 http://localhost:80/v1/health -O - | grep -Eo '"healthy"\s*:\s*true'
+          || exit 1
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     restart: unless-stopped
     init: true
-    networks:
-      - lefrigo-net
+    networks: [lefrigo-net]
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.notif.rule=Host(`notification.le-frigo.fr`)"
-      - "traefik.http.routers.notif.entrypoints=websecure"
-      - "traefik.http.routers.notif.tls=true"
-      - "traefik.http.routers.notif.tls.certresolver=myresolver"
-      - "traefik.http.services.notif.loadbalancer.server.port=80"
+      - traefik.enable=true
+      - traefik.http.routers.notif.rule=Host(`notification.le-frigo.fr`)
+      - traefik.http.routers.notif.entrypoints=websecure
+      - traefik.http.routers.notif.tls=true
+      - traefik.http.routers.notif.tls.certresolver=myresolver
+      - traefik.http.services.notif.loadbalancer.server.port=80
     deploy:
       resources:
         limits:
@@ -58,34 +58,29 @@ services:
           memory: 256M
         reservations:
           memory: 64M
-
   jellyseerr:
     image: ghcr.io/seerr-team/seerr:latest
     init: true
-    user: "${PUID}:${PGID}"
+    user: ${PUID}:${PGID}
     container_name: jellyseerr
-    ports:
-      - 5055:5055
-    volumes:
-      - ${APPS_DATA_DIR}/jellyseer/config:/app/config
+    ports: [5055:5055]
+    volumes: ['${APPS_DATA_DIR}/jellyseer/config:/app/config']
     healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status
+        || exit 1
       start_period: 20s
       timeout: 3s
       interval: 15s
       retries: 3
     restart: unless-stopped
-    environment:
-      - LOG_LEVEL=debug
-      - TZ=Europe/Paris
+    environment: [LOG_LEVEL=debug, TZ=Europe/Paris]
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.jellyseerr.rule=Host(`jellyseerr.le-frigo.fr`)"
-      - "traefik.http.routers.jellyseerr.entrypoints=websecure"
-      - "traefik.http.routers.jellyseerr.tls.certresolver=myresolver"
-      - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
-    networks:
-      - lefrigo-net
+      - traefik.enable=true
+      - traefik.http.routers.jellyseerr.rule=Host(`jellyseerr.le-frigo.fr`)
+      - traefik.http.routers.jellyseerr.entrypoints=websecure
+      - traefik.http.routers.jellyseerr.tls.certresolver=myresolver
+      - traefik.http.services.jellyseerr.loadbalancer.server.port=5055
+    networks: [lefrigo-net]
     deploy:
       resources:
         limits:
@@ -100,8 +95,7 @@ services:
     container_name: outline
     restart: always
     user: ${PUID}:${PGID}
-    networks:
-      - lefrigo-net
+    networks: [lefrigo-net]
     environment:
       NODE_ENV: production
       SECRET_KEY: ${OUTLINE_SECRET_KEY}
@@ -125,18 +119,16 @@ services:
       FILE_STORAGE: local
       FILE_STORAGE_UPLOAD_MAX_SIZE: 26214400
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.outline.service=outline"
-      - "traefik.http.routers.outline.rule=Host(`doc.le-frigo.fr`)"
-      - "traefik.http.routers.outline.entrypoints=websecure"
-      - "traefik.http.routers.outline.tls.certresolver=myresolver"
-      - "traefik.http.services.outline.loadbalancer.server.port=3421"
-
+      - traefik.enable=true
+      - traefik.http.routers.outline.service=outline
+      - traefik.http.routers.outline.rule=Host(`doc.le-frigo.fr`)
+      - traefik.http.routers.outline.entrypoints=websecure
+      - traefik.http.routers.outline.tls.certresolver=myresolver
+      - traefik.http.services.outline.loadbalancer.server.port=3421
   homeassistant:
     container_name: homeassistant
     image: ghcr.io/home-assistant/home-assistant:stable
-    ports:
-      - "8123:8123"
+    ports: [8123:8123]
     volumes:
       - ${APPS_DATA_DIR}/homeassistant/config:/config
       - ${APPS_DATA_DIR}/homeassistant/storage:/var/lib/homeassistant
@@ -144,107 +136,86 @@ services:
       - /run/dbus:/run/dbus:ro
     restart: unless-stopped
     privileged: true
-    networks:
-      - lefrigo-net
+    networks: [lefrigo-net]
     environment:
       TZ: Europe/Paris
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.homeassistant.service=homeassistant"
-      - "traefik.http.routers.homeassistant.rule=Host(`house.le-frigo.fr`)"
-      - "traefik.http.routers.homeassistant.entrypoints=websecure"
-      - "traefik.http.routers.homeassistant.tls.certresolver=myresolver"
-      - "traefik.http.services.homeassistant.loadbalancer.server.port=8123"
-      - "traefik.http.routers.homeassistant.priority=1"
-
+      - traefik.enable=true
+      - traefik.http.routers.homeassistant.service=homeassistant
+      - traefik.http.routers.homeassistant.rule=Host(`house.le-frigo.fr`)
+      - traefik.http.routers.homeassistant.entrypoints=websecure
+      - traefik.http.routers.homeassistant.tls.certresolver=myresolver
+      - traefik.http.services.homeassistant.loadbalancer.server.port=8123
+      - traefik.http.routers.homeassistant.priority=1
   mealie:
-    image: ghcr.io/mealie-recipes/mealie:v3.16.0 # 
+    image: ghcr.io/mealie-recipes/mealie:v3.16.0
     container_name: mealie
     restart: always
-    ports:
-        - "9925:9000"
+    ports: [9925:9000]
     deploy:
       resources:
         limits:
           memory: 1000M
-    volumes:
-      - ${APPS_DATA_DIR}/mealie/data:/app/data/
-    networks:
-      - lefrigo-net
+    volumes: ['${APPS_DATA_DIR}/mealie/data:/app/data/']
+    networks: [lefrigo-net]
     environment:
-      - "ALLOW_SIGNUP=false"
-      - "PUID=${PUID}"
-      - "PGID=${PGID}"
-      - "TZ=Europe/Paris"
-      - "BASE_URL=https://mealie.le-frigo.fr"
-      - "DB_ENGINE=postgres"
-      - "POSTGRES_USER=${POSTGRES_MEALIE_USER}"
-      - "POSTGRES_PASSWORD=${POSTGRES_MEALIE_PASSWORD}"
-      - "POSTGRES_SERVER=postgres-common"
-      - "POSTGRES_PORT=5432"
-      - "POSTGRES_DB=mealie"
-      - "OIDC_AUTH_ENABLED=true"
-      - "OIDC_SIGNUP_ENABLED=true"
-      - "OIDC_CONFIGURATION_URL=https://auth.le-frigo.fr/application/o/mealie/.well-known/openid-configuration"
-      - "OIDC_CLIENT_ID=${MEALIE_OIDC_ID}"
-      - "OIDC_CLIENT_SECRET=${MEALIE_OIDC_SECRET}"
-      - "OIDC_AUTO_REDIRECT=true"
+      - ALLOW_SIGNUP=false
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Paris
+      - BASE_URL=https://mealie.le-frigo.fr
+      - DB_ENGINE=postgres
+      - POSTGRES_USER=${POSTGRES_MEALIE_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_MEALIE_PASSWORD}
+      - POSTGRES_SERVER=postgres-common
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=mealie
+      - OIDC_AUTH_ENABLED=true
+      - OIDC_SIGNUP_ENABLED=true
+      - OIDC_CONFIGURATION_URL=https://auth.le-frigo.fr/application/o/mealie/.well-known/openid-configuration
+      - OIDC_CLIENT_ID=${MEALIE_OIDC_ID}
+      - OIDC_CLIENT_SECRET=${MEALIE_OIDC_SECRET}
+      - OIDC_AUTO_REDIRECT=true
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.mealie.rule=Host(`mealie.le-frigo.fr`)"
-      - "traefik.http.routers.mealie.entrypoints=websecure"
-      - "traefik.http.routers.mealie.tls.certresolver=myresolver"
-      - "traefik.http.services.mealie.loadbalancer.server.port=9000"
-      - "traefik.http.routers.mealie.priority=1"
-
+      - traefik.enable=true
+      - traefik.http.routers.mealie.rule=Host(`mealie.le-frigo.fr`)
+      - traefik.http.routers.mealie.entrypoints=websecure
+      - traefik.http.routers.mealie.tls.certresolver=myresolver
+      - traefik.http.services.mealie.loadbalancer.server.port=9000
+      - traefik.http.routers.mealie.priority=1
   code-server:
     image: lscr.io/linuxserver/code-server:latest
     container_name: code-server
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=Europe/Paris
+    environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
     volumes:
       - ${APPS_DATA_DIR}/code-server/config:/config
       - ${APPS_DATA_DIR}:/projects
-    ports:
-      - 8443:8443
+    ports: [8443:8443]
     restart: unless-stopped
-
   nextcloud:
     image: lscr.io/linuxserver/nextcloud:latest
     container_name: nextcloud
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=Europe/Paris
+    environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
     volumes:
       - ${APPS_DATA_DIR}/nextcloud/config:/config
       - ${MEDIA_DATA_DIR}/cloud:/data
     restart: unless-stopped
-    networks:
-      - lefrigo-net
+    networks: [lefrigo-net]
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.nextcloud.rule=Host(`cloud.le-frigo.fr`)"
-      - "traefik.http.routers.nextcloud.entrypoints=websecure"
-      - "traefik.http.routers.nextcloud.tls.certresolver=myresolver"
-      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
-
+      - traefik.enable=true
+      - traefik.http.routers.nextcloud.rule=Host(`cloud.le-frigo.fr`)
+      - traefik.http.routers.nextcloud.entrypoints=websecure
+      - traefik.http.routers.nextcloud.tls.certresolver=myresolver
+      - traefik.http.services.nextcloud.loadbalancer.server.port=80
   whodb:
     image: clidey/whodb
-    ports:
-      - "2000:8080"
-    environment:
-      - TZ=Europe/Paris
+    ports: [2000:8080]
+    environment: [TZ=Europe/Paris]
     restart: unless-stopped
-    networks:
-      - lefrigo-net
-
+    networks: [lefrigo-net]
 networks:
   lefrigo-net:
     external: true
-
 volumes:
   changedetection-data:
   n8n_data:

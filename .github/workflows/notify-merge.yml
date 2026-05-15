@@ -1,0 +1,14 @@
+---
+name: Merge & deployment notification
+on:
+  push:
+    branches: [main]
+jobs:
+  notify-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Notification
+        run: |-
+          curl -H "Content-Type: application/json" \
+          -d "{\"content\": \"Infrastructure Update: Pull Request successfully merged into main branch. New configuration is now being deployed to the server.\"}" \
+          ${{ secrets.MESSAGING_WEBHOOK_URL }}

@@ -1,3 +1,4 @@
+---
 services:
   docker-proxy:
     image: tecnativa/docker-socket-proxy
@@ -12,11 +13,9 @@ services:
       - INFO=1
       - EVENTS=1
       - PORT=1
-    networks:
-      - dockhand-internal
-    privileged: True
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [dockhand-internal]
+    privileged: true
+    volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
   dockhand:
     image: fnsys/dockhand:latest
     container_name: dockhand
