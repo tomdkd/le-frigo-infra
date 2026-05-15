@@ -1,0 +1,21 @@
+[yamlfix]
+# Ne pas ajouter "---" en début de fichier
+explicit_start = false
+
+# Indentation à 2 espaces
+indent = 2
+
+# Conserver le style de séquences existant (block style)
+sequence_style = "keep_style"
+
+# Conserver les guillemets existants sans les modifier
+preserve_quotes = true
+
+# Ne pas ajouter de guillemets sur les valeurs simples
+quote_basic_values = false
+
+# Ligne blanche entre les blocs de premier niveau
+section_whitelines = 1
+
+# Ligne blanche avant les commentaires
+comments_whitelines = 1
