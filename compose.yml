@@ -13,7 +13,7 @@ services:
       - INFO=1
       - EVENTS=1
       - PORT=1
-    networks: [dockhand-internal]
+    networks: [docker-proxy-net]
     privileged: true
     volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
   dockhand:
@@ -21,11 +21,11 @@ services:
     container_name: dockhand
     user: 1000:1000
     volumes: [./data/dockhand:/app/data]
-    networks: [dockhand-internal, lefrigo-net]
+    networks: [docker-proxy-net]
     ports: [3000:3000]
 networks:
-  dockhand-internal:
-    name: dockhand-internal
+  docker-proxy-net:
+    name: docker-proxy-net
   lefrigo-net:
     driver: bridge
     name: lefrigo-net
