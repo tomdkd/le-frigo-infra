@@ -11,30 +11,25 @@ jobs:
     steps:
       - name: Code checkout
         uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.x
-
       - name: YAML Formatting check
         run: |
           pip install yamlfix --quiet
           yamlfix --check .
-
       - name: YAML Linting
         uses: ibiqlik/action-yamllint@v3
         with:
           file_or_dir: .
           config_file: .yamllint
-
       - name: Prepare .env files from stack.env.example
         run: |
           find . -name "stack.env.example" | while read -r file; do
             cp "$file" "$(dirname "$file")/.env"
             echo "Created .env in $(dirname "$file")"
           done
-
       - name: Docker Compose validation
         run: |-
           for file in $(find . -name "docker-compose.yml" -o -name "compose.yml"); do
