@@ -86,7 +86,7 @@ services:
       - AUTHENTIK_EMAIL__USE_SSL=${AUTHENTIK_EMAIL__USE_SSL}
       - AUTHENTIK_EMAIL__FROM=${AUTHENTIK_EMAIL__FROM}
       - AUTHENTIK_WEB__WORKERS=2
-    ports: [9000:9000, 9443:9443]
+    ports: [1001:9000, 1002:9443]
     volumes:
       - ${APPS_DATA_DIR}/authentik/data:/data
       - ${APPS_DATA_DIR}/authentik/media:/media

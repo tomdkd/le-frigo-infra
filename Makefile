@@ -10,30 +10,36 @@ lint: ## Format and lint YAML files using yamlfix via Docker
 	docker run --rm -v ${CURDIR}:/workspace -w /workspace python:alpine sh -c "pip install yamlfix --quiet && yamlfix ."
 
 # --- Stack Commands ---
-up: ## Start Dockhand + a specific stack (e.g., make up STACK=04-tools)
-	@if [ -z "$(STACK)" ]; then echo "❌ Error: Please specify a stack (e.g., make up STACK=04-tools)"; exit 1; fi
+down: ## Stop a specific stack and Dockhand (e.g., make down STACK=06-tools)
+	@if [ -z "$(STACK)" ]; then echo "❌ Error: Please specify a stack (e.g., make down STACK=06-tools)"; exit 1; fi
+	docker compose -f compose.yml -f ./$(STACK)/compose.yml --env-file ./$(STACK)/.env down
+
+up: ## Start Dockhand + a specific stack (e.g., make up STACK=06-tools)
+	@if [ -z "$(STACK)" ]; then echo "❌ Error: Please specify a stack (e.g., make up STACK=06-tools)"; exit 1; fi
 	cp ./$(STACK)/stack.env.example ./$(STACK)/.env
 	@echo "🚀 Starting base Dockhand configuration..."
 	docker compose -f compose.yml up -d
 	@echo "⏳ Base ready. Now starting $(STACK) stack..."
 	docker compose -f compose.yml -f ./$(STACK)/compose.yml --env-file ./$(STACK)/.env up -d
 
-down: ## Stop a specific stack and Dockhand (e.g., make down STACK=04-tools)
-	@if [ -z "$(STACK)" ]; then echo "❌ Error: Please specify a stack (e.g., make down STACK=04-tools)"; exit 1; fi
-	docker compose -f compose.yml -f ./$(STACK)/compose.yml --env-file ./$(STACK)/.env down
-
 # --- Convenience Shortcuts ---
-core: ## Start Dockhand + 01-core stack
-	@$(MAKE) up STACK=01-core
+sso: ## Start Dockhand + SSO stack
+	@$(MAKE) up STACK=01-sso
 
-multimedia: ## Start Dockhand + 02-multimedia stack
-	@$(MAKE) up STACK=02-multimedia
+secret-manager: ## Start Dockhand + Secret Manager stack
+	@$(MAKE) up STACK=02-secret-manager
 
-downloads: ## Start Dockhand + 03-downloads stack
-	@$(MAKE) up STACK=03-downloads
+core: ## Start Dockhand + Core stack
+	@$(MAKE) up STACK=03-core
 
-tools: ## Start Dockhand + 04-tools stack
-	@$(MAKE) up STACK=04-tools
+multimedia: ## Start Dockhand + 04-multimedia stack
+	@$(MAKE) up STACK=04-multimedia
 
-monitoring: ## Start Dockhand + 05-monitoring stack
-	@$(MAKE) up STACK=05-monitoring
+downloads: ## Start Dockhand + 05-downloads stack
+	@$(MAKE) up STACK=05-downloads
+
+tools: ## Start Dockhand + 06-tools stack
+	@$(MAKE) up STACK=06-tools
+
+monitoring: ## Start Dockhand + 07-monitoring stack
+	@$(MAKE) up STACK=07-monitoring

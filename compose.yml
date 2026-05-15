@@ -22,7 +22,7 @@ services:
     user: 1000:1000
     volumes: [./data/dockhand:/app/data]
     networks: [docker-proxy-net]
-    ports: [3000:3000]
+    ports: [1000:3000]
 networks:
   docker-proxy-net:
     name: docker-proxy-net
