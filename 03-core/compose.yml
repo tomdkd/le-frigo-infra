@@ -1,0 +1,96 @@
+---
+services:
+  # --- COMMON DATABASE ---
+  postgres-common:
+    image: postgres:16-alpine
+    container_name: postgres-common
+    restart: always
+    user: ${PUID}:${PGID}
+    ports: [5432:5432]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_MULTIPLE_DATABASES: outline
+    volumes:
+      - ${APPS_DATA_DIR}/postgre/data:/var/lib/postgresql/data
+      - ${FOLDER_PATH}/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+    networks: [lefrigo-net]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+
+  # --- DOCKER PROXY FOR APPLICATIONS ---
+  docker-proxy-read:
+    container_name: docker-proxy-read
+    environment:
+      - CONTAINERS=1
+      - NETWORKS=1
+      - EVENTS=1
+      - VERSION=1
+      - IMAGES=1
+      - INFO=1
+      - PING=1
+    image: tecnativa/docker-socket-proxy
+    networks: [lefrigo-net]
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  # --- REVERSE PROXY ---
+  traefik:
+    image: traefik:v3.6.9
+    container_name: traefik
+    user: ${PUID}:${PGID}
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    networks: [lefrigo-net]
+    ports: [81:80, 444:443]
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APPS_DATA_DIR}/traefik/acme.json:/acme.json
+    command:
+      - --ping=true
+      - --api.insecure=true
+      - --api.dashboard=true
+      - --log.level=INFO
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.endpoint=tcp://docker-proxy-read:2375
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --certificatesresolvers.myresolver.acme.httpchallenge=true
+      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.myresolver.acme.storage=/acme.json
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dashboard.rule=Host(`traefik.le-frigo.fr`)
+      - traefik.http.routers.dashboard.service=api@internal
+      - traefik.http.routers.dashboard.entrypoints=websecure
+      - traefik.http.routers.dashboard.tls.certresolver=myresolver
+      - traefik.http.routers.dashboard.middlewares=authentik@docker
+
+  # --- REDIS ---
+  redis:
+    image: redis:8.6.1
+    container_name: common-redis
+    restart: always
+    networks: [lefrigo-net]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 30s
+      retries: 3
+networks:
+  lefrigo-net:
+    external: true
