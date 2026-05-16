@@ -10,12 +10,12 @@ lint: ## Format and lint YAML files using yamlfix via Docker
 	docker run --rm -v ${CURDIR}:/workspace -w /workspace python:alpine sh -c "pip install yamlfix --quiet && yamlfix ."
 
 # --- Stack Commands ---
-down: ## Stop a specific stack and Dockhand (e.g., make down STACK=06-tools)
-	@if [ -z "$(STACK)" ]; then echo "❌ Error: Please specify a stack (e.g., make down STACK=06-tools)"; exit 1; fi
+down: ## Stop a specific stack and Dockhand (e.g., make down STACK=05-tools)
+	@if [ -z "$(STACK)" ]; then echo "❌ Error: Please specify a stack (e.g., make down STACK=05-tools)"; exit 1; fi
 	docker compose -f compose.yml -f ./$(STACK)/compose.yml --env-file ./$(STACK)/.env down
 
-up: ## Start Dockhand + a specific stack (e.g., make up STACK=06-tools)
-	@if [ -z "$(STACK)" ]; then echo "❌ Error: Please specify a stack (e.g., make up STACK=06-tools)"; exit 1; fi
+up: ## Start Dockhand + a specific stack (e.g., make up STACK=05-tools)
+	@if [ -z "$(STACK)" ]; then echo "❌ Error: Please specify a stack (e.g., make up STACK=05-tools)"; exit 1; fi
 	cp ./$(STACK)/stack.env.example ./$(STACK)/.env
 	@echo "🚀 Starting base Dockhand configuration..."
 	docker compose -f compose.yml up -d
@@ -26,20 +26,17 @@ up: ## Start Dockhand + a specific stack (e.g., make up STACK=06-tools)
 sso: ## Start Dockhand + SSO stack
 	@$(MAKE) up STACK=01-sso
 
-secret-manager: ## Start Dockhand + Secret Manager stack
-	@$(MAKE) up STACK=02-secret-manager
-
 core: ## Start Dockhand + Core stack
-	@$(MAKE) up STACK=03-core
+	@$(MAKE) up STACK=02-core
 
-multimedia: ## Start Dockhand + 04-multimedia stack
-	@$(MAKE) up STACK=04-multimedia
+multimedia: ## Start Dockhand + Multimedia stack
+	@$(MAKE) up STACK=03-multimedia
 
-downloads: ## Start Dockhand + 05-downloads stack
-	@$(MAKE) up STACK=05-downloads
+downloads: ## Start Dockhand + Downloads stack
+	@$(MAKE) up STACK=04-downloads
 
-tools: ## Start Dockhand + 06-tools stack
-	@$(MAKE) up STACK=06-tools
+tools: ## Start Dockhand + Tools stack
+	@$(MAKE) up STACK=05-tools
 
-monitoring: ## Start Dockhand + 07-monitoring stack
-	@$(MAKE) up STACK=07-monitoring
+monitoring: ## Start Dockhand + Monitoring stack
+	@$(MAKE) up STACK=06-monitoring
