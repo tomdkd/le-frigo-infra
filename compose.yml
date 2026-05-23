@@ -21,7 +21,7 @@ services:
     container_name: dockhand
     user: 1000:1000
     volumes: [./data/dockhand:/app/data]
-    networks: [docker-proxy-net]
+    networks: [docker-proxy-net, lefrigo-net]
     ports: [1000:3000]
 networks:
   docker-proxy-net:
