@@ -5,14 +5,13 @@ services:
     image: postgres:16-alpine
     container_name: authentik-db
     restart: always
-    user: ${PUID}:${PGID}
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: authentik
     volumes:
       - ${APPS_DATA_DIR}/postgres_authentik/data:/var/lib/postgresql/data
-    networks: [authentik-net]
+    networks: [authentik-net, lefrigo-net]
     healthcheck:
       test: [CMD-SHELL, 'pg_isready -U ${POSTGRES_USER} -d authentik']
       interval: 10s
@@ -38,7 +37,7 @@ services:
         condition: service_healthy
     environment:
       - DOCKER_HOST=tcp://docker-proxy-read:2375
-      - AUTHENTIK_POSTGRESQL__HOST=authentik-db
+      - AUTHENTIK_POSTGRESQL__HOST=postgres-common
       - AUTHENTIK_POSTGRESQL__USER=${POSTGRES_USER}
       - AUTHENTIK_POSTGRESQL__NAME=authentik
       - AUTHENTIK_POSTGRESQL__PASSWORD=${POSTGRES_PASSWORD}
@@ -52,7 +51,7 @@ services:
       - AUTHENTIK_EMAIL__FROM=${AUTHENTIK_EMAIL__FROM}
       - AUTHENTIK_WORKER__CONCURRENCY=1
     volumes: ['${APPS_DATA_DIR}/authentik/certs:/certs']
-    networks: [authentik-net]
+    networks: [authentik-net, lefrigo-net]
     deploy:
       resources:
         limits:
@@ -74,7 +73,7 @@ services:
       authentik-worker:
         condition: service_healthy
     environment:
-      - AUTHENTIK_POSTGRESQL__HOST=authentik-db
+      - AUTHENTIK_POSTGRESQL__HOST=postgres-common
       - AUTHENTIK_POSTGRESQL__USER=${POSTGRES_USER}
       - AUTHENTIK_POSTGRESQL__NAME=authentik
       - AUTHENTIK_POSTGRESQL__PASSWORD=${POSTGRES_PASSWORD}
@@ -94,7 +93,7 @@ services:
       - ${APPS_DATA_DIR}/authentik/custom-templates:/templates
       - ${APPS_DATA_DIR}/authentik/geoip:/geoip
       - ${APPS_DATA_DIR}/authentik/custom-icons:/web/dist/assets/icons
-    networks: [authentik-net]
+    networks: [authentik-net, lefrigo-net]
     labels:
       - traefik.enable=true
       - traefik.http.routers.authentik.rule=Host(`auth.le-frigo.fr`)
@@ -113,3 +112,5 @@ services:
           memory: 256M
 networks:
   authentik-net:
+  lefrigo-net:
+    external: true
