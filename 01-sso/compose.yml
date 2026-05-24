@@ -10,7 +10,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: authentik
-    volumes: ['${APPS_DATA_DIR}/postgre/data:/var/lib/postgresql/data']
+    volumes:
+      - ${APPS_DATA_DIR}/postgres_authentik/data:/var/lib/postgresql/data
     networks: [authentik-net]
     healthcheck:
       test: [CMD-SHELL, 'pg_isready -U ${POSTGRES_USER} -d authentik']
