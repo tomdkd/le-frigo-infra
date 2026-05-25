@@ -27,7 +27,8 @@ services:
 
   # --- AUTHENTIK OUTPOST PROXY ---
   authentik_proxy:
-    image: ghcr.io/goauthentik/proxy
+    image: ghcr.io/goauthentik/proxy:2025.12.4
+    container_name: authentik-proxy
     ports: [9000:9000, 9443:9443]
     environment:
       - AUTHENTIK_HOST=http://authentik-server:9000
