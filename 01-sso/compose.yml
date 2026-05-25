@@ -51,7 +51,7 @@ services:
       - AUTHENTIK_EMAIL__FROM=${AUTHENTIK_EMAIL__FROM}
       - AUTHENTIK_WORKER__CONCURRENCY=4
     volumes: ['${APPS_DATA_DIR}/authentik/certs:/certs']
-    networks: [authentik-net]
+    networks: [authentik-net, lefrigo-net]
     deploy:
       resources:
         limits:
