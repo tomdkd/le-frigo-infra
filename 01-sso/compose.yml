@@ -33,10 +33,10 @@ services:
       - AUTHENTIK_HOST=http://authentik-server:9000
       - AUTHENTIK_INSECURE=true
       - AUTHENTIK_TOKEN=${AUTHENTIK_PROXY_TOKEN}
-      - POSTGRES_HOST=127.0.0.1
+      - POSTGRES_HOST=authentik-db
       - POSTGRES_USER=authentik
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=/data/outpost.db
+      - POSTGRES_DB=authentik
     networks: [authentik-net, lefrigo-net]
     restart: unless-stopped
     depends_on:
