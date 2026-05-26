@@ -34,12 +34,14 @@ services:
       - AUTHENTIK_HOST=https://auth.le-frigo.fr
       - AUTHENTIK_INSECURE=false
       - AUTHENTIK_TOKEN=${AUTHENTIK_PROXY_TOKEN}
-      - AUTHENTIK_POSTGRESQL__HOST=authentik-db
-      - AUTHENTIK_POSTGRESQL__USER=authentik
-      - AUTHENTIK_POSTGRESQL__NAME=authentik
-      - AUTHENTIK_POSTGRESQL__PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     networks: [authentik-net, lefrigo-net]
     restart: unless-stopped
+    depends_on:
+      authentik-db:
+        condition: service_healthy
+      authentik-worker:
+        condition: service_healthy
     deploy:
       resources:
         limits:
