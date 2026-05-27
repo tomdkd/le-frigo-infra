@@ -72,6 +72,16 @@ services:
       - ${APPS_DATA_DIR}/tailscale/state:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
     environment: ['TS_AUTHKEY=${TS_AUTHKEY}', TS_STATEFUL_CONFIG=true]
+  # --- DATABASUS ---
+  databasus:
+    container_name: databasus
+    image: databasus/databasus:latest
+    ports: [4005:4005]
+    volumes: ['${APPS_DATA_DIR}/databasus/data:/databasus-data']
+    restart: unless-stopped
+    networks: [lefrigo-net, 01-sso_authentik-net]
 networks:
   lefrigo-net:
+    external: true
+  01-sso_authentik-net:
     external: true
