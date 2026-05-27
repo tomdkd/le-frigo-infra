@@ -25,6 +25,25 @@ services:
         reservations:
           memory: 512M
 
+      # --- DOCKER PROXY FOR APPLICATIONS ---
+  docker-proxy-authentik:
+    container_name: docker-proxy-authentik
+    environment:
+      - CONTAINERS=1
+      - NETWORKS=1
+      - EVENTS=1
+      - VERSION=1
+      - IMAGES=1
+      - INFO=1
+      - PING=1
+    image: tecnativa/docker-socket-proxy
+    networks: [authentik-net]
+    privileged: true
+    volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
+    depends_on:
+      authentik-db:
+        condition: service_healthy
+
   # --- AUTHENTIK OUTPOST PROXY ---
   # authentik-proxy:
   #   image: ghcr.io/goauthentik/proxy:2025.12.4
@@ -58,8 +77,10 @@ services:
     depends_on:
       authentik-db:
         condition: service_healthy
+      docker-proxy-authentik:
+        condition: service_started
     environment:
-      - DOCKER_HOST=tcp://docker-proxy-read:2375
+      - DOCKER_HOST=tcp://docker-proxy-authentik:2375
       - AUTHENTIK_POSTGRESQL__HOST=authentik-db
       - AUTHENTIK_POSTGRESQL__USER=authentik
       - AUTHENTIK_POSTGRESQL__NAME=authentik
