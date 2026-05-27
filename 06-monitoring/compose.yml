@@ -76,6 +76,7 @@ services:
   databasus:
     container_name: databasus
     image: databasus/databasus:latest
+    user: ${PUID}:${PGID}
     ports: [4005:4005]
     volumes: ['${APPS_DATA_DIR}/databasus/data:/databasus-data']
     restart: unless-stopped
