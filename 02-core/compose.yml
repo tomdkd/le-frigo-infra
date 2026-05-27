@@ -79,6 +79,13 @@ services:
       - traefik.http.routers.dashboard.entrypoints=websecure
       - traefik.http.routers.dashboard.tls.certresolver=myresolver
       - traefik.http.routers.dashboard.middlewares=authentik@docker
+    depends_on:
+      postgres-common:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      docker-proxy-read:
+        condition: service_started
 
   # --- REDIS ---
   redis:
