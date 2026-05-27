@@ -1,85 +1,116 @@
-# ❄️ Le Frigo - GitOps Infrastructure 
+# LeFrigo - Homelab Infrastructure
+This repository contains the GitOps and Docker Compose configurations for the LeFrigo infrastructure, hosted on a TrueNAS SCALE system.
 
-Welcome to the official repository of Le Frigo (The Fridge). This project manages a complete home server infrastructure using Docker Compose and a GitOps approach via Portainer.
+## Overview
+LeFrigo is a multi-stack self-hosted environment built around architecture isolation, security firewalls, and centralized identity management.
 
-## 🏗️ Architecture Overview
-The infrastructure is segmented into 5 logical stacks to ensure high availability, easier maintenance, and clear separation of concerns.
+- Reverse Proxy: Traefik v3 (handling automated Let's Encrypt SSL certificates).
 
-### 01-Core (The Foundation)
-The backbone of the server, providing networking, security, and shared databases.
+- Identity Provider (SSO): Authentik (protecting internal routes via ForwardAuth or native OpenID Connect).
 
-- Traefik: Reverse proxy with automatic TLS (Let's Encrypt).
+- Storage & Permissions: Data persistence is mapped via host directory binds using unified execution masks (PUID/PGID).
 
-- Authentik: Identity and Access Management (SSO).
+## Available Stacks & Applications
+The infrastructure is broken down into 6 logical deployment stacks:
 
-- Postgres & Redis: Shared databases for all stacks.
+### 1. SSO (01-sso)
+Handles core identity management and edge route authentication.
 
-- Tailscale: Secure mesh VPN for remote management.
+- authentik-server / authentik-worker: Core IAM portal and task processors.
 
-### 02-Multimedia
-The entertainment hub.
+- authentik-db: Dedicated PostgreSQL 16 instance.
 
-- Jellyfin: Movie and TV show streaming.
+- docker-proxy-authentik: Isolated socket proxy restricting Docker API access.
 
-- Navidrome: High-performance music server.
+### 2. Core (02-core)
+The technical backbone of the server.
 
-- Immich: Self-hosted photo and video backup solution.
+- traefik: Ingress controller and SSL termination gateway.
 
-- Kavita: Digital library for books and manga.
+- docker-proxy-read: Read-only Docker socket proxy for Traefik service discovery.
 
-### 03-Downloads (The Bastion)
-Secure media acquisition behind a VPN.
+- postgres-common: Central multi-tenant PostgreSQL database.
 
-- Gluetun: VPN Gateway (Wireguard/ProtonVPN) with Kill Switch.
+- common-redis: Shared in-memory caching engine.
 
-- qBittorrent: Torrent client routed through Gluetun.
+### 3. Multimedia (03-multimedia)
+Entertainment, streaming, and personal archiving platforms.
 
-- Radarr & Sonarr: Automatic movie and series management.
+- jellyfin: Video streaming server (including Stuck In Yesterday band media libraries).
 
-- Prowlarr: Indexer manager for the Arrs.
+- navidrome: Music server featuring split routing (SSO for Web UI, token-auth for Subsonic APIs).
 
-### 04-Tools
-Productivity and utility services.
+- immich-server / immich-db: Photo management and backup (decoupled from ML to save RAM).
 
-- Outline: Modern team knowledge base (Wiki).
+- audiobookshelf: Audiobooks and podcasts streaming platform.
 
-- Filebrowser: Web-based file manager with Authentik SSO.
+### 4. Downloads (04-downloads)
+Automated media acquisition pipeline.
 
-- Wallos: Personal subscription tracker.
+- gluetun: WireGuard VPN client encapsulating target containers.
 
-- BentoPDF & ConvertX: PDF and file conversion utilities.
+- qbittorrent: Torrent client sandboxed inside Gluetun's network namespace.
 
-- ntfy: Self-hosted notification service.
+- prowlarr / radarr / sonarr: Indexer management and automated content monitors.
 
-- pgAdmin: Graphical administration for Postgres.
+- ygege / shelfmark: Auxiliary search and ebook utilities.
 
-- Jellyseerr: Ask movie or series publc interface
+### 5. Tools (05-tools)
+Productivity, documentation, and home automation utilities.
 
-### 05-Monitoring
-Health and safety services.
+- outline: Wiki workspace integrated with Authentik OIDC and postgres-common.
 
-- Uptime Kuma: Monitoring and status pages.
+- mealie: Recipe manager with native Authentik OIDC auto-redirects.
 
-- What's Up Docker (WUD): Automated container update alerts.
+- jellyseerr: Media request manager.
 
-- Backrest: Web UI for Restic backups with SSH support.
+- homeassistant: Smart home automation platform.
 
-## ⚙️ Setup & Configuration
-### Environment Variables
-Each stack relies on a local `.env` file based on the provided `.env`.example. Key variables include:
+- code-server: Web-based IDE mapping the deployment workspace directory.
 
-- `APPS_DATA_DIR`: Root path for application configurations.
+### 6. Monitoring (06-monitoring)
+High availability, backup strategies, and remote access.
 
-- `MEDIA_DATA_DIR`: Root path for media storage.
+- uptime-kuma: Infrastructure health check monitoring panel.
 
-- `PUID/PGID`: User/Group IDs to ensure correct permissions.
+- backrest: Privileged Restic backup orchestrator targeting local datasets and offsite mirrors.
 
-### Networking
-All stacks communicate through a single external Docker network: lefrigo-net.
+- tailscale: Mesh VPN node running in host network mode.
 
-## 🚀 Deployment
-Clone this repository to your NAS.
+# Local Development & Operations
+## Local Architecture Behavior
+Local development mimics the production GitOps behavior by using Dockhand as a base layer. When starting any stack locally, the automation workflow dynamically:
+- Copies the stack's local environment example (`stack.env.example`) to a runtime `.env` file.
+- Spins up the core Dockhand orchestration container using the root `compose.yml`.
+- Merges the root configuration with the target stack's overrides to launch the environment.
 
-Configure your .env files for each directory.
+## Managing Stacks Locally
+A Makefile is available at the root of the repository to standardize operations. You must specify the target stack directory using the STACK argument, or use the built-in convenience shortcuts.
 
-Deploy via Portainer by linking this repository to 5 distinct stacks using the path to each `docker-compose.yml`.
+### 1. Starting a Stack
+To spin up Dockhand combined with a specific service layer, use the generic up command: `make up STACK=05-tools`
+Alternatively, you can use the predefined stack shortcuts: 
+```bash
+make sso          # Starts Dockhand + SSO stack (01-sso)
+make core         # Starts Dockhand + Core stack (02-core)
+make multimedia   # Starts Dockhand + Multimedia stack (03-multimedia)
+make downloads    # Starts Dockhand + Downloads stack (04-downloads)
+make tools        # Starts Dockhand + Tools stack (05-tools)
+make monitoring   # Starts Dockhand + Monitoring stack (06-monitoring)
+```
+### 2. Stopping a Stack
+To safely tear down an active stack along with the base Dockhand container, run: 
+```bash
+make down STACK=05-tools
+```
+
+### 3. Code Quality & Linting
+Before committing changes to YAML configurations, run the built-in formatter to ensure syntax compliance. This executes yamlfix inside an isolated ephemeral Docker container, preventing the need for local Python dependencies:
+```bash
+make lint
+```
+
+### 4. Help CommandTo list all available automation targets and shortcuts, run:
+```bash
+make help
+```

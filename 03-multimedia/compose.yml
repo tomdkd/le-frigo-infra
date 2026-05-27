@@ -114,8 +114,6 @@ services:
     depends_on:
       immich-db:
         condition: service_healthy
-      immich-machine-learning:
-        condition: service_healthy
     networks: [lefrigo-net]
     labels:
       - traefik.enable=true
@@ -124,21 +122,6 @@ services:
       - traefik.http.routers.immich.entrypoints=websecure
       - traefik.http.routers.immich.tls.certresolver=myresolver
       - traefik.http.services.immich.loadbalancer.server.port=2283
-  immich-machine-learning:
-    container_name: immich_machine_learning
-    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
-    volumes: [model-cache:/cache]
-    environment:
-      - DB_HOSTNAME=immich-db
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_DATABASE_NAME=${DB_DATABASE_NAME}
-      - TZ=Europe/Paris
-    restart: always
-    healthcheck:
-      disable: false
-    networks: [lefrigo-net]
-    depends_on: [immich-db]
   immich-db:
     image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
     container_name: immich_postgres
@@ -180,9 +163,6 @@ services:
       - traefik.http.services.audiobookshelf.loadbalancer.server.port=80
     networks: [lefrigo-net]
     restart: always
-volumes:
-  model-cache:
-  mysql_data:
 networks:
   lefrigo-net:
     external: true
