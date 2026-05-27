@@ -73,6 +73,8 @@ services:
       - AUTHENTIK_EMAIL__USE_SSL=${AUTHENTIK_EMAIL__USE_SSL}
       - AUTHENTIK_EMAIL__FROM=${AUTHENTIK_EMAIL__FROM}
       - AUTHENTIK_WORKER__CONCURRENCY=4
+      - AUTHENTIK_BOOTSTRAP_OUTPOST_INITIALIZATION=true
+      - AUTHENTIK_OUTPOSTS_CONTAINER_IMAGE_BASE=ghcr.io/goauthentik/%s
     volumes: ['${APPS_DATA_DIR}/authentik/certs:/certs']
     networks: [authentik-net, lefrigo-net]
     deploy:
@@ -109,6 +111,8 @@ services:
       - AUTHENTIK_EMAIL__USE_SSL=${AUTHENTIK_EMAIL__USE_SSL}
       - AUTHENTIK_EMAIL__FROM=${AUTHENTIK_EMAIL__FROM}
       - AUTHENTIK_WEB__WORKERS=2
+      - AUTHENTIK_BOOTSTRAP_OUTPOST_INITIALIZATION=true
+      - AUTHENTIK_OUTPOSTS_CONTAINER_IMAGE_BASE=ghcr.io/goauthentik/%s
     ports: [1001:9000, 1002:9443]
     volumes:
       - ${APPS_DATA_DIR}/authentik/data:/data
