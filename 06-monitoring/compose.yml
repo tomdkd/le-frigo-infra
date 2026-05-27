@@ -77,7 +77,6 @@ services:
     container_name: databasus
     image: databasus/databasus:latest
     ports: [4005:4005]
-    environment: ['PUID=${PUID}', 'PGID=${PGID}']
     volumes: ['${APPS_DATA_DIR}/databasus/data:/databasus-data']
     restart: unless-stopped
     networks: [lefrigo-net, 01-sso_authentik-net]
