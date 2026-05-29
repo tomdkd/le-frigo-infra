@@ -1,16 +1,13 @@
 ## Description
 <!-- A clear and concise description of what this PR does and why (the main goal). -->
 
-
 ## Changes
 <!-- List the main changes, files updated, or new services added. -->
 * **File/Service:** Description of the change
 * **Network & Security Configuration:** Description of proxy or routing changes
 
-
-## Security & Best Practices
+## What to do after deployment
 <!-- Highlight security considerations, encryption, or critical post-deployment actions. -->
-
 
 ## How to test
 <!-- Step-by-step checklist to deploy and verify the changes. -->
