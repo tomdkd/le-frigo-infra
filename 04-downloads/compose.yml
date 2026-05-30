@@ -2,7 +2,7 @@
 services:
   # --- GLUETUN ---
   gluetun:
-    image: qmcgaw/gluetun
+    image: qmcgaw/gluetun:pr-3353
     container_name: gluetun
     user: 0:0
     cap_add: [NET_ADMIN]
@@ -52,7 +52,7 @@ services:
 
   # --- QBitorrent ---
   qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
+    image: lscr.io/linuxserver/qbittorrent:5.2.1
     container_name: qbittorrent
     network_mode: service:gluetun
     environment:
@@ -83,7 +83,7 @@ services:
 
   # --- PROWLARR ---
   prowlarr:
-    image: lscr.io/linuxserver/prowlarr:latest
+    image: lscr.io/linuxserver/prowlarr:2.4.0-nightly
     container_name: prowlarr
     environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
     networks: [lefrigo-net]
@@ -109,7 +109,7 @@ services:
 
   # --- RADARR ---
   radarr:
-    image: lscr.io/linuxserver/radarr:latest
+    image: lscr.io/linuxserver/radarr:6.2.0-nightly
     container_name: radarr
     ports: [7878:7878]
     environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
@@ -143,7 +143,7 @@ services:
 
   # --- SONARR ---
   sonarr:
-    image: lscr.io/linuxserver/sonarr:latest
+    image: lscr.io/linuxserver/sonarr:4.0.17
     container_name: sonarr
     ports: [8989:8989]
     environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
@@ -175,7 +175,7 @@ services:
       prowlarr:
         condition: service_healthy
   ygege:
-    image: uwucode/ygege:latest
+    image: uwucode/ygege:0.9.1
     container_name: ygege
     restart: unless-stopped
     environment:
@@ -196,7 +196,7 @@ services:
       prowlarr:
         condition: service_healthy
   shelfmark:
-    image: ghcr.io/calibrain/shelfmark:latest
+    image: ghcr.io/calibrain/shelfmark:v1.3.0
     container_name: shelfmark
     environment:
       PUID: ${PUID}

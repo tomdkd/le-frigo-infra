@@ -2,7 +2,7 @@
 services:
   # --- JELLYFIN ---
   jellyfin:
-    image: jellyfin/jellyfin
+    image: jellyfin/jellyfin:2026052922
     container_name: jellyfin
     user: ${PUID}:${PGID}
     restart: unless-stopped
@@ -95,7 +95,7 @@ services:
 
   # --- IMMICH ---
   immich-server:
-    image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
+    image: ghcr.io/immich-app/immich-server:commit-dc2c01e4737eb6524d1d4a16ee47ffac16264111
     container_name: immich_server
     user: ${PUID}:${PGID}
     ports: [2283:2283]
@@ -146,7 +146,8 @@ services:
 
   # --- AUDIOBOOKSHELF ---
   audiobookshelf:
-    image: ghcr.io/advplyr/audiobookshelf:latest
+    image: ghcr.io/advplyr/audiobookshelf:2.35.1
+    container_name: audiobookshelf
     ports: [8085:80]
     user: ${PUID}:${PGID}
     volumes:

@@ -1,7 +1,7 @@
 ---
 services:
   jellyseerr:
-    image: ghcr.io/seerr-team/seerr:latest
+    image: ghcr.io/seerr-team/seerr:3.2.0
     init: true
     user: ${PUID}:${PGID}
     container_name: jellyseerr
@@ -33,7 +33,7 @@ services:
 
   # --- OUTLINE ---
   outline:
-    image: docker.getoutline.com/outlinewiki/outline:latest
+    image: docker.getoutline.com/outlinewiki/outline:1.7.1
     container_name: outline
     restart: always
     user: ${PUID}:${PGID}
@@ -69,7 +69,7 @@ services:
       - traefik.http.services.outline.loadbalancer.server.port=3421
   homeassistant:
     container_name: homeassistant
-    image: ghcr.io/home-assistant/home-assistant:stable
+    image: ghcr.io/home-assistant/home-assistant:2026.5.4
     ports: [8123:8123]
     volumes:
       - ${APPS_DATA_DIR}/homeassistant/config:/config
@@ -126,7 +126,7 @@ services:
       - traefik.http.services.mealie.loadbalancer.server.port=9000
       - traefik.http.routers.mealie.priority=1
   code-server:
-    image: lscr.io/linuxserver/code-server:latest
+    image: lscr.io/linuxserver/code-server:4.122.0
     container_name: code-server
     environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
     volumes:
@@ -135,11 +135,14 @@ services:
     ports: [8443:8443]
     restart: unless-stopped
   whodb:
-    image: clidey/whodb
+    image: clidey/whodb:0.112.0
+    container_name: whodb
     ports: [2000:8080]
     environment: [TZ=Europe/Paris]
     restart: unless-stopped
-    networks: [lefrigo-net]
+    networks: [lefrigo-net, 01-sso-authentik-net]
 networks:
   lefrigo-net:
+    external: true
+  01-sso-authentik-net:
     external: true

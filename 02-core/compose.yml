@@ -38,7 +38,7 @@ services:
       - IMAGES=1
       - INFO=1
       - PING=1
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:v0.4.2
     networks: [lefrigo-net]
     privileged: true
     volumes:
