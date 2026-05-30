@@ -1,13 +1,13 @@
 # LeFrigo Infrastructure
 
-LeFrigo is a modular self-hosted Docker Compose homelab for TrueNAS SCALE. It splits infrastructure into isolated logical stacks, centralizes ingress through Traefik, and relies on Authentik for identity and access control.
+LeFrigo is a modular self-hosted Docker Compose homelab for TrueNAS SCALE and Linux hosts. It organizes services into isolated logical stacks and centralizes edge routing through Traefik with Authentik identity.
 
 ## Stacks
-- `01-sso` — Authentik identity provider, database, and isolated Docker socket proxy
-- `02-core` — Traefik ingress, shared PostgreSQL, shared Redis, and Traefik Docker discovery proxy
+- `01-sso` — Authentik identity provider and isolated socket proxy
+- `02-core` — Traefik ingress, shared PostgreSQL, and Redis
 - `03-multimedia` — Jellyfin, Navidrome, Immich, Audiobookshelf
-- `04-downloads` — Gluetun VPN, qBittorrent, Prowlarr, Radarr, Sonarr, Ygege, Shelfmark
-- `05-tools` — Outline, Mealie, Jellyseerr, Home Assistant, code-server, WHODB
+- `04-downloads` — Gluetun, qBittorrent, Prowlarr, Radarr, Sonarr, Ygege, Shelfmark
+- `05-tools` — Outline, Mealie, Home Assistant, code-server, Jellyseerr, WHODB
 - `06-monitoring` — Uptime Kuma, Backrest, Tailscale, Databasus, Vaultwarden
 
 ## Quick start
@@ -27,7 +27,6 @@ make help
 ```
 
 ## Notes
-- Each stack uses its own `stack.env.example` file to generate a runtime `STACK/.env`.
-- The root `compose.yml` provides the Dockhand orchestrator and Docker socket proxies.
-- Traefik is exposed on host ports `81` and `444`, mapped to container ports `80` and `443`.
-- For deep architecture details, see `.ai-agent/infrastructure.md` and the `docs/` directory.
+- Each stack contains a `stack.env.example`; use the Makefile to generate `STACK/.env`.
+- The root `compose.yml` provides the Dockhand orchestrator and the Docker socket proxy.
+- For architecture and topology details, see `.ai-agent/infrastructure.md` and the `docs/` directory.

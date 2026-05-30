@@ -6,7 +6,6 @@ This document describes how each logical stack connects with others and which sh
 - `compose.yml` defines the base stack with:
   - `docker-proxy`: safe Docker API proxy
   - `dockhand`: runtime orchestrator for stack composition
-  - `pgadmin`: optional PostgreSQL management UI
 - Root services are attached to `docker-proxy-net` and `lefrigo-net`.
 
 ## 2. 01-sso (Identity Provider)
@@ -33,7 +32,7 @@ This document describes how each logical stack connects with others and which sh
 
 ## 6. 05-tools (Productivity)
 - Hosts `outline`, `mealie`, `jellyseerr`, `homeassistant`, `code-server`, and `whodb`.
-- `outline` uses `postgres-common` and `common-redis` from `02-core`.
+- `outline` uses `postgres-common` and `redis` from `02-core`.
 - `mealie` uses native Authentik OIDC integration to authenticate users.
 - `homeassistant` and `jellyseerr` are protected by Traefik and Authentik when exposed.
 

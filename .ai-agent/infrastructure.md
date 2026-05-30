@@ -32,7 +32,6 @@ LeFrigo follows a multi-stack, GitOps-inspired architecture optimized for TrueNA
 ### Root Level (Orchestration & Base Management)
 - **docker-proxy:** Limited Docker socket proxy for safe container metadata access.
 - **dockhand:** Orchestrator container that starts base services and stack-specific compose groups.
-- **pgadmin:** PostgreSQL administration UI exposed on host port `5050`.
 
 ### 01-sso (Identity Provider)
 Handles Authentik SSO, worker processes, and a stack-specific Docker socket proxy.
