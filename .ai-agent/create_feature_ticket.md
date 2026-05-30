@@ -13,10 +13,11 @@ When creating the issue via the GitHub API or MCP tool:
 ---
 
 ## 📥 Inputs & Context
-Before acting, you must read and analyze:
+Before acting, you must read, open, and analyze the following documentation files to gather full architectural context:
 1. **`.ai-agent/infrastructure.md`**: To understand the global architecture, storage paths, stack folders, and security/BFF constraints.
-2. **`.github/issue_template/feature_request.md`**: To get the exact Markdown layout.
-3. **User Prompt**: The user's rough request specifying the service to add or modify.
+2. **All Referenced Deep-Dive Docs**: You MUST explicitly read every markdown file listed in the "Reference Deep-Dive Docs" section of `infrastructure.md` (e.g., `docs/network-topology.md`, `docs/stack-interconnections.md`). Do not skip them; they contain the network and routing truth needed for accurate routing.
+3. **`.github/issue_template/feature_request.md`**: To get the exact Markdown layout.
+4. **User Prompt**: The user's rough request specifying the service to add or modify.
 
 ---
 
