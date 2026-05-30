@@ -5,54 +5,39 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    labels:
-      - Network
-
+    labels: [Network]
   - package-ecosystem: docker
     directory: /01-sso
     schedule:
       interval: weekly
-    labels:
-      - SSO
-
+    labels: [SSO]
   - package-ecosystem: docker
     directory: /02-core
     schedule:
       interval: weekly
-    labels:
-      - Core
-
+    labels: [Core]
   - package-ecosystem: docker
     directory: /03-multimedia
     schedule:
       interval: weekly
-    labels:
-      - Multimedia
-
+    labels: [Multimedia]
   - package-ecosystem: docker
     directory: /04-downloads
     schedule:
       interval: weekly
-    labels:
-      - Downloads
-
+    labels: [Downloads]
   - package-ecosystem: docker
     directory: /05-tools
     schedule:
       interval: weekly
-    labels:
-      - Tools
-
+    labels: [Tools]
   - package-ecosystem: docker
     directory: /06-monitoring
     schedule:
       interval: weekly
-    labels:
-      - Monitoring
-
+    labels: [Monitoring]
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
-    labels:
-      - Push CI
+    labels: [Push CI]
