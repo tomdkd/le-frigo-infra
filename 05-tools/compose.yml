@@ -1,7 +1,7 @@
 ---
 services:
   jellyseerr:
-    image: ghcr.io/seerr-team/seerr:3.2.0
+    image: ghcr.io/seerr-team/seerr:v3.2.0
     init: true
     user: ${PUID}:${PGID}
     container_name: jellyseerr

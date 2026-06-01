@@ -80,7 +80,7 @@ services:
     ports: [4005:4005]
     volumes: ['${APPS_DATA_DIR}/databasus/data:/databasus-data']
     restart: unless-stopped
-    networks: [lefrigo-net, 01-sso_authentik-net]
+    networks: [lefrigo-net, 01-sso-authentik-net]
   # --- VAULTWARDEN ---
   vaultwarden:
     image: vaultwarden/server:1.36.0
@@ -103,5 +103,5 @@ services:
 networks:
   lefrigo-net:
     external: true
-  01-sso_authentik-net:
+  01-sso-authentik-net:
     external: true
