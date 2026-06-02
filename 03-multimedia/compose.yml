@@ -133,8 +133,7 @@ services:
     security_opt: [no-new-privileges:true]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.gonic-api.rule=Host(`music.api.le-frigo.fr`) && PathPrefix(`/rest`,
-        `/ping`)
+      - "traefik.http.routers.gonic-api.rule=Host(`music.api.le-frigo.fr`) && PathPrefix(`/rest`, `/ping`)"
       - traefik.http.routers.gonic-api.entrypoints=websecure
       - traefik.http.routers.gonic-api.tls=true
       - traefik.http.routers.gonic-api.tls.certresolver=letsencrypt
