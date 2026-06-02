@@ -45,54 +45,6 @@ services:
       retries: 3
       start_period: 60s
 
-  # --- NAVIDROME ---
-  navidrome:
-    image: deluan/navidrome:0.60.3
-    container_name: navidrome
-    user: ${PUID}:${PGID}
-    ports: [4533:4533]
-    restart: unless-stopped
-    environment:
-      - ND_BASEURL=https://musique.le-frigo.fr
-      - ND_REVERSEPROXY=true
-      - ND_EXTAUTH_TRUSTEDSOURCES=172.16.0.0/12,192.168.1.0/24
-      - ND_EXTAUTH_USERHEADER=X-Authentik-Username
-      - ND_LOGLEVEL=debug
-    volumes:
-      - ${APPS_DATA_DIR}/navidrome/data:/data
-      - ${MEDIA_DATA_DIR}/musique:/music:ro
-    networks: [lefrigo-net]
-    labels:
-      - traefik.enable=true
-      # --- ROUTEUR 1 : Interface Web (Protégée) ---
-      - traefik.http.routers.navidrome-ui.rule=Host(`musique.le-frigo.fr`) && !PathPrefix(`/rest`)
-      - traefik.http.routers.navidrome-ui.entrypoints=websecure
-      - traefik.http.routers.navidrome-ui.tls=true
-      - traefik.http.routers.navidrome-ui.tls.certresolver=myresolver
-      - traefik.http.routers.navidrome-ui.middlewares=authentik@docker
-      - traefik.http.routers.navidrome-ui.service=navidrome-svc
-
-      # --- ROUTEUR 2 : API Subsonic (Ouverte) ---
-      - traefik.http.routers.navidrome-api.rule=Host(`musique.le-frigo.fr`) && PathPrefix(`/rest`)
-      - traefik.http.routers.navidrome-api.entrypoints=websecure
-      - traefik.http.routers.navidrome-api.tls=true
-      - traefik.http.routers.navidrome-api.tls.certresolver=myresolver
-      - traefik.http.routers.navidrome-api.service=navidrome-svc
-      - traefik.http.services.navidrome-svc.loadbalancer.server.port=4533
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 1G
-        reservations:
-          memory: 256M
-    healthcheck:
-      test: [CMD-SHELL, wget -q --spider http://localhost:4533/ping || exit 1]
-      interval: 1m
-      timeout: 5s
-      retries: 3
-      start_period: 20s
-
   # --- IMMICH ---
   immich-server:
     image: ghcr.io/immich-app/immich-server:commit-dc2c01e4737eb6524d1d4a16ee47ffac16264111
@@ -164,6 +116,66 @@ services:
       - traefik.http.services.audiobookshelf.loadbalancer.server.port=80
     networks: [lefrigo-net]
     restart: always
+
+  # --- GONIC ---
+  gonic:
+    image: sentriz/gonic:v0.21.0
+    container_name: gonic
+    restart: unless-stopped
+    user: ${PUID}:${PGID}
+    environment: [TZ=Europe/Paris, GONIC_SCAN_INTERVAL=15]
+    ports: [4747:80]
+    volumes:
+      - ${APPS_DATA_DIR}/gonic/data:/data
+      - ${MEDIA_DATA_DIR}/musique:/music:ro
+      - ${APPS_DATA_DIR}/gonic/playlists:/playlists
+      - ${APPS_DATA_DIR}/gonic/cache:/cache
+    security_opt: [no-new-privileges:true]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.gonic-api.rule=Host(`music.api.le-frigo.fr`) && PathPrefix(`/rest`,
+        `/ping`)
+      - traefik.http.routers.gonic-api.entrypoints=websecure
+      - traefik.http.routers.gonic-api.tls=true
+      - traefik.http.routers.gonic-api.tls.certresolver=letsencrypt
+      - traefik.http.routers.gonic-api.service=gonic-svc
+      - traefik.http.services.gonic-svc.loadbalancer.server.port=80
+    networks: [lefrigo-net]
+    healthcheck:
+      test: [CMD, wget, --spider, -q, http://localhost:80/ping]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+  # --- VIBRDROME-WEB ---
+  vibrdrome-web:
+    image: ddmoney420/vibrdrome-web:v1.8.1-beta.2
+    container_name: vibrdrome-web
+    ports: [8009:80]
+    environment: [VIBRDROME_DEFAULT_SERVER=https://music.api.le-frigo.fr]
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.vibrdrome.rule=Host(`music.le-frigo.fr`)
+      - traefik.http.routers.vibrdrome.entrypoints=websecure
+      - traefik.http.routers.vibrdrome.tls=true
+      - traefik.http.routers.vibrdrome.tls.certresolver=letsencrypt
+      - traefik.http.routers.vibrdrome.service=vibrdrome-svc
+      - traefik.http.services.vibrdrome-svc.loadbalancer.server.port=80
+      - traefik.http.routers.vibrdrome.middlewares=authentik@docker
+    security_opt: [no-new-privileges:true]
+    depends_on: [gonic]
+    networks: [lefrigo-net]
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
 networks:
   lefrigo-net:
     external: true
