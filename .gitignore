@@ -1,5 +1,12 @@
+# Ignore the .env file which contains sensitive environment variables
 .env
+
+# Ignore applications and media folders
 apps/
 medias/
+media/
 data/
+
+# Ignore the AI directories which may contain generated files, caches or custom configs
 .gemini/
+.claude/
