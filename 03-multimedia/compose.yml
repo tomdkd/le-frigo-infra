@@ -119,7 +119,7 @@ services:
 
   # --- GONIC ---
   gonic:
-    image: sentriz/gonic:nightly
+    image: sentriz/gonic:v0.21.0
     container_name: gonic
     restart: unless-stopped
     user: ${PUID}:${PGID}
@@ -133,7 +133,8 @@ services:
     security_opt: [no-new-privileges:true]
     labels:
       - traefik.enable=true
-      - "traefik.http.routers.gonic-api.rule=Host(`music.api.le-frigo.fr`) && PathPrefix(`/rest`, `/ping`)"
+      - traefik.http.routers.gonic-api.rule=Host(`music.api.le-frigo.fr`) && PathPrefix(`/rest`,
+        `/ping`)
       - traefik.http.routers.gonic-api.entrypoints=websecure
       - traefik.http.routers.gonic-api.tls=true
       - traefik.http.routers.gonic-api.tls.certresolver=letsencrypt
@@ -153,9 +154,9 @@ services:
           memory: 512M
   # --- VIBRDROME-WEB ---
   vibrdrome-web:
-    image: ddmoney420/vibrdrome-web
+    image: ddmoney420/vibrdrome-web:v1.8.1-beta.2
     container_name: vibrdrome-web
-    ports: [8080:80]
+    ports: [8009:80]
     environment: [VIBRDROME_DEFAULT_SERVER=https://music.api.le-frigo.fr]
     restart: unless-stopped
     labels:
@@ -168,6 +169,7 @@ services:
       - traefik.http.services.vibrdrome-svc.loadbalancer.server.port=80
       - traefik.http.routers.vibrdrome.middlewares=authentik@docker
     security_opt: [no-new-privileges:true]
+    depends_on: [gonic]
     networks: [lefrigo-net]
     deploy:
       resources:
