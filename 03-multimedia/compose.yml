@@ -130,16 +130,24 @@ services:
       - ${MEDIA_DATA_DIR}/musique:/music:ro
       - ${APPS_DATA_DIR}/gonic/playlists:/playlists
       - ${APPS_DATA_DIR}/gonic/cache:/cache
+      - ${APPS_DATA_DIR}/gonic/podcasts:/podcasts
     security_opt: [no-new-privileges:true]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.gonic-api.rule=Host(`music.api.le-frigo.fr`) && PathPrefix(`/rest`,
-        `/ping`)
+      - traefik.http.routers.gonic-api.rule=Host(`music.api.le-frigo.fr`)
       - traefik.http.routers.gonic-api.entrypoints=websecure
       - traefik.http.routers.gonic-api.tls=true
       - traefik.http.routers.gonic-api.tls.certresolver=letsencrypt
       - traefik.http.routers.gonic-api.service=gonic-svc
+
+      # Activation du middleware CORS
+      - traefik.http.routers.gonic-api.middlewares=gonic-cors
       - traefik.http.services.gonic-svc.loadbalancer.server.port=80
+
+      # 🛡️ Configuration CORS béton
+      - traefik.http.middlewares.gonic-cors.headers.accesscontrolallowmethods=GET,OPTIONS,POST
+      - traefik.http.middlewares.gonic-cors.headers.accesscontrolalloworiginlist=https://music.le-frigo.fr
+      - traefik.http.middlewares.gonic-cors.headers.accesscontrolallowheaders=*
     networks: [lefrigo-net]
     healthcheck:
       test: [CMD, wget, --spider, -q, http://localhost:80/ping]
@@ -164,7 +172,7 @@ services:
       - traefik.http.routers.vibrdrome.rule=Host(`music.le-frigo.fr`)
       - traefik.http.routers.vibrdrome.entrypoints=websecure
       - traefik.http.routers.vibrdrome.tls=true
-      - traefik.http.routers.vibrdrome.tls.certresolver=letsencrypt
+      - traefik.http.routers.vibrdrome.tls.certresolver=myresolver
       - traefik.http.routers.vibrdrome.service=vibrdrome-svc
       - traefik.http.services.vibrdrome-svc.loadbalancer.server.port=80
       - traefik.http.routers.vibrdrome.middlewares=authentik@docker
