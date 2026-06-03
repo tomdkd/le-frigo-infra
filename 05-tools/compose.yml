@@ -141,6 +141,58 @@ services:
     environment: [TZ=Europe/Paris]
     restart: unless-stopped
     networks: [lefrigo-net, 01-sso_authentik-net]
+  # --- FILEBROWSER ---
+  filebrowser:
+    image: filebrowser/filebrowser:v2.63.10-s6
+    container_name: filebrowser
+    ports: [6789:80]
+    volumes: ['${MEDIA_DATA_DIR}:/srv']
+    tmpfs: [/config, /database]
+    environment:
+      - TZ=Europe/Paris
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - FB_DATABASE=/database/filebrowser.db
+      - FB_NOAUTH=true
+    restart: unless-stopped
+    networks: [lefrigo-net]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.filebrowser.rule=Host(`file.le-frigo.fr`)
+      - traefik.http.routers.filebrowser.service=filebrowser
+      - traefik.http.routers.filebrowser.entrypoints=websecure
+      - traefik.http.routers.filebrowser.tls.certresolver=myresolver
+      - traefik.http.services.filebrowser.loadbalancer.server.port=80
+      - traefik.http.routers.filebrowser.middlewares=authentik@docker
+  # --- PICARD ---
+  picard:
+    image: jlesage/musicbrainz-picard:v26.05.2
+    container_name: picard
+    ports: [5800:5800]
+    environment: ['USER_ID=${PUID}', 'GROUP_ID=${PGID}']
+    volumes: ['${MEDIA_DATA_DIR}/musique:/storage:rw']
+    networks: [lefrigo-net]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.picard.rule=Host(`picard.le-frigo.fr`)
+      - traefik.http.routers.picard.service=picard
+      - traefik.http.routers.picard.entrypoints=websecure
+      - traefik.http.routers.picard.tls.certresolver=myresolver
+      - traefik.http.services.picard.loadbalancer.server.port=5800
+      - traefik.http.routers.picard.middlewares=authentik@docker
+    healthcheck:
+      test: [CMD-SHELL, nc -z localhost 5800]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
+        reservations:
+          memory: 512M
 networks:
   lefrigo-net:
     external: true
