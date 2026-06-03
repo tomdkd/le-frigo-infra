@@ -252,6 +252,7 @@ services:
     restart: unless-stopped
     ports: [8086:8081]
     volumes: [/mnt/LeFrigo-Tank/data/youtube_downloads:/downloads]
+    networks: [lefrigo-net]
     labels:
       - traefik.enable=true
       - traefik.http.routers.metube.rule=Host(`metube.le-frigo.fr`)
