@@ -28,8 +28,8 @@ services:
           memory: 1024M
 
   # --- DOCKER PROXY FOR CORE STACK ---
-  docker-proxy:
-    container_name: docker-proxy
+  core-docker-proxy:
+    container_name: core-docker-proxy
     environment:
       - CONTAINERS=1
       - NETWORKS=1
@@ -63,7 +63,7 @@ services:
       - --log.level=INFO
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
-      - --providers.docker.endpoint=tcp://docker-proxy:2375
+      - --providers.docker.endpoint=tcp://core-docker-proxy:2375
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --entrypoints.web.http.redirections.entryPoint.to=websecure
@@ -84,7 +84,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      docker-proxy:
+      core-docker-proxy:
         condition: service_started
 
   # --- REDIS ---

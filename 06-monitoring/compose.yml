@@ -1,8 +1,8 @@
 ---
 services:
-  # --- DOCKER PROXY FOR CORE STACK ---
-  docker-proxy:
-    container_name: docker-proxy
+  # --- DOCKER PROXY FOR MONITORING STACK ---
+  monitoring-docker-proxy:
+    container_name: monitoring-docker-proxy
     environment: [CONTAINERS=1, POST=0]
     image: tecnativa/docker-socket-proxy:v0.4.2
     networks: [monitoring-docker-proxy]
@@ -18,6 +18,9 @@ services:
     volumes: ['${APPS_DATA_DIR}/uptime_kuma:/app/data']
     ports: [9876:3001]
     networks: [lefrigo-net, monitoring-docker-proxy]
+    depends_on:
+      monitoring-docker-proxy:
+         condition: service_started
     labels:
       - traefik.enable=true
       - traefik.http.routers.kuma.rule=Host(`kuma.le-frigo.fr`)
