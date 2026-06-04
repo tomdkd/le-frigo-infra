@@ -1,22 +1,22 @@
 # LeFrigo Infrastructure
 
-LeFrigo is a modular self-hosted Docker Compose homelab for TrueNAS SCALE and Linux hosts. It organizes services into isolated logical stacks and centralizes edge routing through Traefik with Authentik identity.
+LeFrigo is a modular Docker Compose homelab designed for TrueNAS SCALE and Linux hosts. It organizes services into isolated logical stacks with a shared Traefik ingress layer and Authentik identity provider.
 
 ## Stacks
-- `01-sso` — Authentik identity provider and isolated socket proxy
-- `02-core` — Traefik ingress, shared PostgreSQL, and Redis
-- `03-multimedia` — Jellyfin, Navidrome, Immich, Audiobookshelf
-- `04-downloads` — Gluetun, qBittorrent, Prowlarr, Radarr, Sonarr, Ygege, Shelfmark
-- `05-tools` — Outline, Mealie, Home Assistant, code-server, Jellyseerr, WHODB
+- `01-sso` — Authentik identity provider
+- `02-core` — Traefik ingress, shared PostgreSQL, Redis
+- `03-multimedia` — Jellyfin, Immich, Audiobookshelf, Navidrome, Gonic, Vibrdrome
+- `04-downloads` — Gluetun VPN, qBittorrent, Prowlarr, Radarr, Sonarr, Lidarr, Ygege, Shelfmark, Metube
+- `05-tools` — Outline, Mealie, Home Assistant, code-server, Jellyseerr, WHODB, File Browser, Picard
 - `06-monitoring` — Uptime Kuma, Backrest, Tailscale, Databasus, Vaultwarden
 
 ## Quick start
-Start a stack from the repository root:
+Start one stack from the repository root:
 ```bash
 make up STACK=05-tools
 ```
 
-Stop a stack:
+Stop the same stack:
 ```bash
 make down STACK=05-tools
 ```
@@ -27,6 +27,6 @@ make help
 ```
 
 ## Notes
-- Each stack contains a `stack.env.example`; use the Makefile to generate `STACK/.env`.
-- The root `compose.yml` provides the Dockhand orchestrator and the Docker socket proxy.
+- Each stack includes a `stack.env.example`; use the Makefile to generate `STACK/.env`.
+- The root `compose.yml` defines the Dockhand orchestrator and host Docker socket proxy.
 - For architecture and topology details, see `.ai-agent/infrastructure.md` and the `docs/` directory.

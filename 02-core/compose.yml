@@ -27,9 +27,9 @@ services:
         limits:
           memory: 1024M
 
-  # --- DOCKER PROXY FOR APPLICATIONS ---
-  docker-proxy-read:
-    container_name: docker-proxy-read
+  # --- DOCKER PROXY FOR CORE STACK ---
+  docker-proxy:
+    container_name: docker-proxy
     environment:
       - CONTAINERS=1
       - NETWORKS=1
@@ -39,7 +39,7 @@ services:
       - INFO=1
       - PING=1
     image: tecnativa/docker-socket-proxy:v0.4.2
-    networks: [lefrigo-net]
+    networks: [core-docker-proxy]
     privileged: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -51,7 +51,7 @@ services:
     user: ${PUID}:${PGID}
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
-    networks: [lefrigo-net]
+    networks: [lefrigo-net, core-docker-proxy]
     ports: [81:80, 444:443]
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -63,7 +63,7 @@ services:
       - --log.level=INFO
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
-      - --providers.docker.endpoint=tcp://docker-proxy-read:2375
+      - --providers.docker.endpoint=tcp://docker-proxy:2375
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --entrypoints.web.http.redirections.entryPoint.to=websecure
@@ -84,7 +84,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      docker-proxy-read:
+      docker-proxy:
         condition: service_started
 
   # --- REDIS ---
@@ -101,3 +101,5 @@ services:
 networks:
   lefrigo-net:
     external: true
+  core-docker-proxy:
+    name: core-docker-proxy
