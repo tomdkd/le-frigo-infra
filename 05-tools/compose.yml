@@ -143,7 +143,7 @@ services:
     networks: [lefrigo-net, 01-sso_authentik-net]
   # --- FILEBROWSER ---
   filebrowser:
-    image: filebrowser/filebrowser:v2.63.10-s6
+    image: filebrowser/filebrowser:v2.63.12-s6
     container_name: filebrowser
     ports: [6789:80]
     volumes: ['${MEDIA_DATA_DIR}:/srv']
