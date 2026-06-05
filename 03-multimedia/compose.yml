@@ -2,7 +2,7 @@
 services:
   # --- JELLYFIN ---
   jellyfin:
-    image: jellyfin/jellyfin:2026052922
+    image: jellyfin/jellyfin:2026060106
     container_name: jellyfin
     user: ${PUID}:${PGID}
     restart: unless-stopped
