@@ -126,7 +126,7 @@ services:
       - traefik.http.services.mealie.loadbalancer.server.port=9000
       - traefik.http.routers.mealie.priority=1
   code-server:
-    image: lscr.io/linuxserver/code-server:4.122.0
+    image: lscr.io/linuxserver/code-server:4.123.0
     container_name: code-server
     environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
     volumes:
