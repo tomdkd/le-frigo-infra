@@ -1,37 +1,37 @@
 ---
 version: 2
 updates:
-  - package-ecosystem: docker
+  - package-ecosystem: docker-compose
     directory: /
     schedule:
       interval: weekly
     labels: [Network]
-  - package-ecosystem: docker
+  - package-ecosystem: docker-compose
     directory: /01-sso
     schedule:
       interval: weekly
     labels: [SSO]
-  - package-ecosystem: docker
+  - package-ecosystem: docker-compose
     directory: /02-core
     schedule:
       interval: weekly
     labels: [Core]
-  - package-ecosystem: docker
+  - package-ecosystem: docker-compose
     directory: /03-multimedia
     schedule:
       interval: weekly
     labels: [Multimedia]
-  - package-ecosystem: docker
+  - package-ecosystem: docker-compose
     directory: /04-downloads
     schedule:
       interval: weekly
     labels: [Downloads]
-  - package-ecosystem: docker
+  - package-ecosystem: docker-compose
     directory: /05-tools
     schedule:
       interval: weekly
     labels: [Tools]
-  - package-ecosystem: docker
+  - package-ecosystem: docker-compose
     directory: /06-monitoring
     schedule:
       interval: weekly

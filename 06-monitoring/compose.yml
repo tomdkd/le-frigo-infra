@@ -20,7 +20,7 @@ services:
     networks: [lefrigo-net, monitoring-docker-proxy]
     depends_on:
       monitoring-docker-proxy:
-         condition: service_started
+        condition: service_started
     labels:
       - traefik.enable=true
       - traefik.http.routers.kuma.rule=Host(`kuma.le-frigo.fr`)
