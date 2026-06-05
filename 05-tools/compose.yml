@@ -135,7 +135,7 @@ services:
     ports: [8443:8443]
     restart: unless-stopped
   whodb:
-    image: clidey/whodb:0.112.0
+    image: clidey/whodb:0.113.0
     container_name: whodb
     ports: [2000:8080]
     environment: [TZ=Europe/Paris]
