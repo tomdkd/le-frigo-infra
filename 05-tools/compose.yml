@@ -90,7 +90,7 @@ services:
       - traefik.http.services.homeassistant.loadbalancer.server.port=8123
       - traefik.http.routers.homeassistant.priority=1
   mealie:
-    image: ghcr.io/mealie-recipes/mealie:v3.16.0
+    image: ghcr.io/mealie-recipes/mealie:v3.19.2
     container_name: mealie
     restart: always
     ports: [9925:9000]
