@@ -173,7 +173,7 @@ services:
     volumes: ['${MEDIA_DATA_DIR}/musique:/storage:rw']
     networks: [lefrigo-net]
     labels:
-      - traefik.enable=true
+      - traefik.enable=false
       - traefik.http.routers.picard.rule=Host(`picard.le-frigo.fr`)
       - traefik.http.routers.picard.service=picard
       - traefik.http.routers.picard.entrypoints=websecure
