@@ -119,7 +119,7 @@ services:
 
   # --- GONIC ---
   gonic:
-    image: sentriz/gonic:v0.21.0
+    image: sentriz/gonic:v0.22.0
     container_name: gonic
     restart: unless-stopped
     user: ${PUID}:${PGID}
