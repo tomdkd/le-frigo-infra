@@ -115,7 +115,12 @@ services:
   docker-proxy-nursery:
     container_name: docker-proxy-nursery
     image: tecnativa/docker-socket-proxy
-    environment: [CONTAINERS=1, POST=1]
+    environment:
+      - CONTAINERS=1
+      - POST=1
+      - EVENTS=1
+      - REQS=/v*/containers/*
+      - /v*/events?*filter=type%3Dcontainer*
     networks: [nursery-net]
     volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
   containernursery:
