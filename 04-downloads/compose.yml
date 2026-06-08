@@ -228,7 +228,7 @@ services:
       - ${MEDIA_DATA_DIR}:/data
     networks: [lefrigo-net]
     labels:
-      - traefik.enable=true
+      - traefik.enable=false
       - traefik.http.routers.shelfmark.rule=Host(`shelfmark.le-frigo.fr`)
       - traefik.http.routers.shelfmark.service=shelfmark
       - traefik.http.routers.shelfmark.entrypoints=websecure
@@ -254,7 +254,7 @@ services:
     volumes: [/mnt/LeFrigo-Tank/data/youtube_downloads:/downloads]
     networks: [lefrigo-net]
     labels:
-      - traefik.enable=true
+      - traefik.enable=false
       - traefik.http.routers.metube.rule=Host(`metube.le-frigo.fr`)
       - traefik.http.routers.metube.service=metube
       - traefik.http.routers.metube.entrypoints=websecure

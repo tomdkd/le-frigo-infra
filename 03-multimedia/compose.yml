@@ -168,7 +168,7 @@ services:
     environment: [VIBRDROME_DEFAULT_SERVER=https://music.api.le-frigo.fr]
     restart: unless-stopped
     labels:
-      - traefik.enable=true
+      - traefik.enable=false
       - traefik.http.routers.vibrdrome.rule=Host(`music.le-frigo.fr`)
       - traefik.http.routers.vibrdrome.entrypoints=websecure
       - traefik.http.routers.vibrdrome.tls=true
