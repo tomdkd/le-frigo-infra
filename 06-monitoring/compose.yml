@@ -112,28 +112,19 @@ services:
       - traefik.http.routers.vaultwarden.middlewares=authentik@docker
       - traefik.http.services.vaultwarden.loadbalancer.server.port=80
     networks: [lefrigo-net]
-  
   docker-proxy-nursery:
     container_name: docker-proxy-nursery
     image: tecnativa/docker-socket-proxy
-    environment:
-      - CONTAINERS=1
-      - POST=1
+    environment: [CONTAINERS=1, POST=1]
     networks: [nursery-net]
     volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
-
   containernursery:
     image: ghcr.io/itsecholot/containernursery:latest
     container_name: containernursery
-    environment:
-      - DOCKER_HOST=tcp://docker-proxy-nursery:2375 
-    volumes:
-      - ${APPS_DATA_DIR}/containernursery:/usr/src/app/config
-    networks:
-      - nursery-net
-      - lefrigo-net
-    depends_on:
-      - docker-proxy-nursery
+    environment: [DOCKER_HOST=tcp://docker-proxy-nursery:2375]
+    volumes: ['${APPS_DATA_DIR}/containernursery:/usr/src/app/config']
+    networks: [nursery-net, lefrigo-net]
+    depends_on: [docker-proxy-nursery]
     labels:
       - traefik.enable=true
       - traefik.http.routers.nursery-picard.rule=Host(`picard.le-frigo.fr`)
@@ -142,7 +133,6 @@ services:
       - traefik.http.services.nursery-picard-service.loadbalancer.server.port=80
       - traefik.http.routers.nursery-picard.middlewares=authentik@docker
       - traefik.http.routers.nursery-picard.service=nursery-picard-service
-
 networks:
   lefrigo-net:
     external: true
