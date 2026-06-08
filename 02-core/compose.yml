@@ -46,7 +46,7 @@ services:
 
   # --- REVERSE PROXY ---
   traefik:
-    image: traefik:v3.6.9
+    image: traefik:v3.7.4
     container_name: traefik
     user: ${PUID}:${PGID}
     restart: unless-stopped
