@@ -61,7 +61,7 @@ services:
       FILE_STORAGE: local
       FILE_STORAGE_UPLOAD_MAX_SIZE: 26214400
     labels:
-      - traefik.enable=true
+      - traefik.enable=false
       - traefik.http.routers.outline.service=outline
       - traefik.http.routers.outline.rule=Host(`doc.le-frigo.fr`)
       - traefik.http.routers.outline.entrypoints=websecure
@@ -125,22 +125,6 @@ services:
       - traefik.http.routers.mealie.tls.certresolver=myresolver
       - traefik.http.services.mealie.loadbalancer.server.port=9000
       - traefik.http.routers.mealie.priority=1
-  code-server:
-    image: lscr.io/linuxserver/code-server:4.123.0
-    container_name: code-server
-    environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
-    volumes:
-      - ${APPS_DATA_DIR}/code-server/config:/config
-      - ${APPS_DATA_DIR}:/projects
-    ports: [8443:8443]
-    restart: unless-stopped
-  whodb:
-    image: clidey/whodb:0.113.0
-    container_name: whodb
-    ports: [2000:8080]
-    environment: [TZ=Europe/Paris]
-    restart: unless-stopped
-    networks: [lefrigo-net, 01-sso_authentik-net]
   # --- FILEBROWSER ---
   filebrowser:
     image: filebrowser/filebrowser:v2.63.12-s6
