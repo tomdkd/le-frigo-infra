@@ -2,7 +2,7 @@
 services:
   # --- GLUETUN ---
   gluetun:
-    image: qmcgaw/gluetun:pr-3353
+    image: qmcgaw/gluetun:pr-3361
     container_name: gluetun
     user: 0:0
     cap_add: [NET_ADMIN]
