@@ -193,6 +193,7 @@ services:
       - N8N_USER_FOLDER=/home/node/.n8n
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - NPM_CONFIG_CACHE=/home/node/.n8n/.npm
     volumes:
       - ${APPS_DATA_DIR}/n8n:/home/node/.n8n
       - ${MEDIA_DATA_DIR}:/lefrigo_data
