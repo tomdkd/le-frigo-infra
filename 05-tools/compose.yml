@@ -196,7 +196,7 @@ services:
     volumes:
       - ${APPS_DATA_DIR}/n8n:/home/node/.n8n
       - ${MEDIA_DATA_DIR}:/lefrigo_data
-    networks: [lefrigo-net]
+    networks: [lefrigo-net, n8n-net]
     labels:
       - traefik.enable=true
       - traefik.http.routers.n8n.rule=Host(`n8n.le-frigo.fr`)
@@ -212,8 +212,17 @@ services:
           memory: 1G
         reservations:
           memory: 256M
+  # --- OLLAMA ---
+  ollama:
+    image: ollama/ollama:0.30.7
+    container_name: ollama
+    restart: unless-stopped
+    volumes: ['${APPS_DATA_DIR}/ollama/data:/root/.ollama']
+    networks: [n8n-net]
 networks:
   lefrigo-net:
     external: true
   01-sso_authentik-net:
     external: true
+  n8n-net:
+    name: n8n-net
