@@ -126,8 +126,9 @@ services:
   containernursery:
     image: ghcr.io/itsecholot/containernursery:latest
     container_name: containernursery
-    environment: [DOCKER_HOST=tcp://docker-proxy-nursery:2375]
-    volumes: ['${APPS_DATA_DIR}/containernursery:/usr/src/app/config']
+    volumes:
+      - ${APPS_DATA_DIR}/containernursery:/usr/src/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks: [nursery-net, lefrigo-net]
     depends_on: [docker-proxy-nursery]
     labels:
