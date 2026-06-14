@@ -201,15 +201,14 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.services.n8n-svc.loadbalancer.server.port=5678
-
-      - "traefik.http.routers.n8n.rule=Host(`n8n.le-frigo.fr`)"
+      - traefik.http.routers.n8n.rule=Host(`n8n.le-frigo.fr`)
       - traefik.http.routers.n8n.entrypoints=websecure
       - traefik.http.routers.n8n.tls.certresolver=myresolver
       - traefik.http.routers.n8n.middlewares=authentik@docker
       - traefik.http.routers.n8n.service=n8n-svc
       - traefik.http.routers.n8n.priority=1
-
-      - "traefik.http.routers.n8n-webhooks.rule=Host(`n8n.le-frigo.fr`) && (PathPrefix(`/webhook`) || PathPrefix(`/webhook-test`))"
+      - traefik.http.routers.n8n-webhooks.rule=Host(`n8n.le-frigo.fr`) && (PathPrefix(`/webhook`)
+        || PathPrefix(`/webhook-test`))
       - traefik.http.routers.n8n-webhooks.entrypoints=websecure
       - traefik.http.routers.n8n-webhooks.tls.certresolver=myresolver
       - traefik.http.routers.n8n-webhooks.service=n8n-svc
@@ -221,6 +220,15 @@ services:
           memory: 1G
         reservations:
           memory: 256M
+  # Docker socket proxy for n8n to access docker API
+  tools-docker-proxy:
+    container_name: tools-docker-proxy
+    environment: [CONTAINERS=1, GET=1, LOGS=1]
+    image: tecnativa/docker-socket-proxy:v0.4.2
+    networks: [lefrigo-net]
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
   # --- OLLAMA ---
   ollama:
     image: ollama/ollama:0.30.7
