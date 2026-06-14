@@ -30,7 +30,6 @@ services:
           memory: 1G
         reservations:
           memory: 512M
-
   homeassistant:
     container_name: homeassistant
     image: ghcr.io/home-assistant/home-assistant:2026.6.1
