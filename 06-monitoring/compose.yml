@@ -158,11 +158,6 @@ services:
       - traefik.http.routers.nursery-metube.tls.certresolver=myresolver
       - traefik.http.routers.nursery-metube.middlewares=authentik@docker
       - traefik.http.routers.nursery-metube.service=nursery-global-service
-      # Outline service
-      - traefik.http.routers.nursery-outline.rule=Host(`doc.le-frigo.fr`)
-      - traefik.http.routers.nursery-outline.entrypoints=websecure
-      - traefik.http.routers.nursery-outline.tls.certresolver=myresolver
-      - traefik.http.routers.nursery-outline.service=nursery-global-service
       # Vaultwarden service
       - traefik.http.routers.nursery-vaultwarden.rule=Host(`vault.le-frigo.fr`)
       - traefik.http.routers.nursery-vaultwarden.entrypoints=websecure
