@@ -30,43 +30,6 @@ services:
           memory: 1G
         reservations:
           memory: 512M
-
-  # --- OUTLINE ---
-  outline:
-    image: docker.getoutline.com/outlinewiki/outline:1.7.1
-    container_name: outline
-    restart: always
-    user: ${PUID}:${PGID}
-    networks: [lefrigo-net]
-    environment:
-      NODE_ENV: production
-      SECRET_KEY: ${OUTLINE_SECRET_KEY}
-      UTILS_SECRET: ${OUTLINE_UTILS_SECRET}
-      URL: https://doc.le-frigo.fr
-      PORT: 3421
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-common:5432/outline
-      REDIS_URL: redis://common-redis:6379/1
-      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
-      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
-      OIDC_AUTH_URI: https://auth.le-frigo.fr/application/o/authorize/
-      OIDC_TOKEN_URI: https://auth.le-frigo.fr/application/o/token/
-      OIDC_USERINFO_URI: https://auth.le-frigo.fr/application/o/userinfo/
-      OIDC_DISPLAY_NAME: LeFrigo
-      FORCE_HTTPS: true
-      ENABLE_SSL_VERIFICATION: true
-      PGSSLMODE: disable
-      HOST: 0.0.0.0
-      STORAGE_BACKEND: local
-      STORAGE_LOCAL_ROOT_DIR: /var/lib/outline/data
-      FILE_STORAGE: local
-      FILE_STORAGE_UPLOAD_MAX_SIZE: 26214400
-    labels:
-      - traefik.enable=false
-      - traefik.http.routers.outline.service=outline
-      - traefik.http.routers.outline.rule=Host(`doc.le-frigo.fr`)
-      - traefik.http.routers.outline.entrypoints=websecure
-      - traefik.http.routers.outline.tls.certresolver=myresolver
-      - traefik.http.services.outline.loadbalancer.server.port=3421
   homeassistant:
     container_name: homeassistant
     image: ghcr.io/home-assistant/home-assistant:2026.6.1
@@ -243,3 +206,5 @@ networks:
     external: true
   n8n-net:
     name: n8n-net
+  tools-docker-proxy:
+    name: tools-docker-proxy
