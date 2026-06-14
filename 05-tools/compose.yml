@@ -183,18 +183,12 @@ services:
           memory: 1G
         reservations:
           memory: 256M
+  # Docker socket proxy for n8n to access docker API
   tools-docker-proxy:
     container_name: tools-docker-proxy
-    environment:
-      - CONTAINERS=1
-      - NETWORKS=1
-      - EVENTS=1
-      - VERSION=1
-      - IMAGES=1
-      - INFO=1
-      - PING=1
+    environment: [CONTAINERS=1, GET=1, LOGS=1]
     image: tecnativa/docker-socket-proxy:v0.4.2
-    networks: [tools-docker-proxy]
+    networks: [lefrigo-net]
     privileged: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
