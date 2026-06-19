@@ -44,29 +44,6 @@ services:
       authentik-db:
         condition: service_healthy
 
-  # --- AUTHENTIK OUTPOST PROXY ---
-  # authentik-proxy:
-  #   image: ghcr.io/goauthentik/proxy:2025.12.4
-  #   container_name: authentik-proxy
-  #   environment:
-  #     - AUTHENTIK_HOST=http://authentik-server:9000
-  #     - AUTHENTIK_INSECURE=true
-  #     - AUTHENTIK_TOKEN=${AUTHENTIK_PROXY_TOKEN}
-  #   networks: [authentik-net, lefrigo-net]
-  #   restart: unless-stopped
-  #   depends_on:
-  #     authentik-db:
-  #       condition: service_healthy
-  #     authentik-worker:
-  #       condition: service_healthy
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '0.50'
-  #         memory: 512M
-  #       reservations:
-  #         memory: 128M
-
   # --- AUTHENTIK WORKER ---
   authentik-worker:
     image: ghcr.io/goauthentik/server:2025.12.4
