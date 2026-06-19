@@ -87,6 +87,22 @@ services:
       core-docker-proxy:
         condition: service_started
 
+  error-pages:
+    image: ghcr.io/tarampampam/error-pages:4
+    environment:
+      TEMPLATE_NAME: orient
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.error-pages-router.rule=HostRegexp(`.+`)
+      - traefik.http.routers.error-pages-router.priority=10
+      - traefik.http.routers.error-pages-router.entrypoints=websecure
+      - traefik.http.middlewares.error-pages-middleware.errors.status=400-599
+      - traefik.http.middlewares.error-pages-middleware.errors.service=error-pages-service
+      - traefik.http.middlewares.error-pages-middleware.errors.query=/{status}
+      - traefik.http.services.error-pages-service.loadbalancer.server.port=8080
+    networks:
+      - lefrigo-net
+
   # --- REDIS ---
   redis:
     image: redis:8.6.1

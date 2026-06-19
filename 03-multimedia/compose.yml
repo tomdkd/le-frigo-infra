@@ -30,8 +30,8 @@ services:
       - traefik.http.routers.jellyfin-router.tls.certresolver=myresolver
       - traefik.http.routers.jellyfin-router.service=jellyfin-svc
       - traefik.http.services.jellyfin-svc.loadbalancer.server.port=8096
+      - traefik.http.routers.jellyfin-router.middlewares=error-pages-middleware@docker
       - traefik.docker.network=lefrigo-net
-      - traefik.http.routers.jellyfin-svc.middlewares=error-pages-middleware
     deploy:
       resources:
         limits:
