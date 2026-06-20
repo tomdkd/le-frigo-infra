@@ -1,3 +1,4 @@
+---
 services:
   docker-proxy-traefik:
     image: ghcr.io/tecnativa/docker-socket-proxy:latest
@@ -176,7 +177,7 @@ services:
       traefik:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/"]
+      test: [CMD, wget, --spider, -q, http://localhost:8080/]
       interval: 30s
       timeout: 5s
       retries: 3
