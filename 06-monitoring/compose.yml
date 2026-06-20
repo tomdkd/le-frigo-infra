@@ -146,12 +146,6 @@ services:
       - traefik.http.routers.nursery-vibrdrome.tls.certresolver=myresolver
       - traefik.http.routers.nursery-vibrdrome.middlewares=authentik@docker
       - traefik.http.routers.nursery-vibrdrome.service=nursery-global-service
-      # Shelfmark service
-      - traefik.http.routers.nursery-shelfmark.rule=Host(`shelfmark.le-frigo.fr`)
-      - traefik.http.routers.nursery-shelfmark.entrypoints=websecure
-      - traefik.http.routers.nursery-shelfmark.tls.certresolver=myresolver
-      - traefik.http.routers.nursery-shelfmark.middlewares=authentik@docker
-      - traefik.http.routers.nursery-shelfmark.service=nursery-global-service
       # Metube service
       - traefik.http.routers.nursery-metube.rule=Host(`metube.le-frigo.fr`)
       - traefik.http.routers.nursery-metube.entrypoints=websecure
