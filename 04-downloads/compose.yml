@@ -214,7 +214,7 @@ services:
       prowlarr:
         condition: service_healthy
   shelfmark:
-    image: ghcr.io/calibrain/shelfmark:v1.3.0
+    image: ghcr.io/calibrain/shelfmark:v1.3.2
     container_name: shelfmark
     environment:
       PUID: ${PUID}
