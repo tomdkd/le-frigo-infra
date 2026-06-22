@@ -142,7 +142,7 @@ services:
           memory: 512M
   # --- N8N ---
   n8n:
-    image: docker.n8n.io/n8nio/n8n:2.25.6-a37ba24
+    image: docker.n8n.io/n8nio/n8n:2.26.3-a68464d
     container_name: n8n
     restart: unless-stopped
     user: ${PUID}:${PGID}
