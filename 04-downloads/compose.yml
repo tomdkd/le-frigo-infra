@@ -83,7 +83,7 @@ services:
 
   # --- PROWLARR ---
   prowlarr:
-    image: lscr.io/linuxserver/prowlarr:2.4.0-nightly
+    image: lscr.io/linuxserver/prowlarr:2.5.0-nightly
     container_name: prowlarr
     environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
     networks: [lefrigo-net]
