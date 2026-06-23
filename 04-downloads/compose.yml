@@ -174,24 +174,6 @@ services:
     depends_on:
       prowlarr:
         condition: service_healthy
-  lidarr:
-    image: ghcr.io/hotio/lidarr:pr-plugins
-    container_name: lidarr
-    security_opt: [no-new-privileges:true]
-    environment: [TZ=Europe/Paris, 'PUID=${PUID}', 'PGID=${PGID}']
-    volumes: ['${APPS_DATA_DIR}/lidarr:/config', '${MEDIA_DATA_DIR}:/data']
-    networks: [lefrigo-net]
-    ports: [8686:8686]
-    deploy:
-      restart_policy:
-        condition: unless-stopped
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 1G
-    depends_on:
-      prowlarr:
-        condition: service_healthy
   ygege:
     image: uwucode/ygege:0.9.1
     container_name: ygege
@@ -254,7 +236,7 @@ services:
     volumes: [/mnt/LeFrigo-Tank/data/youtube_downloads:/downloads]
     networks: [lefrigo-net]
     labels:
-      - traefik.enable=false
+      - traefik.enable=true
       - traefik.http.routers.metube.rule=Host(`metube.le-frigo.fr`)
       - traefik.http.routers.metube.service=metube
       - traefik.http.routers.metube.entrypoints=websecure
