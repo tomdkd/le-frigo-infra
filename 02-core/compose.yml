@@ -86,7 +86,6 @@ services:
         condition: service_healthy
       core-docker-proxy:
         condition: service_started
-
   error-pages:
     image: ghcr.io/tarampampam/error-pages:4
     environment:
