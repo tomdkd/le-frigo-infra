@@ -68,7 +68,7 @@ services:
   lldap:
     image: lldap/lldap:stable
     restart: unless-stopped
-    ports: [1000:17170]
+    ports: [1001:17170]
     volumes: ['${APPS_DATA_DIR}/lldap/data:/data']
     environment:
       - TZ=Europe/Paris
@@ -77,6 +77,14 @@ services:
       - LLDAP_LDAP_BASE_DN=dc=example,dc=com
       - LLDAP_LDAP_USER_PASS=${LLDAP_ADMIN_PASSWORD}
       - LLDAP_DATABASE_URL=postgres://${LDAP_POSTGRES_USER}:${LDAP_POSTGRES_PASSWORD}@postgres-server/lldap
+      - LLDAP_SMTP_OPTIONS__ENABLE_PASSWORD_RESET=true
+      - LLDAP_SMTP_OPTIONS__SERVER=ssl0.ovh.net
+      - LLDAP_SMTP_OPTIONS__PORT=465
+      - LLDAP_SMTP_OPTIONS__SMTP_ENCRYPTION=TLS
+      - LLDAP_SMTP_OPTIONS__USER=no-reply@le-frigo.fr
+      - LLDAP_SMTP_OPTIONS__PASSWORD=${LLDAP_SMTP_PASSWORD}
+      - LLDAP_SMTP_OPTIONS__FROM=LeFrigo <no-reply@le-frigo.fr>
+      - LLDAP_HTTP_URL=https://ldap.le-frigo.fr
     networks: [lldap-db-net, lldap-auth-net]
     healthcheck:
       test: [CMD, nc, -z, localhost, '17170']
@@ -86,6 +94,14 @@ services:
     depends_on:
       postgres-server:
         condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lldap.rule=Host(`ldap.le-frigo.fr`)"
+      - "traefik.http.routers.lldap.entrypoints=websecure"
+      - "traefik.http.routers.lldap.tls=true"
+      - "traefik.http.services.lldap.loadbalancer.server.port=17170"
+      - "traefik.http.routers.lldap.tls.certresolver=myresolver"
+      - "traefik.docker.network=lefrigo-net"
   tinyauth:
     image: ghcr.io/steveiliop56/tinyauth:v5
     restart: unless-stopped
