@@ -149,6 +149,8 @@ services:
     depends_on:
       lldap:
         condition: service_healthy
+      error-pages:
+        condition: service_healthy
     networks: [lefrigo-net, lldap-auth-net]
     healthcheck:
       test:
@@ -199,9 +201,6 @@ services:
       - traefik.http.middlewares.error-pages-middleware.errors.query=/{status}
       - traefik.http.services.error-pages-service.loadbalancer.server.port=8080
     networks: [lefrigo-net]
-    depends_on:
-      traefik:
-        condition: service_healthy
 networks:
   traefik-proxy-net:
     name: traefik-proxy-net
