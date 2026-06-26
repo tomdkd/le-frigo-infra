@@ -86,11 +86,6 @@ services:
       - LLDAP_SMTP_OPTIONS__FROM=LeFrigo <no-reply@le-frigo.fr>
       - LLDAP_HTTP_URL=https://ldap.le-frigo.fr
     networks: [lldap-db-net, lldap-auth-net]
-    healthcheck:
-      test: [CMD, nc, -z, localhost, '17170']
-      interval: 10s
-      timeout: 5s
-      retries: 3
     depends_on:
       postgres-server:
         condition: service_healthy
@@ -102,6 +97,7 @@ services:
       - "traefik.http.services.lldap.loadbalancer.server.port=17170"
       - "traefik.http.routers.lldap.tls.certresolver=myresolver"
       - "traefik.docker.network=lefrigo-net"
+      - "traefik.http.routers.lldap.middlewares=error-pages-middleware@docker"
   tinyauth:
     image: ghcr.io/steveiliop56/tinyauth:v5
     restart: unless-stopped
@@ -205,4 +201,4 @@ networks:
   lldap-auth-net:
     name: lldap-auth-net
   lefrigo-net:
-    name: lefrigo-net
+    external: true

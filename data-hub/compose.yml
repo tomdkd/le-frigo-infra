@@ -71,15 +71,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.torrent.rule=Host(`torrent.le-frigo.fr`)
-      - traefik.http.routers.torrent.service=torrent
-      - traefik.http.routers.torrent.entrypoints=websecure
-      - traefik.http.routers.torrent.tls.certresolver=myresolver
-      - traefik.http.routers.torrent.middlewares=tinyauth@docker
-      - traefik.http.services.torrent.loadbalancer.server.port=8080
-      - tinyauth.apps.torrent.ldap.groups=admin
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:5.2.1
     container_name: qbittorrent
@@ -120,6 +111,7 @@ services:
       - ${APPS_DATA_DIR}/qbitwebui/data:/data
       - ${MEDIA_DATA_DIR}/downloads:/downloads:ro
     restart: unless-stopped
+    networks: [lefrigo-net]
     labels:
       - traefik.enable=true
       - traefik.http.routers.qbitwebui.rule=Host(`torrent.le-frigo.fr`)
@@ -127,8 +119,8 @@ services:
       - traefik.http.routers.qbitwebui.entrypoints=websecure
       - traefik.http.routers.qbitwebui.tls.certresolver=myresolver
       - traefik.http.services.qbitwebui.loadbalancer.server.port=3000
-      - traefik.http.routers.qbitwebui.middlewares=tinyauth@docker
       - tinyauth.apps.qbitwebui.ldap.groups=admin
+      - traefik.http.routers.cloudbeaver.middlewares=tinyauth@docker,error-pages-middleware@docker
 
   # ==========================================
   #  AUTOMATION PIPELINE
@@ -171,7 +163,7 @@ services:
       - traefik.http.routers.radarr.service=radarr
       - traefik.http.routers.radarr.entrypoints=websecure
       - traefik.http.routers.radarr.tls.certresolver=myresolver
-      - traefik.http.routers.radarr.middlewares=tinyauth@docker
+      - traefik.http.routers.radarr.middlewares=tinyauth@docker,error-pages-middleware@docker
       - traefik.http.services.radarr.loadbalancer.server.port=7878
       - tinyauth.apps.radarr.ldap.groups=admin
     depends_on:
@@ -204,7 +196,7 @@ services:
       - traefik.http.routers.sonarr.service=sonarr
       - traefik.http.routers.sonarr.entrypoints=websecure
       - traefik.http.routers.sonarr.tls.certresolver=myresolver
-      - traefik.http.routers.sonarr.middlewares=tinyauth@docker
+      - traefik.http.routers.sonarr.middlewares=tinyauth@docker,error-pages-middleware@docker
       - traefik.http.services.sonarr.loadbalancer.server.port=8989
       - tinyauth.apps.sonarr.ldap.groups=admin
     deploy:
@@ -259,9 +251,8 @@ services:
       - traefik.http.routers.metube.entrypoints=websecure
       - traefik.http.routers.metube.tls.certresolver=myresolver
       - traefik.http.services.metube.loadbalancer.server.port=8081
-      - traefik.http.routers.metube.middlewares=tinyauth@docker
+      - traefik.http.routers.metube.middlewares=tinyauth@docker,error-pages-middleware@docker
       - tinyauth.apps.metube.ldap.groups=admin
-
   # ==========================================
   #  VIDEO STREAMING & MEDIA MANAGEMENT
   # ==========================================
@@ -352,6 +343,7 @@ services:
       - traefik.http.routers.audiobookshelf.tls.certresolver=myresolver
       - traefik.http.services.audiobookshelf.loadbalancer.server.port=80
       - tinyauth.apps.audiobookshelf.ldap.groups=user,admin
+      - traefik.http.routers.audiobookshelf.middlewares=error-pages-middleware@docker
     networks: [lefrigo-net]
     restart: always
   gonic:
@@ -381,6 +373,7 @@ services:
       - traefik.http.middlewares.gonic-cors.headers.accesscontrolalloworiginlist=https://music.le-frigo.fr
       - traefik.http.middlewares.gonic-cors.headers.accesscontrolallowheaders=*
       - tinyauth.apps.gonic.ldap.groups=user,admin
+      - traefik.http.routers.gonic-api.middlewares=error-pages-middleware@docker
     networks: [lefrigo-net]
     healthcheck:
       test: [CMD, wget, --spider, -q, http://localhost:80/ping]
@@ -407,7 +400,7 @@ services:
       - traefik.http.routers.vibrdrome.tls.certresolver=myresolver
       - traefik.http.routers.vibrdrome.service=vibrdrome-svc
       - traefik.http.services.vibrdrome-svc.loadbalancer.server.port=80
-      - traefik.http.routers.vibrdrome.middlewares=tinyauth@docker
+      - traefik.http.routers.vibrdrome.middlewares=tinyauth@docker,error-pages-middleware@docker
       - tinyauth.apps.vibrdrome.ldap.groups=user,admin
     security_opt: [no-new-privileges:true]
     depends_on: [gonic]
