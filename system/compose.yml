@@ -3,7 +3,7 @@ services:
   docker-proxy-traefik:
     image: ghcr.io/tecnativa/docker-socket-proxy:latest
     restart: unless-stopped
-    environment: [CONTAINERS=1]
+    environment: [CONTAINERS=1, NETWORKS=1]
     volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
     networks: [traefik-proxy-net]
     healthcheck:
