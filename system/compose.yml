@@ -46,6 +46,9 @@ services:
       - traefik.http.routers.dashboard.middlewares=tinyauth@docker,error-pages-middleware
       - traefik.docker.network=lefrigo-net
     networks: [lefrigo-net, traefik-proxy-net]
+    depends_on:
+      tinyauth:
+        condition: service_healthy
     healthcheck:
       test: [CMD, traefik, healthcheck, --ping]
       interval: 10s
@@ -188,11 +191,6 @@ services:
     depends_on:
       traefik:
         condition: service_healthy
-    healthcheck:
-      test: [CMD, wget, --spider, -q, http://localhost:8080/]
-      interval: 30s
-      timeout: 5s
-      retries: 3
 networks:
   traefik-proxy-net:
     name: traefik-proxy-net
