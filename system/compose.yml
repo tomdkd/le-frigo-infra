@@ -2,6 +2,7 @@
 services:
   docker-proxy-traefik:
     image: ghcr.io/tecnativa/docker-socket-proxy:latest
+    container_name: docker-proxy-traefik
     restart: unless-stopped
     environment: [CONTAINERS=1, NETWORKS=1]
     volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
@@ -56,6 +57,7 @@ services:
       retries: 3
   postgres-server:
     image: postgres:16-alpine
+    container_name: postgres-server
     restart: unless-stopped
     environment:
       - POSTGRES_USER=${LDAP_POSTGRES_USER}
@@ -70,6 +72,7 @@ services:
       retries: 5
   lldap:
     image: lldap/lldap:stable
+    container_name: lldap
     restart: unless-stopped
     ports: [1001:17170]
     volumes: ['${APPS_DATA_DIR}/lldap/data:/data']
@@ -103,6 +106,7 @@ services:
       - "traefik.http.routers.lldap.middlewares=error-pages-middleware@docker"
   tinyauth:
     image: ghcr.io/steveiliop56/tinyauth:v5
+    container_name: tinyauth
     restart: unless-stopped
     environment:
       - TINYAUTH_APPURL=https://login.le-frigo.fr
@@ -149,6 +153,7 @@ services:
       retries: 3
   pocketid:
     image: ghcr.io/pocket-id/pocket-id:v2
+    container_name: pocketid
     restart: unless-stopped
     volumes: ['${APPS_DATA_DIR}/pocketid:/app/data']
     environment:
@@ -175,6 +180,7 @@ services:
         condition: service_healthy
     networks: [lefrigo-net]
   error-pages:
+    container_name: error-pages
     image: ghcr.io/tarampampam/error-pages:4
     environment:
       TEMPLATE_NAME: orient
