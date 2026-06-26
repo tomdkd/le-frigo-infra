@@ -121,8 +121,7 @@ services:
       - TINYAUTH_LDAP_BINDDN=uid=admin,ou=people,dc=example,dc=com
       - TINYAUTH_LDAP_BINDPASSWORD=${LLDAP_ADMIN_PASSWORD}
       - TINYAUTH_LDAP_BASEDN=dc=example,dc=com
-      #- TINYAUTH_LDAP_SEARCHFILTER=(uid=%s)
-      - TINYAUTH_LDAP_SEARCHFILTER=(|(uid=%s)(mail=%s))
+      - TINYAUTH_LDAP_SEARCHFILTER=(uid=%s)
       - TINYAUTH_LDAP_INSECURE=true
       - TINYAUTH_OAUTH_PROVIDERS_POCKETID_INSECURE=true
       - TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTID=${POCKETID_CLIENT_ID}
@@ -203,6 +202,41 @@ services:
       - traefik.http.middlewares.error-pages-middleware.errors.query=/{status}
       - traefik.http.services.error-pages-service.loadbalancer.server.port=8080
     networks: [lefrigo-net]
+  homarr:
+    container_name: homarr
+    image: ghcr.io/homarr-labs/homarr:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${APPS_DATA_DIR}/homarr:/appdata
+    environment:
+      - SECRET_ENCRYPTION_KEY=${HOMARR_SECRET_ENCRYPTION_KEY}
+      - AUTH_PROVIDERS=oidc
+      - AUTH_SESSION_EXPIRY_TIME=5m
+      - AUTH_OIDC_ISSUER=https://login.le-frigo.fr
+      - AUTH_OIDC_CLIENT_ID=${TINYAUTH_OIDC_CLIENTS_HOMARR_CLIENTID}
+      - AUTH_OIDC_CLIENT_SECRET=${TINYAUTH_OIDC_CLIENTS_HOMARR_CLIENTSECRET}
+      - AUTH_OIDC_CLIENT_NAME=LeFrigo Connect
+      - AUTH_OIDC_FORCE_USERINFO=true
+      - AUTH_OIDC_GROUPS_ATTRIBUTE=groups
+      - AUTH_OIDC_SCOPES=openid email profile groups
+      - AUTH_OIDC_AUTO_LOGIN=true
+    ports:
+      - '7575:7575'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homepage.rule=Host(`home.le-frigo.fr`)"
+      - "traefik.http.routers.homepage.entrypoints=websecure"
+      - "traefik.http.routers.homepage.tls=true"
+      - "traefik.http.services.homepage.loadbalancer.server.port=3000"
+      - "traefik.http.routers.homepage.middlewares=tinyauth@docker"
+      - "traefik.http.routers.homepage.tls.certresolver=myresolver"
+      - "traefik.docker.network=lefrigo-net"
+    networks:
+      - lefrigo-net
+    depends_on:
+      tinyauth:
+        condition: service_healthy
 networks:
   traefik-proxy-net:
     name: traefik-proxy-net
