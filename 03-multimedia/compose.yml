@@ -136,7 +136,7 @@ services:
       - traefik.http.routers.gonic-api.rule=Host(`music.api.le-frigo.fr`)
       - traefik.http.routers.gonic-api.entrypoints=websecure
       - traefik.http.routers.gonic-api.tls=true
-      - traefik.http.routers.gonic-api.tls.certresolver=letsencrypt
+      - traefik.http.routers.gonic-api.tls.certresolver=myresolver
       - traefik.http.routers.gonic-api.service=gonic-svc
       - traefik.http.routers.gonic-api.middlewares=gonic-cors
       - traefik.http.services.gonic-svc.loadbalancer.server.port=80
