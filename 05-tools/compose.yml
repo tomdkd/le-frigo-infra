@@ -105,11 +105,18 @@ services:
     networks: [lefrigo-net]
     labels:
       - traefik.enable=true
+      - traefik.http.services.filebrowser.loadbalancer.server.port=80
+      - traefik.http.routers.filebrowser-share.rule=Host(`file.le-frigo.fr`) && PathPrefix(`/share`)
+      - traefik.http.routers.filebrowser-share.entrypoints=websecure
+      - traefik.http.routers.filebrowser-share.tls.certresolver=myresolver
+      - traefik.http.routers.filebrowser-share.service=filebrowser
+      - traefik.http.routers.filebrowser-share.priority=20
+
       - traefik.http.routers.filebrowser.rule=Host(`file.le-frigo.fr`)
-      - traefik.http.routers.filebrowser.service=filebrowser
       - traefik.http.routers.filebrowser.entrypoints=websecure
       - traefik.http.routers.filebrowser.tls.certresolver=myresolver
-      - traefik.http.services.filebrowser.loadbalancer.server.port=80
+      - traefik.http.routers.filebrowser.service=filebrowser
+      - traefik.http.routers.filebrowser.priority=10
       - traefik.http.routers.filebrowser.middlewares=authentik@docker
   # --- PICARD ---
   picard:
