@@ -106,7 +106,7 @@ services:
     user: ${PUID}:${PGID}
     environment:
       - ENCRYPTION_KEY=${QBITWEBUI_ENCRYPTION_KEY}
-      - DISABLE_REGISTRATION=false
+      - DISABLE_REGISTRATION=true
       - DOWNLOADS_PATH=/downloads
     volumes:
       - ${APPS_DATA_DIR}/qbitwebui/data:/data
