@@ -121,7 +121,6 @@ services:
       - traefik.http.services.qbitwebui.loadbalancer.server.port=3000
       - traefik.http.routers.qbitwebui.middlewares=tinyauth@docker,error-pages-middleware@docker
       - tinyauth.apps.qbitwebui.ldap.groups=admin
-
   # ==========================================
   #  AUTOMATION PIPELINE
   # ==========================================
@@ -315,12 +314,13 @@ services:
       - traefik.http.routers.immich.entrypoints=websecure
       - traefik.http.routers.immich.tls.certresolver=myresolver
       - traefik.http.services.immich.loadbalancer.server.port=2283
+      - traefik.http.routers.immich.middlewares=error-pages-middleware@docker
+      - tinyauth.apps.immich.ldap.groups=admin
     deploy:
       resources:
         limits:
           cpus: '4.00'
           memory: 4096M
-
   # ==========================================
   #  MUSIC, AUDIO & PODCASTS
   # ==========================================

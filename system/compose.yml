@@ -209,8 +209,7 @@ services:
     container_name: homarr
     image: ghcr.io/homarr-labs/homarr:latest
     restart: unless-stopped
-    volumes:
-      - ${APPS_DATA_DIR}/homarr:/appdata
+    volumes: ['${APPS_DATA_DIR}/homarr:/appdata']
     environment:
       - SECRET_ENCRYPTION_KEY=${HOMARR_SECRET_ENCRYPTION_KEY}
       - AUTH_PROVIDERS=oidc
