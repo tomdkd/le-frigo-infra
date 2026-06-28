@@ -169,14 +169,14 @@ services:
     restart: unless-stopped
     volumes: ['${APPS_DATA_DIR}/pocketid:/app/data']
     environment:
-      - APP_URL=https://pocketid.preprod.le-frigo.fr
+      - APP_URL=https://pocketid.le-frigo.fr
       - ENCRYPTION_KEY=${POCKETID_ENCRYPTION_KEY}
       - TRUST_PROXY=true
       - PUID=1000
       - PGID=1000
     labels:
       - traefik.enable=true
-      - traefik.http.routers.pocketid.rule=Host(`pocketid.preprod.le-frigo.fr`)
+      - traefik.http.routers.pocketid.rule=Host(`pocketid.le-frigo.fr`)
       - traefik.http.routers.pocketid.entrypoints=websecure
       - traefik.http.routers.pocketid.tls.certresolver=myresolver
       - traefik.http.services.pocketid.loadbalancer.server.port=1411

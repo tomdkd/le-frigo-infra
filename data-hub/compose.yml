@@ -260,6 +260,8 @@ services:
     container_name: jellyfin-preprod
     restart: unless-stopped
     user: ${PUID}:${PGID}
+    ports:
+      - 8097:8096
     environment:
       - TZ=Europe/Paris
       - JELLYFIN_PublishedServerUrl=https://stream.preprod.le-frigo.fr
@@ -276,7 +278,7 @@ services:
       - traefik.http.services.jellyfin-preprod-svc.loadbalancer.server.port=8096
       - traefik.http.routers.jellyfin-preprod.middlewares=error-pages-preprod-middleware@docker
       - tinyauth.apps.jellyfin-preprod.ldap.groups=user,admin
-    networks: [lefrigo-net, data-hub-net]
+    networks: [lefrigo-net, data-hub-net, lldap-auth-net]
     deploy:
       resources:
         limits:
@@ -416,3 +418,5 @@ networks:
     name: data-hub-db-net
   data-hub-redis-net:
     name: data-hub-redis-net
+  lldap-auth-net:
+    external: true
