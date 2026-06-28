@@ -53,7 +53,6 @@ services:
       - traefik.http.routers.dashboard.entrypoints=websecure
       - traefik.http.routers.dashboard.tls.certresolver=myresolver
       - traefik.http.routers.dashboard.middlewares=tinyauth@docker,error-pages-middleware
-      - traefik.docker.network=lefrigo-net
     networks: [lefrigo-net, traefik-proxy-net]
     depends_on:
       tinyauth:
@@ -104,13 +103,13 @@ services:
       postgres-server:
         condition: service_healthy
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.lldap.rule=Host(`ldap.le-frigo.fr`)"
-      - "traefik.http.routers.lldap.entrypoints=websecure"
-      - "traefik.http.routers.lldap.tls=true"
-      - "traefik.http.services.lldap.loadbalancer.server.port=17170"
-      - "traefik.http.routers.lldap.tls.certresolver=myresolver"
-      - "traefik.http.routers.lldap.middlewares=error-pages-middleware@docker"
+      - traefik.enable=true
+      - traefik.http.routers.lldap.rule=Host(`ldap.le-frigo.fr`)
+      - traefik.http.routers.lldap.entrypoints=websecure
+      - traefik.http.routers.lldap.tls=true
+      - traefik.http.services.lldap.loadbalancer.server.port=17170
+      - traefik.http.routers.lldap.tls.certresolver=myresolver
+      - traefik.http.routers.lldap.middlewares=error-pages-middleware@docker
   tinyauth:
     image: ghcr.io/steveiliop56/tinyauth:v5
     container_name: tinyauth
@@ -132,17 +131,14 @@ services:
       - TINYAUTH_OAUTH_PROVIDERS_POCKETID_REDIRECTURL=https://login.le-frigo.fr/api/oauth/callback/pocketid
       - TINYAUTH_OAUTH_PROVIDERS_POCKETID_SCOPES=openid email profile groups
       - TINYAUTH_OAUTH_PROVIDERS_POCKETID_NAME=Pocket ID
-
       - TINYAUTH_OIDC_CLIENTS_HOMARR_CLIENTID=${TINYAUTH_OIDC_CLIENTS_HOMARR_CLIENTID}
       - TINYAUTH_OIDC_CLIENTS_HOMARR_CLIENTSECRET=${TINYAUTH_OIDC_CLIENTS_HOMARR_CLIENTSECRET}
       - TINYAUTH_OIDC_CLIENTS_HOMARR_TRUSTEDREDIRECTURIS=https://home.le-frigo.fr/api/auth/callback/oidc
       - TINYAUTH_OIDC_CLIENTS_HOMARR_NAME=Homarr
-
       - TINYAUTH_OIDC_CLIENTS_JELLYSEERR_CLIENTID=${TINYAUTH_OIDC_CLIENTS_JELLYSEERR_CLIENTID}
       - TINYAUTH_OIDC_CLIENTS_JELLYSEERR_CLIENTSECRET=${TINYAUTH_OIDC_CLIENTS_JELLYSEERR_CLIENTSECRET}
       - TINYAUTH_OIDC_CLIENTS_JELLYSEERR_TRUSTEDREDIRECTURIS=https://jellyseerr-test.le-frigo.fr/login
       - TINYAUTH_OIDC_CLIENTS_JELLYSEERR_NAME=Jellyseerr
-
       - DISABLE_CONTINUE=true
       - TINYAUTH_LDAP_GROUPCACHETTL=0
     labels:
@@ -214,7 +210,6 @@ services:
     image: ghcr.io/homarr-labs/homarr:latest
     restart: unless-stopped
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - ${APPS_DATA_DIR}/homarr:/appdata
     environment:
       - SECRET_ENCRYPTION_KEY=${HOMARR_SECRET_ENCRYPTION_KEY}
@@ -228,19 +223,16 @@ services:
       - AUTH_OIDC_GROUPS_ATTRIBUTE=groups
       - AUTH_OIDC_SCOPES=openid email profile groups
       - AUTH_OIDC_AUTO_LOGIN=true
-    ports:
-      - '7575:7575'
+    ports: [7575:7575]
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.homepage.rule=Host(`home.le-frigo.fr`)"
-      - "traefik.http.routers.homepage.entrypoints=websecure"
-      - "traefik.http.routers.homepage.tls=true"
-      - "traefik.http.services.homepage.loadbalancer.server.port=3000"
-      - "traefik.http.routers.homepage.middlewares=tinyauth@docker"
-      - "traefik.http.routers.homepage.tls.certresolver=myresolver"
-      - "traefik.docker.network=lefrigo-net"
-    networks:
-      - lefrigo-net
+      - traefik.enable=true
+      - traefik.http.routers.homepage.rule=Host(`home.le-frigo.fr`)
+      - traefik.http.routers.homepage.entrypoints=websecure
+      - traefik.http.routers.homepage.tls=true
+      - traefik.http.services.homepage.loadbalancer.server.port=3000
+      - traefik.http.routers.homepage.middlewares=tinyauth@docker
+      - traefik.http.routers.homepage.tls.certresolver=myresolver
+    networks: [lefrigo-net]
     depends_on:
       tinyauth:
         condition: service_healthy
