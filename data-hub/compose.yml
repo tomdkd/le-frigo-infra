@@ -389,7 +389,8 @@ services:
     image: ddmoney420/vibrdrome-web:v1.8.1-beta.2
     container_name: vibrdrome-web-preprod
     ports: [8009:80]
-    environment: [VIBRDROME_DEFAULT_SERVER=https://music.api.preprod.le-frigo.fr]
+    environment:
+      - VIBRDROME_DEFAULT_SERVER=https://music.api.preprod.le-frigo.fr
     restart: unless-stopped
     labels:
       - traefik.enable=true
