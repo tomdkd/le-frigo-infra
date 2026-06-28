@@ -80,7 +80,7 @@ services:
       - TZ=Europe/Paris
       - WEBUI_PORT=8080
     volumes:
-      - ${APPS_DATA_DIR}/qbitorrent/config:/config
+      - ${APPS_DATA_DIR}/qbittorrent/config:/config
       - ${MEDIA_DATA_DIR}:/data
     depends_on:
       gluetun-preprod:
@@ -103,6 +103,7 @@ services:
   qbitwebui-preprod:
     image: ghcr.io/mkbula/qbitwebui:latest
     container_name: qbitwebui-preprod
+    user: ${PUID}:${PGID}
     environment:
       - ENCRYPTION_KEY=${QBITWEBUI_ENCRYPTION_KEY}
       - DISABLE_REGISTRATION=true
