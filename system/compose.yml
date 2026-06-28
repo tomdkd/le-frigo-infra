@@ -100,7 +100,7 @@ services:
       - LLDAP_HTTP_URL=https://ldap.preprod.le-frigo.fr
     networks: [lldap-db-net, lldap-auth-net, lefrigo-net]
     depends_on:
-      postgres-server-preprod:
+      postgres-server:
         condition: service_healthy
     labels:
       - traefik.enable=true
