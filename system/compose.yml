@@ -154,7 +154,7 @@ services:
       lldap:
         condition: service_healthy
       error-pages:
-        condition: service_healthy
+        condition: service_started
     networks: [lefrigo-net, lldap-auth-net]
     healthcheck:
       test:
