@@ -2,14 +2,14 @@
 services:
   cloudbeaver:
     image: dbeaver/cloudbeaver:latest
-    container_name: cloudbeaver
+    container_name: cloudbeaver-preprod
     restart: unless-stopped
     ports: [8978:8978]
     volumes: ['${APPS_DATA_DIR}/cloudbeaver:/opt/cloudbeaver/workspace']
     networks: [lefrigo-net]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.cloudbeaver.rule=Host(`dbeaver.le-frigo.fr`)
+      - traefik.http.routers.cloudbeaver.rule=Host(`dbeaver.preprod.le-frigo.fr`)
       - traefik.http.routers.cloudbeaver.entrypoints=websecure
       - traefik.http.routers.cloudbeaver.tls=true
       - traefik.http.routers.cloudbeaver.tls.certresolver=myresolver

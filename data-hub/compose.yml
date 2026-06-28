@@ -5,7 +5,7 @@ services:
   # ==========================================
   postgres-media:
     image: postgres:16-alpine
-    container_name: postgres-media
+    container_name: postgres-media-preprod
     restart: unless-stopped
     environment:
       - POSTGRES_USER=${MEDIA_POSTGRES_USER}
@@ -20,7 +20,7 @@ services:
       retries: 5
   redis-media:
     image: redis:8.6.1
-    container_name: redis-media
+    container_name: redis-media-preprod
     restart: always
     networks: [data-hub-redis-net]
     healthcheck:
@@ -34,7 +34,7 @@ services:
   # ==========================================
   gluetun:
     image: qmcgaw/gluetun:pr-3361
-    container_name: gluetun
+    container_name: gluetun-preprod
     user: 0:0
     cap_add: [NET_ADMIN]
     devices: [/dev/net/tun:/dev/net/tun]
@@ -73,7 +73,7 @@ services:
       start_period: 20s
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:5.2.1
-    container_name: qbittorrent
+    container_name: qbittorrent-preprod
     network_mode: service:gluetun
     environment:
       - PUID=${PUID}
@@ -114,7 +114,7 @@ services:
     networks: [lefrigo-net]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.qbitwebui.rule=Host(`torrent.le-frigo.fr`)
+      - traefik.http.routers.qbitwebui.rule=Host(`torrent.preprod.le-frigo.fr`)
       - traefik.http.routers.qbitwebui.service=qbitwebui
       - traefik.http.routers.qbitwebui.entrypoints=websecure
       - traefik.http.routers.qbitwebui.tls.certresolver=myresolver
@@ -126,7 +126,7 @@ services:
   # ==========================================
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:2.4.0-nightly
-    container_name: prowlarr
+    container_name: prowlarr-preprod
     environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
     networks: [lefrigo-net]
     ports: [9696:9696]
@@ -150,7 +150,7 @@ services:
       start_period: 30s
   radarr:
     image: lscr.io/linuxserver/radarr:6.2.1-nightly
-    container_name: radarr
+    container_name: radarr-preprod
     ports: [7878:7878]
     environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
     volumes: ['${APPS_DATA_DIR}/radarr:/config', '${MEDIA_DATA_DIR}:/data']
@@ -158,7 +158,7 @@ services:
     networks: [lefrigo-net]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.radarr.rule=Host(`radarr.le-frigo.fr`)
+      - traefik.http.routers.radarr.rule=Host(`radarr.preprod.le-frigo.fr`)
       - traefik.http.routers.radarr.service=radarr
       - traefik.http.routers.radarr.entrypoints=websecure
       - traefik.http.routers.radarr.tls.certresolver=myresolver
@@ -183,7 +183,7 @@ services:
       start_period: 40s
   sonarr:
     image: lscr.io/linuxserver/sonarr:4.0.17
-    container_name: sonarr
+    container_name: sonarr-preprod
     ports: [8989:8989]
     environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
     volumes: ['${APPS_DATA_DIR}/sonarr:/config', '${MEDIA_DATA_DIR}:/data']
@@ -191,7 +191,7 @@ services:
     networks: [lefrigo-net]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.sonarr.rule=Host(`sonarr.le-frigo.fr`)
+      - traefik.http.routers.sonarr.rule=Host(`sonarr.preprod.le-frigo.fr`)
       - traefik.http.routers.sonarr.service=sonarr
       - traefik.http.routers.sonarr.entrypoints=websecure
       - traefik.http.routers.sonarr.tls.certresolver=myresolver
@@ -216,7 +216,7 @@ services:
         condition: service_healthy
   ygege:
     image: uwucode/ygege:0.9.1
-    container_name: ygege
+    container_name: ygege-preprod
     restart: unless-stopped
     environment:
       LOG_LEVEL: info
@@ -238,14 +238,14 @@ services:
   metube:
     image: alexta69/metube:2026.06.06
     user: ${PUID}:${PGID}
-    container_name: metube
+    container_name: metube-preprod
     restart: unless-stopped
     ports: [8086:8081]
     volumes: ['${MEDIA_DATA_DIR}/youtube_downloads:/downloads']
     networks: [lefrigo-net]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.metube.rule=Host(`metube.le-frigo.fr`)
+      - traefik.http.routers.metube.rule=Host(`metube.preprod.le-frigo.fr`)
       - traefik.http.routers.metube.service=metube
       - traefik.http.routers.metube.entrypoints=websecure
       - traefik.http.routers.metube.tls.certresolver=myresolver
@@ -257,13 +257,13 @@ services:
   # ==========================================
   jellyfin:
     image: jellyfin/jellyfin:10.11.11
-    container_name: jellyfin
+    container_name: jellyfin-preprod
     restart: unless-stopped
     user: ${PUID}:${PGID}
     ports: [8096:8096/tcp, 7359:7359/udp]
     environment:
       - TZ=Europe/Paris
-      - JELLYFIN_PublishedServerUrl=https://stream.le-frigo.fr
+      - JELLYFIN_PublishedServerUrl=https://stream.preprod.le-frigo.fr
     volumes:
       - ${APPS_DATA_DIR}/jellyfin:/config
       - ${MEDIA_DATA_DIR}/films:/films
@@ -271,7 +271,7 @@ services:
       - ${MEDIA_DATA_DIR}/stuck_in_yesterday:/stuck_in_yesterday
     labels:
       - traefik.enable=true
-      - traefik.http.routers.jellyfin.rule=Host(`jellyfin.le-frigo.fr`)
+      - traefik.http.routers.jellyfin.rule=Host(`jellyfin.preprod.le-frigo.fr`)
       - traefik.http.routers.jellyfin.entrypoints=websecure
       - traefik.http.routers.jellyfin.tls=true
       - traefik.http.routers.jellyfin.tls.certresolver=myresolver
@@ -286,7 +286,7 @@ services:
           memory: 4096M
   immich-server:
     image: ghcr.io/immich-app/immich-server:commit-dc2c01e4737eb6524d1d4a16ee47ffac16264111
-    container_name: immich_server
+    container_name: immich_server-preprod
     user: ${PUID}:${PGID}
     ports: [2283:2283]
     volumes:
@@ -310,7 +310,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.immich.service=immich
-      - traefik.http.routers.immich.rule=Host(`immich.le-frigo.fr`)
+      - traefik.http.routers.immich.rule=Host(`immich.preprod.le-frigo.fr`)
       - traefik.http.routers.immich.entrypoints=websecure
       - traefik.http.routers.immich.tls.certresolver=myresolver
       - traefik.http.services.immich.loadbalancer.server.port=2283
@@ -326,7 +326,7 @@ services:
   # ==========================================
   audiobookshelf:
     image: ghcr.io/advplyr/audiobookshelf:2.35.1
-    container_name: audiobookshelf
+    container_name: audiobookshelf-preprod
     ports: [8085:80]
     user: ${PUID}:${PGID}
     volumes:
@@ -337,7 +337,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.audiobookshelf.service=audiobookshelf
-      - traefik.http.routers.audiobookshelf.rule=Host(`audiobooks.le-frigo.fr`)
+      - traefik.http.routers.audiobookshelf.rule=Host(`audiobooks.preprod.le-frigo.fr`)
       - traefik.http.routers.audiobookshelf.entrypoints=websecure
       - traefik.http.routers.audiobookshelf.tls.certresolver=myresolver
       - traefik.http.services.audiobookshelf.loadbalancer.server.port=80
@@ -347,7 +347,7 @@ services:
     restart: always
   gonic:
     image: sentriz/gonic:v0.22.0
-    container_name: gonic
+    container_name: gonic-preprod
     restart: unless-stopped
     user: ${PUID}:${PGID}
     environment: [TZ=Europe/Paris, GONIC_SCAN_INTERVAL=15]
@@ -361,7 +361,7 @@ services:
     security_opt: [no-new-privileges:true]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.gonic-api.rule=Host(`music.api.le-frigo.fr`)
+      - traefik.http.routers.gonic-api.rule=Host(`music.api.preprod.le-frigo.fr`)
       - traefik.http.routers.gonic-api.entrypoints=websecure
       - traefik.http.routers.gonic-api.tls=true
       - traefik.http.routers.gonic-api.tls.certresolver=myresolver
@@ -369,7 +369,7 @@ services:
       - traefik.http.routers.gonic-api.middlewares=gonic-cors
       - traefik.http.services.gonic-svc.loadbalancer.server.port=80
       - traefik.http.middlewares.gonic-cors.headers.accesscontrolallowmethods=GET,OPTIONS,POST
-      - traefik.http.middlewares.gonic-cors.headers.accesscontrolalloworiginlist=https://music.le-frigo.fr
+      - traefik.http.middlewares.gonic-cors.headers.accesscontrolalloworiginlist=https://music.preprod.le-frigo.fr
       - traefik.http.middlewares.gonic-cors.headers.accesscontrolallowheaders=*
       - tinyauth.apps.gonic.ldap.groups=user,admin
       - traefik.http.routers.gonic-api.middlewares=error-pages-middleware@docker
@@ -387,9 +387,9 @@ services:
           memory: 512M
   vibrdrome-web:
     image: ddmoney420/vibrdrome-web:v1.8.1-beta.2
-    container_name: vibrdrome-web
+    container_name: vibrdrome-web-preprod
     ports: [8009:80]
-    environment: [VIBRDROME_DEFAULT_SERVER=https://music.api.le-frigo.fr]
+    environment: [VIBRDROME_DEFAULT_SERVER=https://music.api.preprod.le-frigo.fr]
     restart: unless-stopped
     labels:
       - traefik.enable=true
