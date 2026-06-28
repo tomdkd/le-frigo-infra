@@ -226,12 +226,12 @@ services:
     ports: [7575:7575]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.homepage.rule=Host(`home.le-frigo.fr`)
-      - traefik.http.routers.homepage.entrypoints=websecure
-      - traefik.http.routers.homepage.tls=true
-      - traefik.http.services.homepage.loadbalancer.server.port=3000
-      - traefik.http.routers.homepage.middlewares=tinyauth@docker
-      - traefik.http.routers.homepage.tls.certresolver=myresolver
+      - traefik.http.routers.homarr.rule=Host(`home.le-frigo.fr`)
+      - traefik.http.routers.homarr.entrypoints=websecure
+      - traefik.http.routers.homarr.tls=true
+      - traefik.http.services.homarr.loadbalancer.server.port=3000
+      - traefik.http.routers.homarr.middlewares=tinyauth@docker
+      - traefik.http.routers.homarr.tls.certresolver=myresolver
     networks: [lefrigo-net]
     depends_on:
       tinyauth:

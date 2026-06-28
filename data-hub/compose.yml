@@ -104,7 +104,7 @@ services:
     image: ghcr.io/mkbula/qbitwebui:latest
     ports: [8081:3000]
     environment:
-      - ENCRYPTION_KEY=your-secret-key-here
+      - ENCRYPTION_KEY=${QBITWEBUI_ENCRYPTION_KEY}
       - DISABLE_REGISTRATION=true
       - DOWNLOADS_PATH=/downloads
     volumes:
@@ -119,8 +119,8 @@ services:
       - traefik.http.routers.qbitwebui.entrypoints=websecure
       - traefik.http.routers.qbitwebui.tls.certresolver=myresolver
       - traefik.http.services.qbitwebui.loadbalancer.server.port=3000
+      - traefik.http.routers.qbitwebui.middlewares=tinyauth@docker,error-pages-middleware@docker
       - tinyauth.apps.qbitwebui.ldap.groups=admin
-      - traefik.http.routers.cloudbeaver.middlewares=tinyauth@docker,error-pages-middleware@docker
 
   # ==========================================
   #  AUTOMATION PIPELINE
@@ -278,7 +278,6 @@ services:
       - traefik.http.routers.jellyfin.tls.certresolver=myresolver
       - traefik.http.services.jellyfin.loadbalancer.server.port=8096
       - traefik.http.routers.jellyfin.middlewares=error-pages-middleware@docker
-      - traefik.docker.network=lefrigo-net
       - tinyauth.apps.jellyfin.ldap.groups=user,admin
     networks: [lefrigo-net, data-hub-net]
     deploy:
