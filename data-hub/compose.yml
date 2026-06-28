@@ -352,7 +352,7 @@ services:
       - ${APPS_DATA_DIR}/gonic/data:/data
       - ${MEDIA_DATA_DIR}/musique:/music:ro
       - ${APPS_DATA_DIR}/gonic/playlists:/playlists
-      # - ${APPS_DATA_DIR}/gonic/cache:/cache
+      - ${APPS_DATA_DIR}/gonic/cache:/cache
       - ${APPS_DATA_DIR}/gonic/podcasts:/podcasts
     security_opt: [no-new-privileges:true]
     labels:
