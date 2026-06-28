@@ -1,67 +1,67 @@
 ---
 services:
-  docker-proxy-traefik-preprod:
-    image: ghcr.io/tecnativa/docker-socket-proxy:latest
-    container_name: docker-proxy-traefik-preprod
-    restart: unless-stopped
-    environment:
-      - CONTAINERS=1
-      - NETWORKS=1
-      - EVENTS=1
-      - VERSION=1
-      - IMAGES=1
-      - INFO=1
-      - PING=1
-    volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
-    networks: [traefik-proxy-net]
-    healthcheck:
-      test: [CMD, nc, -z, localhost, '2375']
-      interval: 30s
-      timeout: 5s
-      retries: 3
-  traefik-preprod:
-    image: traefik:v3.6.9
-    container_name: traefik-preprod
-    user: ${PUID}:${PGID}
-    restart: unless-stopped
-    security_opt: [no-new-privileges:true]
-    ports: [81:80, 444:443]
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${APPS_DATA_DIR}/traefik/acme.json:/acme.json
-    command:
-      - --ping=true
-      - --api.insecure=true
-      - --api.dashboard=true
-      - --log.level=INFO
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --providers.docker.endpoint=tcp://docker-proxy-traefik-preprod:2375
-      - --entrypoints.web.address=:80
-      - --entrypoints.websecure.address=:443
-      - --entrypoints.web.http.redirections.entryPoint.to=websecure
-      - --entrypoints.web.http.redirections.entryPoint.scheme=https
-      - --certificatesresolvers.myresolver.acme.httpchallenge=true
-      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web
-      - --certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}
-      - --certificatesresolvers.myresolver.acme.storage=/acme.json
-      - --providers.docker.network=lefrigo-net
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.dashboard.rule=Host(`traefik.preprod.le-frigo.fr`)
-      - traefik.http.routers.dashboard.service=api@internal
-      - traefik.http.routers.dashboard.entrypoints=websecure
-      - traefik.http.routers.dashboard.tls.certresolver=myresolver
-      - traefik.http.routers.dashboard.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware
-    networks: [lefrigo-net, traefik-proxy-net]
-    depends_on:
-      tinyauth-preprod:
-        condition: service_healthy
-    healthcheck:
-      test: [CMD, traefik, healthcheck, --ping]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+  # docker-proxy-traefik-preprod:
+  #   image: ghcr.io/tecnativa/docker-socket-proxy:latest
+  #   container_name: docker-proxy-traefik-preprod
+  #   restart: unless-stopped
+  #   environment:
+  #     - CONTAINERS=1
+  #     - NETWORKS=1
+  #     - EVENTS=1
+  #     - VERSION=1
+  #     - IMAGES=1
+  #     - INFO=1
+  #     - PING=1
+  #   volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
+  #   networks: [traefik-proxy-net]
+  #   healthcheck:
+  #     test: [CMD, nc, -z, localhost, '2375']
+  #     interval: 30s
+  #     timeout: 5s
+  #     retries: 3
+  # traefik-preprod:
+  #   image: traefik:v3.6.9
+  #   container_name: traefik-preprod
+  #   user: ${PUID}:${PGID}
+  #   restart: unless-stopped
+  #   security_opt: [no-new-privileges:true]
+  #   ports: [81:80, 444:443]
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${APPS_DATA_DIR}/traefik/acme.json:/acme.json
+  #   command:
+  #     - --ping=true
+  #     - --api.insecure=true
+  #     - --api.dashboard=true
+  #     - --log.level=INFO
+  #     - --providers.docker=true
+  #     - --providers.docker.exposedbydefault=false
+  #     - --providers.docker.endpoint=tcp://docker-proxy-traefik-preprod:2375
+  #     - --entrypoints.web.address=:80
+  #     - --entrypoints.websecure.address=:443
+  #     - --entrypoints.web.http.redirections.entryPoint.to=websecure
+  #     - --entrypoints.web.http.redirections.entryPoint.scheme=https
+  #     - --certificatesresolvers.myresolver.acme.httpchallenge=true
+  #     - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web
+  #     - --certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}
+  #     - --certificatesresolvers.myresolver.acme.storage=/acme.json
+  #     - --providers.docker.network=lefrigo-net
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.dashboard.rule=Host(`traefik.preprod.le-frigo.fr`)
+  #     - traefik.http.routers.dashboard.service=api@internal
+  #     - traefik.http.routers.dashboard.entrypoints=websecure
+  #     - traefik.http.routers.dashboard.tls.certresolver=myresolver
+  #     - traefik.http.routers.dashboard.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware
+  #   networks: [lefrigo-net, traefik-proxy-net]
+  #   depends_on:
+  #     tinyauth-preprod:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: [CMD, traefik, healthcheck, --ping]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
   postgres-server-preprod:
     image: postgres:16-alpine
     container_name: postgres-server-preprod
@@ -81,7 +81,7 @@ services:
     image: lldap/lldap:stable
     container_name: lldap-preprod
     restart: unless-stopped
-    ports: [1001:17170]
+    ports: [1111:17170]
     volumes: ['${APPS_DATA_DIR}/lldap/data:/data']
     environment:
       - TZ=Europe/Paris
