@@ -109,7 +109,7 @@ services:
 
   # --- RADARR ---
   radarr:
-    image: lscr.io/linuxserver/radarr:6.2.1-nightly
+    image: lscr.io/linuxserver/radarr:6.3.0-nightly
     container_name: radarr
     ports: [7878:7878]
     environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
