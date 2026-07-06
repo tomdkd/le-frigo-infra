@@ -32,7 +32,7 @@ services:
           memory: 512M
   homeassistant:
     container_name: homeassistant
-    image: ghcr.io/home-assistant/home-assistant:2026.6.4
+    image: ghcr.io/home-assistant/home-assistant:2026.7.1
     ports: [8123:8123]
     volumes:
       - ${APPS_DATA_DIR}/homeassistant/config:/config
