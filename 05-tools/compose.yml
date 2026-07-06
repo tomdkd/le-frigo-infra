@@ -90,7 +90,7 @@ services:
       - traefik.http.routers.mealie.priority=1
   # --- FILEBROWSER ---
   filebrowser:
-    image: filebrowser/filebrowser:v2.63.15-s6
+    image: filebrowser/filebrowser:v2.63.18-s6
     container_name: filebrowser
     ports: [6789:80]
     volumes: ['${MEDIA_DATA_DIR}:/srv']
