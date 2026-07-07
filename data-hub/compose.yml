@@ -3,31 +3,31 @@ services:
   # ==========================================
   #  DATA
   # ==========================================
-  postgres-media-preprod:
-    image: postgres:16-alpine
-    container_name: postgres-media-preprod
-    restart: unless-stopped
-    environment:
-      - POSTGRES_USER=${MEDIA_POSTGRES_USER}
-      - POSTGRES_PASSWORD=${MEDIA_POSTGRES_PASSWORD}
-      - POSTGRES_DB=immich
-    volumes: ['${APPS_DATA_DIR}/postgres-media:/var/lib/postgresql/data']
-    networks: [data-hub-db-net]
-    healthcheck:
-      test: [CMD-SHELL, pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-  redis-media-preprod:
-    image: redis:8.6.1
-    container_name: redis-media-preprod
-    restart: always
-    networks: [data-hub-redis-net]
-    healthcheck:
-      test: [CMD, redis-cli, ping]
-      interval: 5s
-      timeout: 30s
-      retries: 3
+  # postgres-media-preprod:
+  #   image: postgres:16-alpine
+  #   container_name: postgres-media-preprod
+  #   restart: unless-stopped
+  #   environment:
+  #     - POSTGRES_USER=${MEDIA_POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${MEDIA_POSTGRES_PASSWORD}
+  #     - POSTGRES_DB=immich
+  #   volumes: ['${APPS_DATA_DIR}/postgres-media:/var/lib/postgresql/data']
+  #   networks: [data-hub-db-net]
+  #   healthcheck:
+  #     test: [CMD-SHELL, pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  # redis-media-preprod:
+  #   image: redis:8.6.1
+  #   container_name: redis-media-preprod
+  #   restart: always
+  #   networks: [data-hub-redis-net]
+  #   healthcheck:
+  #     test: [CMD, redis-cli, ping]
+  #     interval: 5s
+  #     timeout: 30s
+  #     retries: 3
 
   # ==========================================
   #  NETWORK & DOWNLOAD
@@ -284,131 +284,131 @@ services:
         limits:
           cpus: '4.00'
           memory: 4096M
-  immich-server-preprod:
-    image: ghcr.io/immich-app/immich-server:commit-dc2c01e4737eb6524d1d4a16ee47ffac16264111
-    container_name: immich_server-preprod
-    user: ${PUID}:${PGID}
-    volumes:
-      - ${MEDIA_DATA_DIR}/photos:/data
-      - /etc/localtime:/etc/localtime:ro
-    environment:
-      - DB_HOSTNAME=postgres-media-preprod
-      - DB_USERNAME=${MEDIA_POSTGRES_USER}
-      - DB_PASSWORD=${MEDIA_POSTGRES_PASSWORD}
-      - DB_DATABASE_NAME=immich
-      - REDIS_HOSTNAME=redis-media-preprod
-      - TZ=Europe/Paris
-    healthcheck:
-      disable: false
-    depends_on:
-      postgres-media-preprod:
-        condition: service_healthy
-      redis-media-preprod:
-        condition: service_healthy
-    networks: [lefrigo-net, data-hub-db-net, data-hub-redis-net]
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.immich-preprod.service=immich-preprod-svc
-      - traefik.http.routers.immich-preprod.rule=Host(`immich.preprod.le-frigo.fr`)
-      - traefik.http.routers.immich-preprod.entrypoints=websecure
-      - traefik.http.routers.immich-preprod.tls.certresolver=myresolver
-      - traefik.http.services.immich-preprod-svc.loadbalancer.server.port=2283
-      - traefik.http.routers.immich-preprod.middlewares=error-pages-preprod-middleware@docker
-      - tinyauth.apps.immich-preprod.ldap.groups=admin
-    deploy:
-      resources:
-        limits:
-          cpus: '4.00'
-          memory: 4096M
+  # immich-server-preprod:
+  #   image: ghcr.io/immich-app/immich-server:commit-dc2c01e4737eb6524d1d4a16ee47ffac16264111
+  #   container_name: immich_server-preprod
+  #   user: ${PUID}:${PGID}
+  #   volumes:
+  #     - ${MEDIA_DATA_DIR}/photos:/data
+  #     - /etc/localtime:/etc/localtime:ro
+  #   environment:
+  #     - DB_HOSTNAME=postgres-media-preprod
+  #     - DB_USERNAME=${MEDIA_POSTGRES_USER}
+  #     - DB_PASSWORD=${MEDIA_POSTGRES_PASSWORD}
+  #     - DB_DATABASE_NAME=immich
+  #     - REDIS_HOSTNAME=redis-media-preprod
+  #     - TZ=Europe/Paris
+  #   healthcheck:
+  #     disable: false
+  #   depends_on:
+  #     postgres-media-preprod:
+  #       condition: service_healthy
+  #     redis-media-preprod:
+  #       condition: service_healthy
+  #   networks: [lefrigo-net, data-hub-db-net, data-hub-redis-net]
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.immich-preprod.service=immich-preprod-svc
+  #     - traefik.http.routers.immich-preprod.rule=Host(`immich.preprod.le-frigo.fr`)
+  #     - traefik.http.routers.immich-preprod.entrypoints=websecure
+  #     - traefik.http.routers.immich-preprod.tls.certresolver=myresolver
+  #     - traefik.http.services.immich-preprod-svc.loadbalancer.server.port=2283
+  #     - traefik.http.routers.immich-preprod.middlewares=error-pages-preprod-middleware@docker
+  #     - tinyauth.apps.immich-preprod.ldap.groups=admin
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '4.00'
+  #         memory: 4096M
 
   # ==========================================
   #  MUSIC, AUDIO & PODCASTS
   # ==========================================
-  audiobookshelf-preprod:
-    image: ghcr.io/advplyr/audiobookshelf:2.35.1
-    container_name: audiobookshelf-preprod
-    user: ${PUID}:${PGID}
-    volumes:
-      - ${APPS_DATA_DIR}/audiobookshelf/config:/config
-      - ${APPS_DATA_DIR}/audiobookshelf/metadata:/metadata
-      - ${MEDIA_DATA_DIR}/books:/data
-    environment: [TZ=Europe/Paris]
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.audiobookshelf-preprod.service=audiobookshelf-preprod-svc
-      - traefik.http.routers.audiobookshelf-preprod.rule=Host(`audiobooks.preprod.le-frigo.fr`)
-      - traefik.http.routers.audiobookshelf-preprod.entrypoints=websecure
-      - traefik.http.routers.audiobookshelf-preprod.tls.certresolver=myresolver
-      - traefik.http.services.audiobookshelf-preprod-svc.loadbalancer.server.port=80
-      - tinyauth.apps.audiobookshelf-preprod.ldap.groups=user,admin
-      - traefik.http.routers.audiobookshelf-preprod.middlewares=error-pages-preprod-middleware@docker
-    networks: [lefrigo-net]
-    restart: always
-  gonic-preprod:
-    image: sentriz/gonic:v0.22.0
-    container_name: gonic-preprod
-    restart: unless-stopped
-    user: ${PUID}:${PGID}
-    environment: [TZ=Europe/Paris, GONIC_SCAN_INTERVAL=15]
-    volumes:
-      - ${APPS_DATA_DIR}/gonic/data:/data
-      - ${MEDIA_DATA_DIR}/musique:/music:ro
-      - ${APPS_DATA_DIR}/gonic/playlists:/playlists
-      - ${APPS_DATA_DIR}/gonic/cache:/cache
-      - ${APPS_DATA_DIR}/gonic/podcasts:/podcasts
-    security_opt: [no-new-privileges:true]
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.gonic-api-preprod.rule=Host(`music.api.preprod.le-frigo.fr`)
-      - traefik.http.routers.gonic-api-preprod.entrypoints=websecure
-      - traefik.http.routers.gonic-api-preprod.tls=true
-      - traefik.http.routers.gonic-api-preprod.tls.certresolver=myresolver
-      - traefik.http.routers.gonic-api-preprod.service=gonic-preprod-svc
-      - traefik.http.routers.gonic-api-preprod.middlewares=gonic-cors-preprod
-      - traefik.http.services.gonic-preprod-svc.loadbalancer.server.port=80
-      - traefik.http.middlewares.gonic-cors-preprod.headers.accesscontrolallowmethods=GET,OPTIONS,POST
-      - traefik.http.middlewares.gonic-cors-preprod.headers.accesscontrolalloworiginlist=https://music.preprod.le-frigo.fr
-      - traefik.http.middlewares.gonic-cors-preprod.headers.accesscontrolallowheaders=*
-      - tinyauth.apps.gonic-preprod.ldap.groups=user,admin
-      - traefik.http.routers.gonic-api-preprod.middlewares=error-pages-preprod-middleware@docker
-    networks: [lefrigo-net]
-    healthcheck:
-      test: [CMD, wget, --spider, -q, http://localhost:80/ping]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-  vibrdrome-web-preprod:
-    image: ddmoney420/vibrdrome-web:v1.8.1-beta.2
-    container_name: vibrdrome-web-preprod
-    environment:
-      - VIBRDROME_DEFAULT_SERVER=https://music.api.preprod.le-frigo.fr
-    restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.vibrdrome-preprod.rule=Host(`music.preprod.le-frigo.fr`)
-      - traefik.http.routers.vibrdrome-preprod.entrypoints=websecure
-      - traefik.http.routers.vibrdrome-preprod.tls.true
-      - traefik.http.routers.vibrdrome-preprod.tls.certresolver=myresolver
-      - traefik.http.routers.vibrdrome-preprod.service=vibrdrome-preprod-svc
-      - traefik.http.services.vibrdrome-preprod-svc.loadbalancer.server.port=80
-      - traefik.http.routers.vibrdrome-preprod.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware@docker
-      - tinyauth.apps.vibrdrome-preprod.ldap.groups=user,admin
-    security_opt: [no-new-privileges:true]
-    depends_on:
-      gonic-preprod:
-        condition: service_started
-    networks: [lefrigo-net]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 256M
+  # audiobookshelf-preprod:
+  #   image: ghcr.io/advplyr/audiobookshelf:2.35.1
+  #   container_name: audiobookshelf-preprod
+  #   user: ${PUID}:${PGID}
+  #   volumes:
+  #     - ${APPS_DATA_DIR}/audiobookshelf/config:/config
+  #     - ${APPS_DATA_DIR}/audiobookshelf/metadata:/metadata
+  #     - ${MEDIA_DATA_DIR}/books:/data
+  #   environment: [TZ=Europe/Paris]
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.audiobookshelf-preprod.service=audiobookshelf-preprod-svc
+  #     - traefik.http.routers.audiobookshelf-preprod.rule=Host(`audiobooks.preprod.le-frigo.fr`)
+  #     - traefik.http.routers.audiobookshelf-preprod.entrypoints=websecure
+  #     - traefik.http.routers.audiobookshelf-preprod.tls.certresolver=myresolver
+  #     - traefik.http.services.audiobookshelf-preprod-svc.loadbalancer.server.port=80
+  #     - tinyauth.apps.audiobookshelf-preprod.ldap.groups=user,admin
+  #     - traefik.http.routers.audiobookshelf-preprod.middlewares=error-pages-preprod-middleware@docker
+  #   networks: [lefrigo-net]
+  #   restart: always
+  # gonic-preprod:
+  #   image: sentriz/gonic:v0.22.0
+  #   container_name: gonic-preprod
+  #   restart: unless-stopped
+  #   user: ${PUID}:${PGID}
+  #   environment: [TZ=Europe/Paris, GONIC_SCAN_INTERVAL=15]
+  #   volumes:
+  #     - ${APPS_DATA_DIR}/gonic/data:/data
+  #     - ${MEDIA_DATA_DIR}/musique:/music:ro
+  #     - ${APPS_DATA_DIR}/gonic/playlists:/playlists
+  #     - ${APPS_DATA_DIR}/gonic/cache:/cache
+  #     - ${APPS_DATA_DIR}/gonic/podcasts:/podcasts
+  #   security_opt: [no-new-privileges:true]
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.gonic-api-preprod.rule=Host(`music.api.preprod.le-frigo.fr`)
+  #     - traefik.http.routers.gonic-api-preprod.entrypoints=websecure
+  #     - traefik.http.routers.gonic-api-preprod.tls=true
+  #     - traefik.http.routers.gonic-api-preprod.tls.certresolver=myresolver
+  #     - traefik.http.routers.gonic-api-preprod.service=gonic-preprod-svc
+  #     - traefik.http.routers.gonic-api-preprod.middlewares=gonic-cors-preprod
+  #     - traefik.http.services.gonic-preprod-svc.loadbalancer.server.port=80
+  #     - traefik.http.middlewares.gonic-cors-preprod.headers.accesscontrolallowmethods=GET,OPTIONS,POST
+  #     - traefik.http.middlewares.gonic-cors-preprod.headers.accesscontrolalloworiginlist=https://music.preprod.le-frigo.fr
+  #     - traefik.http.middlewares.gonic-cors-preprod.headers.accesscontrolallowheaders=*
+  #     - tinyauth.apps.gonic-preprod.ldap.groups=user,admin
+  #     - traefik.http.routers.gonic-api-preprod.middlewares=error-pages-preprod-middleware@docker
+  #   networks: [lefrigo-net]
+  #   healthcheck:
+  #     test: [CMD, wget, --spider, -q, http://localhost:80/ping]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 10s
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.50'
+  #         memory: 512M
+  # vibrdrome-web-preprod:
+  #   image: ddmoney420/vibrdrome-web:v1.8.1-beta.2
+  #   container_name: vibrdrome-web-preprod
+  #   environment:
+  #     - VIBRDROME_DEFAULT_SERVER=https://music.api.preprod.le-frigo.fr
+  #   restart: unless-stopped
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.vibrdrome-preprod.rule=Host(`music.preprod.le-frigo.fr`)
+  #     - traefik.http.routers.vibrdrome-preprod.entrypoints=websecure
+  #     - traefik.http.routers.vibrdrome-preprod.tls.true
+  #     - traefik.http.routers.vibrdrome-preprod.tls.certresolver=myresolver
+  #     - traefik.http.routers.vibrdrome-preprod.service=vibrdrome-preprod-svc
+  #     - traefik.http.services.vibrdrome-preprod-svc.loadbalancer.server.port=80
+  #     - traefik.http.routers.vibrdrome-preprod.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware@docker
+  #     - tinyauth.apps.vibrdrome-preprod.ldap.groups=user,admin
+  #   security_opt: [no-new-privileges:true]
+  #   depends_on:
+  #     gonic-preprod:
+  #       condition: service_started
+  #   networks: [lefrigo-net]
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.25'
+  #         memory: 256M
 networks:
   lefrigo-net:
     external: true
