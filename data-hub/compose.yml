@@ -254,10 +254,10 @@ services:
       - ${MEDIA_DATA_DIR}/stuck_in_yesterday:/stuck_in_yesterday
     labels:
       - traefik.enable=true
-      - traefik.http.routers.jellyfin-preprod.rule=Host(`jellyfin.preprod.le-frigo.fr`)
+      - traefik.http.routers.jellyfin-preprod.rule=Host(`stream.preprod.le-frigo.fr`)
       - traefik.http.routers.jellyfin-preprod.entrypoints=websecure
       - traefik.http.routers.jellyfin-preprod.tls.certresolver=myresolver
-      - traefik.http.services.jellyfin-preprod-svc.loadbalancer.server.port=8096
+      - traefik.http.services.jellyfin-preprod-svc.loadbalancer.server.port=8920
       - traefik.http.routers.jellyfin-preprod.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware@docker
       - tinyauth.apps.jellyfin-preprod.ldap.groups=user,admin
     networks: [lefrigo-net, data-hub-net, lldap-auth-net]
