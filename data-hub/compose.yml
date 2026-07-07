@@ -157,15 +157,6 @@ services:
     volumes: ['${APPS_DATA_DIR}/radarr:/config', '${MEDIA_DATA_DIR}:/data']
     restart: always
     networks: [lefrigo-net]
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.radarr-preprod.rule=Host(`radarr.preprod.le-frigo.fr`)
-      - traefik.http.routers.radarr-preprod.service=radarr-preprod-svc
-      - traefik.http.routers.radarr-preprod.entrypoints=websecure
-      - traefik.http.routers.radarr-preprod.tls.certresolver=myresolver
-      - traefik.http.routers.radarr-preprod.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware@docker
-      - traefik.http.services.radarr-preprod-svc.loadbalancer.server.port=7878
-      - tinyauth.apps.radarr-preprod.ldap.groups=admin
     depends_on:
       prowlarr-preprod:
         condition: service_healthy
@@ -189,15 +180,6 @@ services:
     volumes: ['${APPS_DATA_DIR}/sonarr:/config', '${MEDIA_DATA_DIR}:/data']
     restart: always
     networks: [lefrigo-net]
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.sonarr-preprod.rule=Host(`sonarr.preprod.le-frigo.fr`)
-      - traefik.http.routers.sonarr-preprod.service=sonarr-preprod-svc
-      - traefik.http.routers.sonarr-preprod.entrypoints=websecure
-      - traefik.http.routers.sonarr-preprod.tls.certresolver=myresolver
-      - traefik.http.routers.sonarr-preprod.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware@docker
-      - traefik.http.services.sonarr-preprod-svc.loadbalancer.server.port=8989
-      - tinyauth.apps.sonarr-preprod.ldap.groups=admin
     deploy:
       resources:
         limits:
@@ -276,7 +258,7 @@ services:
       - traefik.http.routers.jellyfin-preprod.entrypoints=websecure
       - traefik.http.routers.jellyfin-preprod.tls.certresolver=myresolver
       - traefik.http.services.jellyfin-preprod-svc.loadbalancer.server.port=8096
-      - traefik.http.routers.jellyfin-preprod.middlewares=error-pages-preprod-middleware@docker
+      - traefik.http.routers.jellyfin-preprod.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware@docker
       - tinyauth.apps.jellyfin-preprod.ldap.groups=user,admin
     networks: [lefrigo-net, data-hub-net, lldap-auth-net]
     deploy:
