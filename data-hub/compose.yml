@@ -254,9 +254,8 @@ services:
       - traefik.http.routers.jellyfin.entrypoints=websecure
       - traefik.http.routers.jellyfin.tls.certresolver=myresolver
       - traefik.http.services.jellyfin-svc.loadbalancer.server.port=8096
-      - traefik.http.routers.jellyfin.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
+      - traefik.http.routers.jellyfin.middlewares=error-pages-middleware@docker
       - traefik.providers.docker.network=lefrigo-net
-      - tinyauth.apps.jellyfin.ldap.groups=user,admin
     networks: [lefrigo-net, data-hub-net, lldap-auth-net]
     deploy:
       resources:
