@@ -211,7 +211,7 @@ services:
         condition: service_healthy
   ygege:
     image: uwucode/ygege:0.9.1
-    container_name: ygege-preprod
+    container_name: ygege
     restart: unless-stopped
     environment:
       LOG_LEVEL: info
@@ -239,13 +239,13 @@ services:
     networks: [lefrigo-net]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.metube-preprod.rule=Host(`metube.le-frigo.fr`)
-      - traefik.http.routers.metube-preprod.service=metube-preprod-svc
-      - traefik.http.routers.metube-preprod.entrypoints=websecure
-      - traefik.http.routers.metube-preprod.tls.certresolver=myresolver
-      - traefik.http.services.metube-preprod-svc.loadbalancer.server.port=8081
-      - traefik.http.routers.metube-preprod.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
-      - tinyauth.apps.metube-preprod.ldap.groups=admin
+      - traefik.http.routers.metube.rule=Host(`metube.le-frigo.fr`)
+      - traefik.http.routers.metube.service=metube-svc
+      - traefik.http.routers.metube.entrypoints=websecure
+      - traefik.http.routers.metube.tls.certresolver=myresolver
+      - traefik.http.services.metube-svc.loadbalancer.server.port=8081
+      - traefik.http.routers.metube.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
+      - tinyauth.apps.metube.ldap.groups=admin
 
   # ==========================================
   #  VIDEO STREAMING & MEDIA MANAGEMENT
@@ -334,45 +334,44 @@ services:
       - traefik.http.routers.audiobookshelf.middlewares=error-pages-middleware@docker
     networks: [lefrigo-net]
     restart: always
-  # gonic-preprod:
-  #   image: sentriz/gonic:v0.22.0
-  #   container_name: gonic-preprod
-  #   restart: unless-stopped
-  #   user: ${PUID}:${PGID}
-  #   environment: [TZ=Europe/Paris, GONIC_SCAN_INTERVAL=15]
-  #   volumes:
-  #     - ${APPS_DATA_DIR}/gonic/data:/data
-  #     - ${MEDIA_DATA_DIR}/musique:/music:ro
-  #     - ${APPS_DATA_DIR}/gonic/playlists:/playlists
-  #     - ${APPS_DATA_DIR}/gonic/cache:/cache
-  #     - ${APPS_DATA_DIR}/gonic/podcasts:/podcasts
-  #   security_opt: [no-new-privileges:true]
-  #   labels:
-  #     - traefik.enable=true
-  #     - traefik.http.routers.gonic-api-preprod.rule=Host(`music.api.preprod.le-frigo.fr`)
-  #     - traefik.http.routers.gonic-api-preprod.entrypoints=websecure
-  #     - traefik.http.routers.gonic-api-preprod.tls=true
-  #     - traefik.http.routers.gonic-api-preprod.tls.certresolver=myresolver
-  #     - traefik.http.routers.gonic-api-preprod.service=gonic-preprod-svc
-  #     - traefik.http.routers.gonic-api-preprod.middlewares=gonic-cors-preprod
-  #     - traefik.http.services.gonic-preprod-svc.loadbalancer.server.port=80
-  #     - traefik.http.middlewares.gonic-cors-preprod.headers.accesscontrolallowmethods=GET,OPTIONS,POST
-  #     - traefik.http.middlewares.gonic-cors-preprod.headers.accesscontrolalloworiginlist=https://music.preprod.le-frigo.fr
-  #     - traefik.http.middlewares.gonic-cors-preprod.headers.accesscontrolallowheaders=*
-  #     - tinyauth.apps.gonic-preprod.ldap.groups=user,admin
-  #     - traefik.http.routers.gonic-api-preprod.middlewares=error-pages-preprod-middleware@docker
-  #   networks: [lefrigo-net]
-  #   healthcheck:
-  #     test: [CMD, wget, --spider, -q, http://localhost:80/ping]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 10s
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '0.50'
-  #         memory: 512M
+  gonic:
+    image: sentriz/gonic:v0.22.0
+    container_name: gonic
+    restart: unless-stopped
+    user: ${PUID}:${PGID}
+    environment: [TZ=Europe/Paris, GONIC_SCAN_INTERVAL=15]
+    volumes:
+      - ${APPS_DATA_DIR}/gonic/data:/data
+      - ${MEDIA_DATA_DIR}/musique:/music:ro
+      - ${APPS_DATA_DIR}/gonic/playlists:/playlists
+      - ${APPS_DATA_DIR}/gonic/cache:/cache
+      - ${APPS_DATA_DIR}/gonic/podcasts:/podcasts
+    security_opt: [no-new-privileges:true]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.gonic.rule=Host(`music.api.le-frigo.fr`)
+      - traefik.http.routers.gonic.entrypoints=websecure
+      - traefik.http.routers.gonic.tls=true
+      - traefik.http.routers.gonic.tls.certresolver=myresolver
+      - traefik.http.routers.gonic.service=gonic-svc
+      - traefik.http.routers.gonic-api.middlewares=gonic-cors
+      - traefik.http.services.gonic-svc.loadbalancer.server.port=80
+      - traefik.http.middlewares.gonic-cors.headers.accesscontrolallowmethods=GET,OPTIONS,POST
+      - traefik.http.middlewares.gonic-cors.headers.accesscontrolalloworiginlist=https://music.le-frigo.fr
+      - traefik.http.middlewares.gonic-cors.headers.accesscontrolallowheaders=*
+      - traefik.http.routers.gonic-api.middlewares=error-pages-middleware@docker
+    networks: [lefrigo-net]
+    healthcheck:
+      test: [CMD, wget, --spider, -q, http://localhost:80/ping]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
   # vibrdrome-web-preprod:
   #   image: ddmoney420/vibrdrome-web:v1.8.1-beta.2
   #   container_name: vibrdrome-web-preprod
