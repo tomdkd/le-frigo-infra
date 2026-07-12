@@ -2,7 +2,6 @@
 .env
 
 # Ignore applications and media folders
-apps/
 medias/
 media/
 data/

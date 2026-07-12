@@ -1,0 +1,211 @@
+---
+services:
+  jellyseerr:
+    image: ghcr.io/seerr-team/seerr:preview-new-oidc
+    container_name: jellyseerr
+    user: ${PUID}:${PGID}
+    environment: [TZ=Europe/Paris]
+    volumes: ['${APPS_DATA_DIR}/jellyseerr/config:/app/config']
+    ports: [5056:5055]
+    restart: unless-stopped
+    networks: [lefrigo-net]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jellyseerr.rule=Host(`jellyseerr.le-frigo.fr`)
+      - traefik.http.routers.jellyseerr.entrypoints=websecure
+      - traefik.http.routers.jellyseerr.tls=true
+      - traefik.http.services.jellyseerr.loadbalancer.server.port=5055
+      - traefik.http.routers.jellyseerr.tls.certresolver=myresolver
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 1G
+        reservations:
+          memory: 512M
+  # homeassistant:
+  #   container_name: homeassistant
+  #   image: ghcr.io/home-assistant/home-assistant:2026.6.1
+  #   ports: [8123:8123]
+  #   volumes:
+  #     - ${APPS_DATA_DIR}/homeassistant/config:/config
+  #     - ${APPS_DATA_DIR}/homeassistant/storage:/var/lib/homeassistant
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - /run/dbus:/run/dbus:ro
+  #   restart: unless-stopped
+  #   privileged: true
+  #   networks: [lefrigo-net]
+  #   environment:
+  #     TZ: Europe/Paris
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.homeassistant.service=homeassistant
+  #     - traefik.http.routers.homeassistant.rule=Host(`house.le-frigo.fr`)
+  #     - traefik.http.routers.homeassistant.entrypoints=websecure
+  #     - traefik.http.routers.homeassistant.tls.certresolver=myresolver
+  #     - traefik.http.services.homeassistant.loadbalancer.server.port=8123
+  #     - traefik.http.routers.homeassistant.priority=1
+  #     - traefik.http.routers.homeassistant.middlewares=error-pages-middleware@docker
+  # mealie:
+  #   image: ghcr.io/mealie-recipes/mealie:v3.19.2
+  #   container_name: mealie
+  #   restart: always
+  #   ports: [9925:9000]
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 1000M
+  #   volumes: ['${APPS_DATA_DIR}/mealie/data:/app/data/']
+  #   networks: [lefrigo-net]
+  #   environment:
+  #     - ALLOW_SIGNUP=false
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=Europe/Paris
+  #     - BASE_URL=https://mealie.le-frigo.fr
+  #     - DB_ENGINE=postgres
+  #     - POSTGRES_USER=${POSTGRES_MEALIE_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_MEALIE_PASSWORD}
+  #     - POSTGRES_SERVER=postgres-common
+  #     - POSTGRES_PORT=5432
+  #     - POSTGRES_DB=mealie
+  #     - OIDC_AUTH_ENABLED=true
+  #     - OIDC_SIGNUP_ENABLED=true
+  #     - OIDC_CONFIGURATION_URL=https://auth.le-frigo.fr/application/o/mealie/.well-known/openid-configuration
+  #     - OIDC_CLIENT_ID=${MEALIE_OIDC_ID}
+  #     - OIDC_CLIENT_SECRET=${MEALIE_OIDC_SECRET}
+  #     - OIDC_AUTO_REDIRECT=true
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.mealie.rule=Host(`mealie.le-frigo.fr`)
+  #     - traefik.http.routers.mealie.entrypoints=websecure
+  #     - traefik.http.routers.mealie.tls.certresolver=myresolver
+  #     - traefik.http.services.mealie.loadbalancer.server.port=9000
+  #     - traefik.http.routers.mealie.priority=1
+  #     - traefik.http.routers.mealie.middlewares=error-pages-middleware@docker
+  # # --- FILEBROWSER ---
+  # filebrowser:
+  #   image: filebrowser/filebrowser:v2.63.14-s6
+  #   container_name: filebrowser
+  #   ports: [6789:80]
+  #   volumes: ['${MEDIA_DATA_DIR}:/srv']
+  #   tmpfs: [/config, /database]
+  #   environment:
+  #     - TZ=Europe/Paris
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - FB_DATABASE=/database/filebrowser.db
+  #     - FB_NOAUTH=true
+  #   restart: unless-stopped
+  #   networks: [lefrigo-net]
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.filebrowser.rule=Host(`file.le-frigo.fr`)
+  #     - traefik.http.routers.filebrowser.service=filebrowser
+  #     - traefik.http.routers.filebrowser.entrypoints=websecure
+  #     - traefik.http.routers.filebrowser.tls.certresolver=myresolver
+  #     - traefik.http.services.filebrowser.loadbalancer.server.port=80
+  #     - traefik.http.routers.filebrowser.middlewares=authentik@docker
+  #     - tinyauth.apps.filebrowser.ldap.groups=admin
+  #     - traefik.http.routers.filebrowser.middlewares=error-pages-middleware@docker
+  # # --- PICARD ---
+  # picard:
+  #   image: jlesage/musicbrainz-picard:v26.05.2
+  #   container_name: picard
+  #   ports: [5800:5800]
+  #   environment: ['USER_ID=${PUID}', 'GROUP_ID=${PGID}']
+  #   volumes: ['${MEDIA_DATA_DIR}/musique:/storage:rw']
+  #   networks: [lefrigo-net]
+  #   labels:
+  #     - traefik.enable=false
+  #     - traefik.http.routers.picard.rule=Host(`picard.le-frigo.fr`)
+  #     - traefik.http.routers.picard.service=picard
+  #     - traefik.http.routers.picard.entrypoints=websecure
+  #     - traefik.http.routers.picard.tls.certresolver=myresolver
+  #     - traefik.http.services.picard.loadbalancer.server.port=5800
+  #     - traefik.http.routers.picard.middlewares=authentik@docker
+  #     - tinyauth.apps.picard.ldap.groups=admin
+  #     - traefik.http.routers.picard.middlewares=error-pages-middleware@docker
+  #   healthcheck:
+  #     test: [CMD-SHELL, nc -z localhost 5800]
+  #     interval: 30s
+  #     timeout: 5s
+  #     retries: 3
+  #     start_period: 15s
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '2.0'
+  #         memory: 2048M
+  #       reservations:
+  #         memory: 512M
+  # # --- N8N ---
+  # n8n:
+  #   image: docker.n8n.io/n8nio/n8n:2.25.6-a37ba24
+  #   container_name: n8n
+  #   restart: unless-stopped
+  #   user: ${PUID}:${PGID}
+  #   environment:
+  #     - N8N_HOST=n8n.le-frigo.fr
+  #     - N8N_PORT=5678
+  #     - N8N_PROTOCOL=https
+  #     - NODE_ENV=production
+  #     - WEBHOOK_URL=https://n8n.le-frigo.fr/
+  #     - GENERIC_TIMEZONE=Europe/Paris
+  #     - N8N_USER_FOLDER=/home/node/.n8n
+  #     - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+  #     - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+  #     - NPM_CONFIG_CACHE=/home/node/.n8n/.npm
+  #   volumes:
+  #     - ${APPS_DATA_DIR}/n8n:/home/node/.n8n
+  #     - ${MEDIA_DATA_DIR}:/lefrigo_data
+  #   networks: [lefrigo-net, n8n-net]
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.services.n8n-svc.loadbalancer.server.port=5678
+  #     - traefik.http.routers.n8n.rule=Host(`n8n.le-frigo.fr`)
+  #     - traefik.http.routers.n8n.entrypoints=websecure
+  #     - traefik.http.routers.n8n.tls.certresolver=myresolver
+  #     - traefik.http.routers.n8n.middlewares=authentik@docker
+  #     - traefik.http.routers.n8n.service=n8n-svc
+  #     - traefik.http.routers.n8n.priority=1
+  #     - traefik.http.routers.n8n-webhooks.rule=Host(`n8n.le-frigo.fr`) && (PathPrefix(`/webhook`)
+  #       || PathPrefix(`/webhook-test`))
+  #     - traefik.http.routers.n8n-webhooks.entrypoints=websecure
+  #     - traefik.http.routers.n8n-webhooks.tls.certresolver=myresolver
+  #     - traefik.http.routers.n8n-webhooks.service=n8n-svc
+  #     - traefik.http.routers.n8n-webhooks.priority=2
+  #     - tinyauth.apps.n8n.ldap.groups=admin
+  #     - traefik.http.routers.n8n.middlewares=error-pages-middleware@docker
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.75'
+  #         memory: 1G
+  #       reservations:
+  #         memory: 256M
+  # # Docker socket proxy for n8n to access docker API
+  # tools-docker-proxy:
+  #   container_name: tools-docker-proxy
+  #   environment: [CONTAINERS=1, GET=1, LOGS=1]
+  #   image: tecnativa/docker-socket-proxy:v0.4.2
+  #   networks: [lefrigo-net]
+  #   privileged: true
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  # # --- OLLAMA ---
+  # ollama:
+  #   image: ollama/ollama:0.30.7
+  #   container_name: ollama
+  #   restart: unless-stopped
+  #   volumes: ['${APPS_DATA_DIR}/ollama/data:/root/.ollama']
+  #   networks: [n8n-net]
+networks:
+  lefrigo-net:
+    external: true
+  01-sso_authentik-net:
+    external: true
+  n8n-net:
+    name: n8n-net
+  tools-docker-proxy:
+    name: tools-docker-proxy
