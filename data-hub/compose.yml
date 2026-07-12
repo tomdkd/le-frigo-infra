@@ -315,26 +315,25 @@ services:
   # ==========================================
   #  MUSIC, AUDIO & PODCASTS
   # ==========================================
-  # audiobookshelf-preprod:
-  #   image: ghcr.io/advplyr/audiobookshelf:2.35.1
-  #   container_name: audiobookshelf-preprod
-  #   user: ${PUID}:${PGID}
-  #   volumes:
-  #     - ${APPS_DATA_DIR}/audiobookshelf/config:/config
-  #     - ${APPS_DATA_DIR}/audiobookshelf/metadata:/metadata
-  #     - ${MEDIA_DATA_DIR}/books:/data
-  #   environment: [TZ=Europe/Paris]
-  #   labels:
-  #     - traefik.enable=true
-  #     - traefik.http.routers.audiobookshelf-preprod.service=audiobookshelf-preprod-svc
-  #     - traefik.http.routers.audiobookshelf-preprod.rule=Host(`audiobooks.preprod.le-frigo.fr`)
-  #     - traefik.http.routers.audiobookshelf-preprod.entrypoints=websecure
-  #     - traefik.http.routers.audiobookshelf-preprod.tls.certresolver=myresolver
-  #     - traefik.http.services.audiobookshelf-preprod-svc.loadbalancer.server.port=80
-  #     - tinyauth.apps.audiobookshelf-preprod.ldap.groups=user,admin
-  #     - traefik.http.routers.audiobookshelf-preprod.middlewares=error-pages-preprod-middleware@docker
-  #   networks: [lefrigo-net]
-  #   restart: always
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:2.35.1
+    container_name: audiobookshelf
+    user: ${PUID}:${PGID}
+    volumes:
+      - ${APPS_DATA_DIR}/audiobookshelf/config:/config
+      - ${APPS_DATA_DIR}/audiobookshelf/metadata:/metadata
+      - ${MEDIA_DATA_DIR}/books:/data
+    environment: [TZ=Europe/Paris]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.audiobookshelf.service=audiobookshelf-svc
+      - traefik.http.routers.audiobookshelf.rule=Host(`audiobooks.le-frigo.fr`)
+      - traefik.http.routers.audiobookshelf.entrypoints=websecure
+      - traefik.http.routers.audiobookshelf.tls.certresolver=myresolver
+      - traefik.http.services.audiobookshelf-svc.loadbalancer.server.port=80
+      - traefik.http.routers.audiobookshelf.middlewares=error-pages-middleware@docker
+    networks: [lefrigo-net]
+    restart: always
   # gonic-preprod:
   #   image: sentriz/gonic:v0.22.0
   #   container_name: gonic-preprod
