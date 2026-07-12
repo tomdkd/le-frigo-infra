@@ -32,235 +32,231 @@ services:
   # ==========================================
   #  NETWORK & DOWNLOAD
   # ==========================================
-  gluetun-preprod:
-    image: qmcgaw/gluetun:pr-3361
-    container_name: gluetun-preprod
-    user: 0:0
-    cap_add: [NET_ADMIN]
-    devices: [/dev/net/tun:/dev/net/tun]
-    environment:
-      - VPN_SERVICE_PROVIDER=${VPN_PROVIDER}
-      - VPN_TYPE=wireguard
-      - WIREGUARD_PRIVATE_KEY=${VPN_WG_PRIVATE_KEY}
-      - WIREGUARD_ADDRESSES=${VPN_WG_ADDRESS}
-      - SERVER_NAMES=LT#38
-      - OPENVPN_USER=${OPENVPN_USER}
-      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
-      - VPN_PORT_FORWARDING=on
-      - VPN_PORT_FORWARDING_PROVIDER=${VPN_PROVIDER}
-      - FIREWALL_OUTBOUND_SUBNETS=192.168.1.0/24,172.16.0.0/12
-      - HEALTH_RESTART_VPN=no
-      - HEALTH_INITIAL_DELAY=30s
-      - DNS_ADDRESS=8.8.8.8
-      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data
-        "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences
-        2>&1'
-    ports: [18080:8080, 18001:8000]
-    restart: always
-    networks: [lefrigo-net]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-        reservations:
-          memory: 128M
-    healthcheck:
-      test: [CMD-SHELL, wget -qO- https://google.com || exit 1]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-  qbittorrent-preprod:
-    image: lscr.io/linuxserver/qbittorrent:5.2.1
-    container_name: qbittorrent-preprod
-    network_mode: service:gluetun-preprod
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=Europe/Paris
-      - WEBUI_PORT=8080
-    volumes:
-      - ${APPS_DATA_DIR}/qbittorrent/config:/config
-      - ${MEDIA_DATA_DIR}:/data
-    depends_on:
-      gluetun-preprod:
-        condition: service_healthy
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: '1.00'
-          memory: 2G
-        reservations:
-          memory: 512M
-    healthcheck:
-      test: [CMD-SHELL, wget -q --spider http://localhost:8080/ || exit 1]
-      interval: 1m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-  qbitwebui-preprod:
-    image: ghcr.io/mkbula/qbitwebui:latest
-    container_name: qbitwebui-preprod
-    user: ${PUID}:${PGID}
-    environment:
-      - ENCRYPTION_KEY=${QBITWEBUI_ENCRYPTION_KEY}
-      - DISABLE_REGISTRATION=true
-      - DOWNLOADS_PATH=/downloads
-    volumes:
-      - ${APPS_DATA_DIR}/qbitwebui/data:/data
-      - ${MEDIA_DATA_DIR}/downloads:/downloads:ro
-    restart: unless-stopped
-    networks: [lefrigo-net]
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.qbitwebui-preprod.rule=Host(`torrent.preprod.le-frigo.fr`)
-      - traefik.http.routers.qbitwebui-preprod.service=qbitwebui-preprod-svc
-      - traefik.http.routers.qbitwebui-preprod.entrypoints=websecure
-      - traefik.http.routers.qbitwebui-preprod.tls.certresolver=myresolver
-      - traefik.http.services.qbitwebui-preprod-svc.loadbalancer.server.port=3000
-      - traefik.http.routers.qbitwebui-preprod.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware@docker
-      - tinyauth.apps.qbitwebui-preprod.ldap.groups=admin
+  # gluetun-preprod:
+  #   image: qmcgaw/gluetun:pr-3361
+  #   container_name: gluetun-preprod
+  #   user: 0:0
+  #   cap_add: [NET_ADMIN]
+  #   devices: [/dev/net/tun:/dev/net/tun]
+  #   environment:
+  #     - VPN_SERVICE_PROVIDER=${VPN_PROVIDER}
+  #     - VPN_TYPE=wireguard
+  #     - WIREGUARD_PRIVATE_KEY=${VPN_WG_PRIVATE_KEY}
+  #     - WIREGUARD_ADDRESSES=${VPN_WG_ADDRESS}
+  #     - SERVER_NAMES=LT#38
+  #     - OPENVPN_USER=${OPENVPN_USER}
+  #     - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
+  #     - VPN_PORT_FORWARDING=on
+  #     - VPN_PORT_FORWARDING_PROVIDER=${VPN_PROVIDER}
+  #     - FIREWALL_OUTBOUND_SUBNETS=192.168.1.0/24,172.16.0.0/12
+  #     - HEALTH_RESTART_VPN=no
+  #     - HEALTH_INITIAL_DELAY=30s
+  #     - DNS_ADDRESS=8.8.8.8
+  #     - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data
+  #       "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences
+  #       2>&1'
+  #   ports: [18080:8080, 18001:8000]
+  #   restart: always
+  #   networks: [lefrigo-net]
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.50'
+  #         memory: 512M
+  #       reservations:
+  #         memory: 128M
+  #   healthcheck:
+  #     test: [CMD-SHELL, wget -qO- https://google.com || exit 1]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 20s
+  # qbittorrent-preprod:
+  #   image: lscr.io/linuxserver/qbittorrent:5.2.1
+  #   container_name: qbittorrent-preprod
+  #   network_mode: service:gluetun-preprod
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=Europe/Paris
+  #     - WEBUI_PORT=8080
+  #   volumes:
+  #     - ${APPS_DATA_DIR}/qbittorrent/config:/config
+  #     - ${MEDIA_DATA_DIR}:/data
+  #   depends_on:
+  #     gluetun-preprod:
+  #       condition: service_healthy
+  #   restart: always
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1.00'
+  #         memory: 2G
+  #       reservations:
+  #         memory: 512M
+  #   healthcheck:
+  #     test: [CMD-SHELL, wget -q --spider http://localhost:8080/ || exit 1]
+  #     interval: 1m
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 30s
+  # qbitwebui-preprod:
+  #   image: ghcr.io/mkbula/qbitwebui:latest
+  #   container_name: qbitwebui-preprod
+  #   user: ${PUID}:${PGID}
+  #   environment:
+  #     - ENCRYPTION_KEY=${QBITWEBUI_ENCRYPTION_KEY}
+  #     - DISABLE_REGISTRATION=true
+  #     - DOWNLOADS_PATH=/downloads
+  #   volumes:
+  #     - ${APPS_DATA_DIR}/qbitwebui/data:/data
+  #     - ${MEDIA_DATA_DIR}/downloads:/downloads:ro
+  #   restart: unless-stopped
+  #   networks: [lefrigo-net]
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.qbitwebui-preprod.rule=Host(`torrent.preprod.le-frigo.fr`)
+  #     - traefik.http.routers.qbitwebui-preprod.service=qbitwebui-preprod-svc
+  #     - traefik.http.routers.qbitwebui-preprod.entrypoints=websecure
+  #     - traefik.http.routers.qbitwebui-preprod.tls.certresolver=myresolver
+  #     - traefik.http.services.qbitwebui-preprod-svc.loadbalancer.server.port=3000
+  #     - traefik.http.routers.qbitwebui-preprod.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware@docker
+  #     - tinyauth.apps.qbitwebui-preprod.ldap.groups=admin
 
   # ==========================================
   #  AUTOMATION PIPELINE
   # ==========================================
-  prowlarr-preprod:
-    image: lscr.io/linuxserver/prowlarr:2.4.0-nightly
-    container_name: prowlarr-preprod
-    environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
-    networks: [lefrigo-net]
-    ports: [19697:9696]
-    volumes: ['${APPS_DATA_DIR}/prowlarr:/config']
-    depends_on:
-      gluetun-preprod:
-        condition: service_healthy
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 1G
-        reservations:
-          memory: 256M
-    healthcheck:
-      test: [CMD-SHELL, wget -q --spider http://localhost:9696/ || exit 1]
-      interval: 1m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-  radarr-preprod:
-    image: lscr.io/linuxserver/radarr:6.2.1-nightly
-    container_name: radarr-preprod
-    environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
-    volumes: ['${APPS_DATA_DIR}/radarr:/config', '${MEDIA_DATA_DIR}:/data']
-    restart: always
-    networks: [lefrigo-net]
-    depends_on:
-      prowlarr-preprod:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          cpus: '1.00'
-          memory: 2G
-        reservations:
-          memory: 512M
-    healthcheck:
-      test: [CMD-SHELL, wget -q --spider http://localhost:7878/ || exit 1]
-      interval: 1m
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-  sonarr-preprod:
-    image: lscr.io/linuxserver/sonarr:4.0.17
-    container_name: sonarr-preprod
-    environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
-    volumes: ['${APPS_DATA_DIR}/sonarr:/config', '${MEDIA_DATA_DIR}:/data']
-    restart: always
-    networks: [lefrigo-net]
-    deploy:
-      resources:
-        limits:
-          cpus: '1.00'
-          memory: 2G
-        reservations:
-          memory: 512M
-    healthcheck:
-      test: [CMD-SHELL, wget -q --spider http://localhost:8989/ || exit 1]
-      interval: 1m
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    depends_on:
-      prowlarr-preprod:
-        condition: service_healthy
-  ygege-preprod:
-    image: uwucode/ygege:0.9.1
-    container_name: ygege-preprod
-    restart: unless-stopped
-    environment:
-      LOG_LEVEL: info
-    networks: [lefrigo-net]
-    ports: [18715:8715]
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - curl --fail http://localhost:$${BIND_PORT:-8715}/health || exit 1
-      interval: 1m30s
-      timeout: 20s
-      retries: 3
-      start_period: 10s
-    depends_on:
-      gluetun-preprod:
-        condition: service_healthy
-      prowlarr-preprod:
-        condition: service_healthy
-  metube-preprod:
-    image: alexta69/metube:2026.06.06
-    user: ${PUID}:${PGID}
-    container_name: metube-preprod
-    restart: unless-stopped
-    volumes: ['${MEDIA_DATA_DIR}/youtube_downloads:/downloads']
-    networks: [lefrigo-net]
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.metube-preprod.rule=Host(`metube.preprod.le-frigo.fr`)
-      - traefik.http.routers.metube-preprod.service=metube-preprod-svc
-      - traefik.http.routers.metube-preprod.entrypoints=websecure
-      - traefik.http.routers.metube-preprod.tls.certresolver=myresolver
-      - traefik.http.services.metube-preprod-svc.loadbalancer.server.port=8081
-      - traefik.http.routers.metube-preprod.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware@docker
-      - tinyauth.apps.metube-preprod.ldap.groups=admin
+  # prowlarr-preprod:
+  #   image: lscr.io/linuxserver/prowlarr:2.4.0-nightly
+  #   container_name: prowlarr-preprod
+  #   environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
+  #   networks: [lefrigo-net]
+  #   ports: [19697:9696]
+  #   volumes: ['${APPS_DATA_DIR}/prowlarr:/config']
+  #   depends_on:
+  #     gluetun-preprod:
+  #       condition: service_healthy
+  #   restart: always
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.50'
+  #         memory: 1G
+  #       reservations:
+  #         memory: 256M
+  #   healthcheck:
+  #     test: [CMD-SHELL, wget -q --spider http://localhost:9696/ || exit 1]
+  #     interval: 1m
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 30s
+  # radarr-preprod:
+  #   image: lscr.io/linuxserver/radarr:6.2.1-nightly
+  #   container_name: radarr-preprod
+  #   environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
+  #   volumes: ['${APPS_DATA_DIR}/radarr:/config', '${MEDIA_DATA_DIR}:/data']
+  #   restart: always
+  #   networks: [lefrigo-net]
+  #   depends_on:
+  #     prowlarr-preprod:
+  #       condition: service_healthy
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1.00'
+  #         memory: 2G
+  #       reservations:
+  #         memory: 512M
+  #   healthcheck:
+  #     test: [CMD-SHELL, wget -q --spider http://localhost:7878/ || exit 1]
+  #     interval: 1m
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+  # sonarr-preprod:
+  #   image: lscr.io/linuxserver/sonarr:4.0.17
+  #   container_name: sonarr-preprod
+  #   environment: ['PUID=${PUID}', 'PGID=${PGID}', TZ=Europe/Paris]
+  #   volumes: ['${APPS_DATA_DIR}/sonarr:/config', '${MEDIA_DATA_DIR}:/data']
+  #   restart: always
+  #   networks: [lefrigo-net]
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1.00'
+  #         memory: 2G
+  #       reservations:
+  #         memory: 512M
+  #   healthcheck:
+  #     test: [CMD-SHELL, wget -q --spider http://localhost:8989/ || exit 1]
+  #     interval: 1m
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+  #   depends_on:
+  #     prowlarr-preprod:
+  #       condition: service_healthy
+  # ygege-preprod:
+  #   image: uwucode/ygege:0.9.1
+  #   container_name: ygege-preprod
+  #   restart: unless-stopped
+  #   environment:
+  #     LOG_LEVEL: info
+  #   networks: [lefrigo-net]
+  #   ports: [18715:8715]
+  #   healthcheck:
+  #     test:
+  #       - CMD-SHELL
+  #       - curl --fail http://localhost:$${BIND_PORT:-8715}/health || exit 1
+  #     interval: 1m30s
+  #     timeout: 20s
+  #     retries: 3
+  #     start_period: 10s
+  #   depends_on:
+  #     gluetun-preprod:
+  #       condition: service_healthy
+  #     prowlarr-preprod:
+  #       condition: service_healthy
+  # metube-preprod:
+  #   image: alexta69/metube:2026.06.06
+  #   user: ${PUID}:${PGID}
+  #   container_name: metube-preprod
+  #   restart: unless-stopped
+  #   volumes: ['${MEDIA_DATA_DIR}/youtube_downloads:/downloads']
+  #   networks: [lefrigo-net]
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.metube-preprod.rule=Host(`metube.preprod.le-frigo.fr`)
+  #     - traefik.http.routers.metube-preprod.service=metube-preprod-svc
+  #     - traefik.http.routers.metube-preprod.entrypoints=websecure
+  #     - traefik.http.routers.metube-preprod.tls.certresolver=myresolver
+  #     - traefik.http.services.metube-preprod-svc.loadbalancer.server.port=8081
+  #     - traefik.http.routers.metube-preprod.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware@docker
+  #     - tinyauth.apps.metube-preprod.ldap.groups=admin
 
   # ==========================================
   #  VIDEO STREAMING & MEDIA MANAGEMENT
   # ==========================================
-  jellyfin-preprod:
+  jellyfin:
     image: jellyfin/jellyfin:10.11.11
-    container_name: jellyfin-preprod
     restart: unless-stopped
     user: ${PUID}:${PGID}
-    ports:
-      - 8097:8096
     environment:
       - TZ=Europe/Paris
-      - JELLYFIN_PublishedServerUrl=https://stream.preprod.le-frigo.fr
+      - JELLYFIN_PublishedServerUrl=https://stream.le-frigo.fr
     volumes:
       - ${APPS_DATA_DIR}/jellyfin:/config
       - ${MEDIA_DATA_DIR}/films:/films
       - ${MEDIA_DATA_DIR}/series:/series
-      - ${MEDIA_DATA_DIR}/stuck_in_yesterday:/stuck_in_yesterday
     labels:
       - traefik.enable=true
-      - traefik.http.routers.jellyfin-preprod.rule=Host(`stream.preprod.le-frigo.fr`)
-      - traefik.http.routers.jellyfin-preprod.entrypoints=websecure
-      - traefik.http.routers.jellyfin-preprod.tls.certresolver=myresolver
-      - traefik.http.services.jellyfin-preprod-svc.loadbalancer.server.port=8096
-      - traefik.http.routers.jellyfin-preprod.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware@docker
+      - traefik.http.routers.jellyfin.rule=Host(`stream.le-frigo.fr`)
+      - traefik.http.routers.jellyfin.entrypoints=websecure
+      - traefik.http.routers.jellyfin.tls.certresolver=myresolver
+      - traefik.http.services.jellyfin-svc.loadbalancer.server.port=8096
+      - traefik.http.routers.jellyfin.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
       - traefik.providers.docker.network=lefrigo-net
-      - tinyauth.apps.jellyfin-preprod.ldap.groups=user,admin
+      - tinyauth.apps.jellyfin.ldap.groups=user,admin
     networks: [lefrigo-net, data-hub-net, lldap-auth-net]
     deploy:
       resources:
