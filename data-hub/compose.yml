@@ -32,96 +32,107 @@ services:
   # ==========================================
   #  NETWORK & DOWNLOAD
   # ==========================================
-  # gluetun-preprod:
-  #   image: qmcgaw/gluetun:pr-3361
-  #   container_name: gluetun-preprod
-  #   user: 0:0
-  #   cap_add: [NET_ADMIN]
-  #   devices: [/dev/net/tun:/dev/net/tun]
-  #   environment:
-  #     - VPN_SERVICE_PROVIDER=${VPN_PROVIDER}
-  #     - VPN_TYPE=wireguard
-  #     - WIREGUARD_PRIVATE_KEY=${VPN_WG_PRIVATE_KEY}
-  #     - WIREGUARD_ADDRESSES=${VPN_WG_ADDRESS}
-  #     - SERVER_NAMES=LT#38
-  #     - OPENVPN_USER=${OPENVPN_USER}
-  #     - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
-  #     - VPN_PORT_FORWARDING=on
-  #     - VPN_PORT_FORWARDING_PROVIDER=${VPN_PROVIDER}
-  #     - FIREWALL_OUTBOUND_SUBNETS=192.168.1.0/24,172.16.0.0/12
-  #     - HEALTH_RESTART_VPN=no
-  #     - HEALTH_INITIAL_DELAY=30s
-  #     - DNS_ADDRESS=8.8.8.8
-  #     - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data
-  #       "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences
-  #       2>&1'
-  #   ports: [18080:8080, 18001:8000]
-  #   restart: always
-  #   networks: [lefrigo-net]
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '0.50'
-  #         memory: 512M
-  #       reservations:
-  #         memory: 128M
-  #   healthcheck:
-  #     test: [CMD-SHELL, wget -qO- https://google.com || exit 1]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 20s
-  # qbittorrent-preprod:
-  #   image: lscr.io/linuxserver/qbittorrent:5.2.1
-  #   container_name: qbittorrent-preprod
-  #   network_mode: service:gluetun-preprod
-  #   environment:
-  #     - PUID=${PUID}
-  #     - PGID=${PGID}
-  #     - TZ=Europe/Paris
-  #     - WEBUI_PORT=8080
-  #   volumes:
-  #     - ${APPS_DATA_DIR}/qbittorrent/config:/config
-  #     - ${MEDIA_DATA_DIR}:/data
-  #   depends_on:
-  #     gluetun-preprod:
-  #       condition: service_healthy
-  #   restart: always
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '1.00'
-  #         memory: 2G
-  #       reservations:
-  #         memory: 512M
-  #   healthcheck:
-  #     test: [CMD-SHELL, wget -q --spider http://localhost:8080/ || exit 1]
-  #     interval: 1m
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 30s
-  # qbitwebui-preprod:
-  #   image: ghcr.io/mkbula/qbitwebui:latest
-  #   container_name: qbitwebui-preprod
-  #   user: ${PUID}:${PGID}
-  #   environment:
-  #     - ENCRYPTION_KEY=${QBITWEBUI_ENCRYPTION_KEY}
-  #     - DISABLE_REGISTRATION=true
-  #     - DOWNLOADS_PATH=/downloads
-  #   volumes:
-  #     - ${APPS_DATA_DIR}/qbitwebui/data:/data
-  #     - ${MEDIA_DATA_DIR}/downloads:/downloads:ro
-  #   restart: unless-stopped
-  #   networks: [lefrigo-net]
-  #   labels:
-  #     - traefik.enable=true
-  #     - traefik.http.routers.qbitwebui-preprod.rule=Host(`torrent.preprod.le-frigo.fr`)
-  #     - traefik.http.routers.qbitwebui-preprod.service=qbitwebui-preprod-svc
-  #     - traefik.http.routers.qbitwebui-preprod.entrypoints=websecure
-  #     - traefik.http.routers.qbitwebui-preprod.tls.certresolver=myresolver
-  #     - traefik.http.services.qbitwebui-preprod-svc.loadbalancer.server.port=3000
-  #     - traefik.http.routers.qbitwebui-preprod.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware@docker
-  #     - tinyauth.apps.qbitwebui-preprod.ldap.groups=admin
+  gluetun:
+    image: qmcgaw/gluetun:pr-3361
+    container_name: gluetun
+    user: 0:0
+    cap_add: [NET_ADMIN]
+    devices: [/dev/net/tun:/dev/net/tun]
+    environment:
+      - VPN_SERVICE_PROVIDER=${VPN_PROVIDER}
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${VPN_WG_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${VPN_WG_ADDRESS}
+      - SERVER_NAMES=LT#38
+      - OPENVPN_USER=${OPENVPN_USER}
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
+      - VPN_PORT_FORWARDING=on
+      - VPN_PORT_FORWARDING_PROVIDER=${VPN_PROVIDER}
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.1.0/24,172.16.0.0/12
+      - HEALTH_RESTART_VPN=no
+      - HEALTH_INITIAL_DELAY=30s
+      - DNS_ADDRESS=8.8.8.8
+      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data
+        "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences
+        2>&1'
+    ports: [18080:8080, 18001:8000]
+    restart: always
+    networks: [lefrigo-net]
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          memory: 128M
+    healthcheck:
+      test: [CMD-SHELL, wget -qO- https://google.com || exit 1]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:5.2.1
+    container_name: qbittorrent
+    network_mode: service:gluetun
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Paris
+      - WEBUI_PORT=8080
+    volumes:
+      - ${APPS_DATA_DIR}/qbittorrent/config:/config
+      - ${MEDIA_DATA_DIR}:/data
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 2G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: [CMD-SHELL, wget -q --spider http://localhost:8080/ || exit 1]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  qbitwebui:
+    image: ghcr.io/mkbula/qbitwebui:latest
+    container_name: qbitwebui
+    user: ${PUID}:${PGID}
+    environment:
+      - ENCRYPTION_KEY=${QBITWEBUI_ENCRYPTION_KEY}
+      - DISABLE_REGISTRATION=true
+      - DOWNLOADS_PATH=/downloads
+    volumes:
+      - ${APPS_DATA_DIR}/qbitwebui/data:/data
+      - ${MEDIA_DATA_DIR}/downloads:/downloads:ro
+    restart: unless-stopped
+    networks: [lefrigo-net]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.qbitwebui.rule=Host(`torrent.le-frigo.fr`)
+      - traefik.http.routers.qbitwebui.service=qbitwebui-svc
+      - traefik.http.routers.qbitwebui.entrypoints=websecure
+      - traefik.http.routers.qbitwebui.tls.certresolver=myresolver
+      - traefik.http.services.qbitwebui-svc.loadbalancer.server.port=3000
+      - traefik.http.routers.qbitwebui.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
+      - tinyauth.apps.qbitwebui.ldap.groups=admin
+  net-agent:
+    image: ghcr.io/mkbula/qbitwebui-agent:latest
+    container_name: net-agent
+    network_mode: service:gluetun
+    environment:
+      - QBT_URL=http://localhost:8080
+    depends_on:
+      qbittorrent:
+        condition: service_healthy
+        restart: true
+    restart: unless-stopped
 
   # ==========================================
   #  AUTOMATION PIPELINE
@@ -134,7 +145,7 @@ services:
   #   ports: [19697:9696]
   #   volumes: ['${APPS_DATA_DIR}/prowlarr:/config']
   #   depends_on:
-  #     gluetun-preprod:
+  #     gluetun:
   #       condition: service_healthy
   #   restart: always
   #   deploy:
