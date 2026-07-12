@@ -1,70 +1,70 @@
 ---
 services:
-  # docker-proxy-traefik-preprod:
-  #   image: ghcr.io/tecnativa/docker-socket-proxy:latest
-  #   container_name: docker-proxy-traefik-preprod
-  #   restart: unless-stopped
-  #   environment:
-  #     - CONTAINERS=1
-  #     - NETWORKS=1
-  #     - EVENTS=1
-  #     - VERSION=1
-  #     - IMAGES=1
-  #     - INFO=1
-  #     - PING=1
-  #   volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
-  #   networks: [traefik-proxy-net]
-  #   healthcheck:
-  #     test: [CMD, nc, -z, localhost, '2375']
-  #     interval: 30s
-  #     timeout: 5s
-  #     retries: 3
-  # traefik-preprod:
-  #   image: traefik:v3.6.9
-  #   container_name: traefik-preprod
-  #   user: ${PUID}:${PGID}
-  #   restart: unless-stopped
-  #   security_opt: [no-new-privileges:true]
-  #   ports: [81:80, 444:443]
-  #   volumes:
-  #     - /etc/localtime:/etc/localtime:ro
-  #     - ${APPS_DATA_DIR}/traefik/acme.json:/acme.json
-  #   command:
-  #     - --ping=true
-  #     - --api.insecure=true
-  #     - --api.dashboard=true
-  #     - --log.level=INFO
-  #     - --providers.docker=true
-  #     - --providers.docker.exposedbydefault=false
-  #     - --providers.docker.endpoint=tcp://docker-proxy-traefik-preprod:2375
-  #     - --entrypoints.web.address=:80
-  #     - --entrypoints.websecure.address=:443
-  #     - --entrypoints.web.http.redirections.entryPoint.to=websecure
-  #     - --entrypoints.web.http.redirections.entryPoint.scheme=https
-  #     - --certificatesresolvers.myresolver.acme.httpchallenge=true
-  #     - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web
-  #     - --certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}
-  #     - --certificatesresolvers.myresolver.acme.storage=/acme.json
-  #     - --providers.docker.network=lefrigo-net
-  #   labels:
-  #     - traefik.enable=true
-  #     - traefik.http.routers.dashboard.rule=Host(`traefik.preprod.le-frigo.fr`)
-  #     - traefik.http.routers.dashboard.service=api@internal
-  #     - traefik.http.routers.dashboard.entrypoints=websecure
-  #     - traefik.http.routers.dashboard.tls.certresolver=myresolver
-  #     - traefik.http.routers.dashboard.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware
-  #   networks: [lefrigo-net, traefik-proxy-net]
-  #   depends_on:
-  #     tinyauth-preprod:
-  #       condition: service_healthy
-  #   healthcheck:
-  #     test: [CMD, traefik, healthcheck, --ping]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 3
-  postgres-server-preprod:
+  docker-proxy-traefik:
+    image: ghcr.io/tecnativa/docker-socket-proxy:latest
+    container_name: docker-proxy-traefik
+    restart: unless-stopped
+    environment:
+      - CONTAINERS=1
+      - NETWORKS=1
+      - EVENTS=1
+      - VERSION=1
+      - IMAGES=1
+      - INFO=1
+      - PING=1
+    volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
+    networks: [traefik-proxy-net]
+    healthcheck:
+      test: [CMD, nc, -z, localhost, '2375']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+  traefik:
+    image: traefik:v3.7.7
+    container_name: traefik
+    user: ${PUID}:${PGID}
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    ports: [81:80, 444:443]
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APPS_DATA_DIR}/traefik/acme.json:/acme.json
+    command:
+      - --ping=true
+      - --api.insecure=true
+      - --api.dashboard=true
+      - --log.level=INFO
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.endpoint=tcp://docker-proxy-traefik:2375
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --certificatesresolvers.myresolver.acme.httpchallenge=true
+      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.myresolver.acme.storage=/acme.json
+      - --providers.docker.network=lefrigo-net
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dashboard.rule=Host(`traefik.le-frigo.fr`)
+      - traefik.http.routers.dashboard.service=api@internal
+      - traefik.http.routers.dashboard.entrypoints=websecure
+      - traefik.http.routers.dashboard.tls.certresolver=myresolver
+      - traefik.http.routers.dashboard.middlewares=tinyauth-middleware@docker,error-pages-middleware
+    networks: [lefrigo-net, traefik-proxy-net]
+    depends_on:
+      tinyauth:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, traefik, healthcheck, --ping]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  ldap-db:
     image: postgres:16-alpine
-    container_name: postgres-server-preprod
+    container_name: ldap-db
     restart: unless-stopped
     environment:
       - POSTGRES_USER=${LDAP_POSTGRES_USER}
@@ -77,9 +77,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  lldap-preprod:
+  lldap:
     image: lldap/lldap:stable
-    container_name: lldap-preprod
+    container_name: lldap
     restart: unless-stopped
     ports: [1111:17170]
     volumes: ['${APPS_DATA_DIR}/lldap/data:/data']
@@ -89,7 +89,7 @@ services:
       - LLDAP_KEY_SEED=${LLDAP_KEY_SEED}
       - LLDAP_LDAP_BASE_DN=dc=example,dc=com
       - LLDAP_LDAP_USER_PASS=${LLDAP_ADMIN_PASSWORD}
-      - LLDAP_DATABASE_URL=postgres://${LDAP_POSTGRES_USER}:${LDAP_POSTGRES_PASSWORD}@postgres-server-preprod/lldap
+      - LLDAP_DATABASE_URL=postgres://${LDAP_POSTGRES_USER}:${LDAP_POSTGRES_PASSWORD}@ldap-db/lldap
       - LLDAP_SMTP_OPTIONS__ENABLE_PASSWORD_RESET=true
       - LLDAP_SMTP_OPTIONS__SERVER=ssl0.ovh.net
       - LLDAP_SMTP_OPTIONS__PORT=465
@@ -97,26 +97,26 @@ services:
       - LLDAP_SMTP_OPTIONS__USER=no-reply@le-frigo.fr
       - LLDAP_SMTP_OPTIONS__PASSWORD=${LLDAP_SMTP_PASSWORD}
       - LLDAP_SMTP_OPTIONS__FROM=LeFrigo <no-reply@le-frigo.fr>
-      - LLDAP_HTTP_URL=https://ldap.preprod.le-frigo.fr
+      - LLDAP_HTTP_URL=https://ldap.le-frigo.fr
     networks: [lldap-db-net, lldap-auth-net, lefrigo-net]
     depends_on:
-      postgres-server-preprod:
+      ldap-db:
         condition: service_healthy
     labels:
       - traefik.enable=true
-      - traefik.http.routers.lldap.rule=Host(`ldap.preprod.le-frigo.fr`)
+      - traefik.http.routers.lldap.rule=Host(`ldap.le-frigo.fr`)
       - traefik.http.routers.lldap.entrypoints=websecure
       - traefik.http.routers.lldap.tls=true
       - traefik.http.services.lldap.loadbalancer.server.port=17170
       - traefik.http.routers.lldap.tls.certresolver=myresolver
-      - traefik.http.routers.lldap.middlewares=error-pages-preprod-middleware@docker
-  tinyauth-preprod:
+      - traefik.http.routers.lldap.middlewares=error-pages-middleware@docker
+  tinyauth:
     image: ghcr.io/steveiliop56/tinyauth:v5
-    container_name: tinyauth-preprod
+    container_name: tinyauth
     restart: unless-stopped
     environment:
-      - TINYAUTH_APPURL=https://login.preprod.le-frigo.fr
-      - TINYAUTH_LDAP_ADDRESS=ldap://lldap-preprod:3890
+      - TINYAUTH_APPURL=https://login.le-frigo.fr
+      - TINYAUTH_LDAP_ADDRESS=ldap://lldap:3890
       - TINYAUTH_LDAP_BINDDN=uid=admin,ou=people,dc=example,dc=com
       - TINYAUTH_LDAP_BINDPASSWORD=${LLDAP_ADMIN_PASSWORD}
       - TINYAUTH_LDAP_BASEDN=dc=example,dc=com
@@ -125,19 +125,19 @@ services:
       - TINYAUTH_OAUTH_PROVIDERS_POCKETID_INSECURE=true
       - TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTID=${POCKETID_CLIENT_ID}
       - TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTSECRET=${POCKETID_CLIENT_SECRET}
-      - TINYAUTH_OAUTH_PROVIDERS_POCKETID_AUTHURL=https://pocketid.preprod.le-frigo.fr/authorize
-      - TINYAUTH_OAUTH_PROVIDERS_POCKETID_TOKENURL=http://pocketid-preprod:1411/api/oidc/token
-      - TINYAUTH_OAUTH_PROVIDERS_POCKETID_USERINFOURL=http://pocketid-preprod:1411/api/oidc/userinfo
-      - TINYAUTH_OAUTH_PROVIDERS_POCKETID_REDIRECTURL=https://login.preprod.le-frigo.fr/api/oauth/callback/pocketid
+      - TINYAUTH_OAUTH_PROVIDERS_POCKETID_AUTHURL=https://pocketid.le-frigo.fr/authorize
+      - TINYAUTH_OAUTH_PROVIDERS_POCKETID_TOKENURL=http://pocketid:1411/api/oidc/token
+      - TINYAUTH_OAUTH_PROVIDERS_POCKETID_USERINFOURL=http://pocketid:1411/api/oidc/userinfo
+      - TINYAUTH_OAUTH_PROVIDERS_POCKETID_REDIRECTURL=https://login.le-frigo.fr/api/oauth/callback/pocketid
       - TINYAUTH_OAUTH_PROVIDERS_POCKETID_SCOPES=openid email profile groups
       - TINYAUTH_OAUTH_PROVIDERS_POCKETID_NAME=Pocket ID
       - TINYAUTH_OIDC_CLIENTS_HOMARR_CLIENTID=${TINYAUTH_OIDC_CLIENTS_HOMARR_CLIENTID}
       - TINYAUTH_OIDC_CLIENTS_HOMARR_CLIENTSECRET=${TINYAUTH_OIDC_CLIENTS_HOMARR_CLIENTSECRET}
-      - TINYAUTH_OIDC_CLIENTS_HOMARR_TRUSTEDREDIRECTURIS=https://home.preprod.le-frigo.fr/api/auth/callback/oidc
+      - TINYAUTH_OIDC_CLIENTS_HOMARR_TRUSTEDREDIRECTURIS=https://home.le-frigo.fr/api/auth/callback/oidc
       - TINYAUTH_OIDC_CLIENTS_HOMARR_NAME=Homarr
       - TINYAUTH_OIDC_CLIENTS_JELLYSEERR_CLIENTID=${TINYAUTH_OIDC_CLIENTS_JELLYSEERR_CLIENTID}
       - TINYAUTH_OIDC_CLIENTS_JELLYSEERR_CLIENTSECRET=${TINYAUTH_OIDC_CLIENTS_JELLYSEERR_CLIENTSECRET}
-      - TINYAUTH_OIDC_CLIENTS_JELLYSEERR_TRUSTEDREDIRECTURIS=https://jellyseerr-test.preprod.le-frigo.fr/login
+      - TINYAUTH_OIDC_CLIENTS_JELLYSEERR_TRUSTEDREDIRECTURIS=https://jellyseerr.le-frigo.fr/login
       - TINYAUTH_OIDC_CLIENTS_JELLYSEERR_NAME=Jellyseerr
       - TINYAUTH_OIDC_CLIENTS_JELLYFIN_CLIENTID=${TINYAUTH_OIDC_CLIENTS_JELLYFIN_CLIENTID}
       - TINYAUTH_OIDC_CLIENTS_JELLYFIN_CLIENTSECRET=${TINYAUTH_OIDC_CLIENTS_JELLYFIN_CLIENTSECRET}
@@ -146,17 +146,17 @@ services:
       - TINYAUTH_LDAP_GROUPCACHETTL=0
     labels:
       - traefik.enable=true
-      - traefik.http.routers.tinyauth.rule=Host(`login.preprod.le-frigo.fr`)
+      - traefik.http.routers.tinyauth.rule=Host(`login.le-frigo.fr`)
       - traefik.http.routers.tinyauth.entrypoints=websecure
       - traefik.http.routers.tinyauth.tls=true
       - traefik.http.services.tinyauth.loadbalancer.server.port=3000
-      - traefik.http.middlewares.tinyauth-preprod-middleware.forwardauth.address=http://tinyauth-preprod:3000/api/auth/traefik
+      - traefik.http.middlewares.tinyauth-middleware.forwardauth.address=http://tinyauth:3000/api/auth/traefik
       - traefik.http.routers.tinyauth.tls.certresolver=myresolver
-      - traefik.http.routers.tinyauth.middlewares=error-pages-preprod-middleware@docker
+      - traefik.http.routers.tinyauth.middlewares=error-pages-middleware@docker
     depends_on:
-      lldap-preprod:
+      lldap:
         condition: service_healthy
-      error-pages-preprod:
+      error-pages:
         condition: service_started
     networks: [lefrigo-net, lldap-auth-net]
     healthcheck:
@@ -166,9 +166,9 @@ services:
       interval: 15s
       timeout: 5s
       retries: 3
-  pocketid-preprod:
+  pocketid:
     image: ghcr.io/pocket-id/pocket-id:v2
-    container_name: pocketid-preprod
+    container_name: pocketid
     restart: unless-stopped
     volumes: ['${APPS_DATA_DIR}/pocketid:/app/data']
     environment:
@@ -183,18 +183,18 @@ services:
       - traefik.http.routers.pocketid.entrypoints=websecure
       - traefik.http.routers.pocketid.tls.certresolver=myresolver
       - traefik.http.services.pocketid.loadbalancer.server.port=1411
-      - traefik.http.routers.pocketid.middlewares=error-pages-preprod-middleware@docker
+      - traefik.http.routers.pocketid.middlewares=error-pages-middleware@docker
     healthcheck:
       test: [CMD, /app/pocket-id, healthcheck]
       interval: 30s
       timeout: 5s
       retries: 2
     depends_on:
-      tinyauth-preprod:
+      tinyauth:
         condition: service_healthy
     networks: [lefrigo-net]
-  error-pages-preprod:
-    container_name: error-pages-preprod
+  error-pages:
+    container_name: error-pages
     image: ghcr.io/tarampampam/error-pages:4
     environment:
       TEMPLATE_NAME: orient
@@ -203,13 +203,13 @@ services:
       - traefik.http.routers.error-pages-router.rule=HostRegexp(`.+`)
       - traefik.http.routers.error-pages-router.priority=10
       - traefik.http.routers.error-pages-router.entrypoints=websecure
-      - traefik.http.middlewares.error-pages-preprod-middleware.errors.status=400-599
-      - traefik.http.middlewares.error-pages-preprod-middleware.errors.service=error-pages-service
-      - traefik.http.middlewares.error-pages-preprod-middleware.errors.query=/{status}
+      - traefik.http.middlewares.error-pages-middleware.errors.status=400-599
+      - traefik.http.middlewares.error-pages-middleware.errors.service=error-pages-service
+      - traefik.http.middlewares.error-pages-middleware.errors.query=/{status}
       - traefik.http.services.error-pages-service.loadbalancer.server.port=8080
     networks: [lefrigo-net]
   homarr:
-    container_name: homarr-preprod
+    container_name: homarr
     image: ghcr.io/homarr-labs/homarr:latest
     restart: unless-stopped
     volumes: ['${APPS_DATA_DIR}/homarr:/appdata', '/var/run/docker.sock:/var/run/docker.sock']
@@ -217,7 +217,7 @@ services:
       - SECRET_ENCRYPTION_KEY=${HOMARR_SECRET_ENCRYPTION_KEY}
       - AUTH_PROVIDERS=oidc
       #- AUTH_SESSION_EXPIRY_TIME=5m
-      - AUTH_OIDC_ISSUER=https://login.preprod.le-frigo.fr
+      - AUTH_OIDC_ISSUER=https://login.le-frigo.fr
       - AUTH_OIDC_CLIENT_ID=${TINYAUTH_OIDC_CLIENTS_HOMARR_CLIENTID}
       - AUTH_OIDC_CLIENT_SECRET=${TINYAUTH_OIDC_CLIENTS_HOMARR_CLIENTSECRET}
       - AUTH_OIDC_CLIENT_NAME=LeFrigo Connect
@@ -228,15 +228,15 @@ services:
     ports: [7575:7575]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.homarr.rule=Host(`home.preprod.le-frigo.fr`)
+      - traefik.http.routers.homarr.rule=Host(`home.le-frigo.fr`)
       - traefik.http.routers.homarr.entrypoints=websecure
       - traefik.http.routers.homarr.tls=true
       - traefik.http.services.homarr.loadbalancer.server.port=3000
-      - traefik.http.routers.homarr.middlewares=tinyauth-preprod-middleware@docker
+      - traefik.http.routers.homarr.middlewares=tinyauth-middleware@docker
       - traefik.http.routers.homarr.tls.certresolver=myresolver
     networks: [lefrigo-net]
     depends_on:
-      tinyauth-preprod:
+      tinyauth:
         condition: service_healthy
 networks:
   traefik-proxy-net:
