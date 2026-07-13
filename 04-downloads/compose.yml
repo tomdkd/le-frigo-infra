@@ -228,7 +228,7 @@ services:
         condition: service_healthy
   # --- METUBE ---
   metube:
-    image: alexta69/metube:2026.06.20
+    image: alexta69/metube:2026.07.13
     user: ${PUID}:${PGID}
     container_name: metube
     restart: unless-stopped
