@@ -130,101 +130,98 @@ services:
       - traefik.http.routers.code-server.entrypoints=websecure
       - traefik.http.routers.code-server.tls.certresolver=myresolver
       - traefik.http.services.code-server.loadbalancer.server.port=8443
-      - traefik.http.routers.code-server.middlewares=tinyauth-middleware@docker
+      - traefik.http.routers.code-server.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
       - tinyauth.apps.code-server.ldap.groups=admin
-      - traefik.http.routers.code-server.middlewares=error-pages-middleware@docker
-  # # --- PICARD ---
-  # picard:
-  #   image: jlesage/musicbrainz-picard:v26.05.2
-  #   container_name: picard
-  #   ports: [5800:5800]
-  #   environment: ['USER_ID=${PUID}', 'GROUP_ID=${PGID}']
-  #   volumes: ['${MEDIA_DATA_DIR}/musique:/storage:rw']
-  #   networks: [lefrigo-net]
-  #   labels:
-  #     - traefik.enable=false
-  #     - traefik.http.routers.picard.rule=Host(`picard.le-frigo.fr`)
-  #     - traefik.http.routers.picard.service=picard
-  #     - traefik.http.routers.picard.entrypoints=websecure
-  #     - traefik.http.routers.picard.tls.certresolver=myresolver
-  #     - traefik.http.services.picard.loadbalancer.server.port=5800
-  #     - traefik.http.routers.picard.middlewares=authentik@docker
-  #     - tinyauth.apps.picard.ldap.groups=admin
-  #     - traefik.http.routers.picard.middlewares=error-pages-middleware@docker
-  #   healthcheck:
-  #     test: [CMD-SHELL, nc -z localhost 5800]
-  #     interval: 30s
-  #     timeout: 5s
-  #     retries: 3
-  #     start_period: 15s
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '2.0'
-  #         memory: 2048M
-  #       reservations:
-  #         memory: 512M
-  # # --- N8N ---
-  # n8n:
-  #   image: docker.n8n.io/n8nio/n8n:2.25.6-a37ba24
-  #   container_name: n8n
-  #   restart: unless-stopped
-  #   user: ${PUID}:${PGID}
-  #   environment:
-  #     - N8N_HOST=n8n.le-frigo.fr
-  #     - N8N_PORT=5678
-  #     - N8N_PROTOCOL=https
-  #     - NODE_ENV=production
-  #     - WEBHOOK_URL=https://n8n.le-frigo.fr/
-  #     - GENERIC_TIMEZONE=Europe/Paris
-  #     - N8N_USER_FOLDER=/home/node/.n8n
-  #     - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
-  #     - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
-  #     - NPM_CONFIG_CACHE=/home/node/.n8n/.npm
-  #   volumes:
-  #     - ${APPS_DATA_DIR}/n8n:/home/node/.n8n
-  #     - ${MEDIA_DATA_DIR}:/lefrigo_data
-  #   networks: [lefrigo-net, n8n-net]
-  #   labels:
-  #     - traefik.enable=true
-  #     - traefik.http.services.n8n-svc.loadbalancer.server.port=5678
-  #     - traefik.http.routers.n8n.rule=Host(`n8n.le-frigo.fr`)
-  #     - traefik.http.routers.n8n.entrypoints=websecure
-  #     - traefik.http.routers.n8n.tls.certresolver=myresolver
-  #     - traefik.http.routers.n8n.middlewares=authentik@docker
-  #     - traefik.http.routers.n8n.service=n8n-svc
-  #     - traefik.http.routers.n8n.priority=1
-  #     - traefik.http.routers.n8n-webhooks.rule=Host(`n8n.le-frigo.fr`) && (PathPrefix(`/webhook`)
-  #       || PathPrefix(`/webhook-test`))
-  #     - traefik.http.routers.n8n-webhooks.entrypoints=websecure
-  #     - traefik.http.routers.n8n-webhooks.tls.certresolver=myresolver
-  #     - traefik.http.routers.n8n-webhooks.service=n8n-svc
-  #     - traefik.http.routers.n8n-webhooks.priority=2
-  #     - tinyauth.apps.n8n.ldap.groups=admin
-  #     - traefik.http.routers.n8n.middlewares=error-pages-middleware@docker
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '0.75'
-  #         memory: 1G
-  #       reservations:
-  #         memory: 256M
-  # # Docker socket proxy for n8n to access docker API
-  # tools-docker-proxy:
-  #   container_name: tools-docker-proxy
-  #   environment: [CONTAINERS=1, GET=1, LOGS=1]
-  #   image: tecnativa/docker-socket-proxy:v0.4.2
-  #   networks: [lefrigo-net]
-  #   privileged: true
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  # # --- OLLAMA ---
-  # ollama:
-  #   image: ollama/ollama:0.30.7
-  #   container_name: ollama
-  #   restart: unless-stopped
-  #   volumes: ['${APPS_DATA_DIR}/ollama/data:/root/.ollama']
-  #   networks: [n8n-net]
+  # --- PICARD ---
+  picard:
+    image: jlesage/musicbrainz-picard:v26.05.2
+    container_name: picard
+    ports: [5800:5800]
+    environment: ['USER_ID=${PUID}', 'GROUP_ID=${PGID}']
+    volumes: ['${MEDIA_DATA_DIR}/musique:/storage:rw']
+    networks: [lefrigo-net]
+    labels:
+      - traefik.enable=false
+      - traefik.http.routers.picard.rule=Host(`picard.le-frigo.fr`)
+      - traefik.http.routers.picard.service=picard
+      - traefik.http.routers.picard.entrypoints=websecure
+      - traefik.http.routers.picard.tls.certresolver=myresolver
+      - traefik.http.services.picard.loadbalancer.server.port=5800
+      - traefik.http.routers.picard.middlewares=tinyauth-middleware@docker
+      - tinyauth.apps.picard.ldap.groups=admin
+    healthcheck:
+      test: [CMD-SHELL, nc -z localhost 5800]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
+        reservations:
+          memory: 512M
+  # --- N8N ---
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:2.25.6-a37ba24
+    container_name: n8n
+    restart: unless-stopped
+    user: ${PUID}:${PGID}
+    environment:
+      - N8N_HOST=n8n.le-frigo.fr
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - NODE_ENV=production
+      - WEBHOOK_URL=https://n8n.le-frigo.fr/
+      - GENERIC_TIMEZONE=Europe/Paris
+      - N8N_USER_FOLDER=/home/node/.n8n
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - NPM_CONFIG_CACHE=/home/node/.n8n/.npm
+    volumes:
+      - ${APPS_DATA_DIR}/n8n:/home/node/.n8n
+      - ${MEDIA_DATA_DIR}:/lefrigo_data
+    networks: [lefrigo-net, n8n-net]
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.n8n-svc.loadbalancer.server.port=5678
+      - traefik.http.routers.n8n.rule=Host(`n8n.le-frigo.fr`)
+      - traefik.http.routers.n8n.entrypoints=websecure
+      - traefik.http.routers.n8n.tls.certresolver=myresolver
+      - traefik.http.routers.n8n.middlewares=tinyauth-middleware@docker
+      - traefik.http.routers.n8n.service=n8n-svc
+      - traefik.http.routers.n8n.priority=1
+
+      - traefik.http.routers.n8n-webhooks.rule=Host(`n8n.le-frigo.fr`) && (PathPrefix(`/webhook`) || PathPrefix(`/webhook-test`))
+      - traefik.http.routers.n8n-webhooks.entrypoints=websecure
+      - traefik.http.routers.n8n-webhooks.tls.certresolver=myresolver
+      - traefik.http.routers.n8n-webhooks.service=n8n-svc
+      - traefik.http.routers.n8n-webhooks.priority=2
+      - tinyauth.apps.n8n.ldap.groups=admin
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 1G
+        reservations:
+          memory: 256M
+  # Docker socket proxy for n8n to access docker API
+  tools-docker-proxy:
+    container_name: tools-docker-proxy
+    environment: [CONTAINERS=1, GET=1, LOGS=1]
+    image: tecnativa/docker-socket-proxy:v0.4.2
+    networks: [lefrigo-net]
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+  # --- OLLAMA ---
+  ollama:
+    image: ollama/ollama:0.30.7
+    container_name: ollama
+    restart: unless-stopped
+    volumes: ['${APPS_DATA_DIR}/ollama/data:/root/.ollama']
+    networks: [n8n-net]
 networks:
   lefrigo-net:
     external: true
