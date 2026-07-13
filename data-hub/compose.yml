@@ -291,6 +291,7 @@ services:
       - ${APPS_DATA_DIR}/jellyfin:/config
       - ${MEDIA_DATA_DIR}/films:/films
       - ${MEDIA_DATA_DIR}/series:/series
+      - ${MEDIA_DATA_DIR}/musique:/musiques
     labels:
       - traefik.enable=true
       - traefik.http.routers.jellyfin.rule=Host(`stream.le-frigo.fr`)
