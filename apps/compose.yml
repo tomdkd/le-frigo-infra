@@ -243,6 +243,17 @@ services:
       - traefik.http.routers.leafwiki.middlewares=tinyauth-middleware@docker
       - tinyauth.apps.leafwiki.ldap.groups=admin,user
     networks: [lefrigo-net]
+  gotify:
+    image: gotify/server:2.9.1
+    container_name: gotify
+    restart: unless-stopped
+    ports:
+      - "6756:80"
+    environment:
+      - TZ=Europe/Paris
+    volumes:
+      - gotify_data:/app/data
+    networks: [lefrigo-net]
 networks:
   lefrigo-net:
     external: true
@@ -252,3 +263,5 @@ networks:
     name: n8n-net
   tools-docker-proxy:
     name: tools-docker-proxy
+volumes:
+  gotify_data:
