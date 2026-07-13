@@ -88,7 +88,7 @@ services:
   # --- DATABASUS ---
   databasus:
     container_name: databasus
-    image: databasus/databasus:v3.47.0
+    image: databasus/databasus:v3.48.0
     ports: [4005:4005]
     volumes: ['${APPS_DATA_DIR}/databasus/data:/databasus-data']
     restart: unless-stopped
