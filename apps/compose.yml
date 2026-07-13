@@ -84,30 +84,55 @@ services:
   #     - traefik.http.routers.mealie.priority=1
   #     - traefik.http.routers.mealie.middlewares=error-pages-middleware@docker
   # # --- FILEBROWSER ---
-  # filebrowser:
-  #   image: filebrowser/filebrowser:v2.63.14-s6
-  #   container_name: filebrowser
-  #   ports: [6789:80]
-  #   volumes: ['${MEDIA_DATA_DIR}:/srv']
-  #   tmpfs: [/config, /database]
-  #   environment:
-  #     - TZ=Europe/Paris
-  #     - PUID=${PUID}
-  #     - PGID=${PGID}
-  #     - FB_DATABASE=/database/filebrowser.db
-  #     - FB_NOAUTH=true
-  #   restart: unless-stopped
-  #   networks: [lefrigo-net]
-  #   labels:
-  #     - traefik.enable=true
-  #     - traefik.http.routers.filebrowser.rule=Host(`file.le-frigo.fr`)
-  #     - traefik.http.routers.filebrowser.service=filebrowser
-  #     - traefik.http.routers.filebrowser.entrypoints=websecure
-  #     - traefik.http.routers.filebrowser.tls.certresolver=myresolver
-  #     - traefik.http.services.filebrowser.loadbalancer.server.port=80
-  #     - traefik.http.routers.filebrowser.middlewares=authentik@docker
-  #     - tinyauth.apps.filebrowser.ldap.groups=admin
-  #     - traefik.http.routers.filebrowser.middlewares=error-pages-middleware@docker
+  filebrowser:
+    image: filebrowser/filebrowser:v2.63.14-s6
+    container_name: filebrowser
+    ports: [6789:80]
+    volumes: ['${MEDIA_DATA_DIR}:/srv']
+    tmpfs: [/config, /database]
+    environment:
+      - TZ=Europe/Paris
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - FB_DATABASE=/database/filebrowser.db
+      - FB_NOAUTH=true
+    restart: unless-stopped
+    networks: [lefrigo-net]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.filebrowser.rule=Host(`file.le-frigo.fr`)
+      - traefik.http.routers.filebrowser.service=filebrowser
+      - traefik.http.routers.filebrowser.entrypoints=websecure
+      - traefik.http.routers.filebrowser.tls.certresolver=myresolver
+      - traefik.http.services.filebrowser.loadbalancer.server.port=80
+      - traefik.http.routers.filebrowser.middlewares=tinyauth-middleware@docker
+      - tinyauth.apps.filebrowser.ldap.groups=admin
+      - traefik.http.routers.filebrowser.middlewares=error-pages-middleware@docker
+  code-server:
+    image: lscr.io/linuxserver/code-server:latest
+    container_name: code-server
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Paris
+      - DEFAULT_WORKSPACE=/config/workspace
+      - PWA_APPNAME=code-server
+    volumes:
+      - ${APPS_DATA_DIR}/code-server:/config
+      - ${APPS_DATA_DIR}:/config/workspace/configurations
+    ports:
+      - 8443:8443
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.code-server.rule=Host(`code.le-frigo.fr`)
+      - traefik.http.routers.code-server.service=code-server
+      - traefik.http.routers.code-server.entrypoints=websecure
+      - traefik.http.routers.code-server.tls.certresolver=myresolver
+      - traefik.http.services.code-server.loadbalancer.server.port=8443
+      - traefik.http.routers.code-server.middlewares=tinyauth-middleware@docker
+      - tinyauth.apps.code-server.ldap.groups=admin
+      - traefik.http.routers.code-server.middlewares=error-pages-middleware@docker
   # # --- PICARD ---
   # picard:
   #   image: jlesage/musicbrainz-picard:v26.05.2
