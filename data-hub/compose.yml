@@ -126,8 +126,7 @@ services:
     image: ghcr.io/mkbula/qbitwebui-agent:latest
     container_name: net-agent
     network_mode: service:gluetun
-    environment:
-      - QBT_URL=http://localhost:8080
+    environment: [QBT_URL=http://localhost:8080]
     depends_on:
       qbittorrent:
         condition: service_healthy

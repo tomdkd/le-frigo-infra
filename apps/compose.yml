@@ -83,7 +83,7 @@ services:
   #     - traefik.http.services.mealie.loadbalancer.server.port=9000
   #     - traefik.http.routers.mealie.priority=1
   #     - traefik.http.routers.mealie.middlewares=error-pages-middleware@docker
-  # # --- FILEBROWSER ---
+  #  # --- FILEBROWSER ---
   filebrowser:
     image: filebrowser/filebrowser:v2.63.14-s6
     container_name: filebrowser
@@ -120,8 +120,7 @@ services:
     volumes:
       - ${APPS_DATA_DIR}/code-server:/config
       - ${APPS_DATA_DIR}:/config/workspace/configurations
-    ports:
-      - 8443:8443
+    ports: [8443:8443]
     restart: unless-stopped
     labels:
       - traefik.enable=true
@@ -192,8 +191,8 @@ services:
       - traefik.http.routers.n8n.middlewares=tinyauth-middleware@docker
       - traefik.http.routers.n8n.service=n8n-svc
       - traefik.http.routers.n8n.priority=1
-
-      - traefik.http.routers.n8n-webhooks.rule=Host(`n8n.le-frigo.fr`) && (PathPrefix(`/webhook`) || PathPrefix(`/webhook-test`))
+      - traefik.http.routers.n8n-webhooks.rule=Host(`n8n.le-frigo.fr`) && (PathPrefix(`/webhook`)
+        || PathPrefix(`/webhook-test`))
       - traefik.http.routers.n8n-webhooks.entrypoints=websecure
       - traefik.http.routers.n8n-webhooks.tls.certresolver=myresolver
       - traefik.http.routers.n8n-webhooks.service=n8n-svc

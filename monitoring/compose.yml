@@ -6,16 +6,16 @@ services:
     restart: unless-stopped
     ports: [8978:8978]
     volumes: ['${APPS_DATA_DIR}/cloudbeaver:/opt/cloudbeaver/workspace']
-    networks: [lefrigo-net]
+    networks: [lefrigo-net, jellystat-net]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.cloudbeaver.rule=Host(`dbeaver.preprod.le-frigo.fr`)
+      - traefik.http.routers.cloudbeaver.rule=Host(`dbeaver.le-frigo.fr`)
       - traefik.http.routers.cloudbeaver.entrypoints=websecure
       - traefik.http.routers.cloudbeaver.tls=true
       - traefik.http.routers.cloudbeaver.tls.certresolver=myresolver
       - traefik.http.routers.cloudbeaver.service=cloudbeaver-svc
       - traefik.http.services.cloudbeaver-svc.loadbalancer.server.port=8978
-      - traefik.http.routers.cloudbeaver.middlewares=tinyauth@docker,error-pages-middleware@docker
+      - traefik.http.routers.cloudbeaver.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
       - tinyauth.apps.cloudbeaver.ldap.groups=admin
     deploy:
       resources:
@@ -30,6 +30,66 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+  jellystat-db:
+    image: postgres:18.1
+    shm_size: 1gb
+    container_name: jellystat-db
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-file: '5'
+        max-size: 10m
+    environment:
+      POSTGRES_USER: ${JELLYSTAT_DB_USER}
+      POSTGRES_PASSWORD: ${JELLYSTAT_DB_PASSWORD}
+    volumes: ['${APPS_DATA_DIR}/jellystat-db:/var/lib/postgresql']
+    healthcheck:
+      test: [CMD-SHELL, pg_isready --dbname=postgres --username=postgres]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [jellystat-net]
+  jellystat:
+    image: cyfershepard/jellystat:latest
+    container_name: jellystat
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-file: '5'
+        max-size: 10m
+    environment:
+      POSTGRES_USER: ${JELLYSTAT_DB_USER}
+      POSTGRES_PASSWORD: ${JELLYSTAT_DB_PASSWORD}
+      POSTGRES_IP: jellystat-db
+      POSTGRES_PORT: 5432
+      JWT_SECRET: ${JELLYSTAT_JWT_SECRET}
+      TZ: Europe/Paris
+    volumes: ['${APPS_DATA_DIR}/jellystat:/app/backend/backup-data']
+    ports: [3435:3000]
+    networks: [lefrigo-net, jellystat-net]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jellystat.rule=Host(`jellystat.le-frigo.fr`)
+      - traefik.http.routers.jellystat.entrypoints=websecure
+      - traefik.http.routers.jellystat.tls=true
+      - traefik.http.routers.jellystat.tls.certresolver=myresolver
+      - traefik.http.routers.jellystat.service=jellystat-svc
+      - traefik.http.services.jellystat-svc.loadbalancer.server.port=3000
+      - traefik.http.routers.jellystat.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
+      - tinyauth.apps.jellystat.ldap.groups=admin
+    depends_on:
+      jellystat-db:
+        condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000/auth/isConfigured
+        || exit 1
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
 networks:
   lefrigo-net:
     external: true
+  jellystat-net:
