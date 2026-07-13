@@ -221,6 +221,27 @@ services:
     restart: unless-stopped
     volumes: ['${APPS_DATA_DIR}/ollama/data:/root/.ollama']
     networks: [n8n-net]
+  leafwiki:
+    image: ghcr.io/perber/leafwiki:v0.11.4
+    container_name: leafwiki
+    ports:
+      - "7298:8080"
+    environment:
+      - LEAFWIKI_JWT_SECRET=${LEAFWIKI_JWT_SECRET}
+      - LEAFWIKI_ADMIN_PASSWORD=${LEAFWIKI_ADMIN_PASSWORD}
+    volumes:
+      - ${APPS_DATA_DIR}/leafwiki:/app/data
+    restart: unless-stopped
+    labels:
+      - traefik.enable=false
+      - traefik.http.routers.leafwiki.rule=Host(`doc.le-frigo.fr`)
+      - traefik.http.routers.leafwiki.service=leafwiki
+      - traefik.http.routers.leafwiki.entrypoints=websecure
+      - traefik.http.routers.leafwiki.tls.certresolver=myresolver
+      - traefik.http.services.leafwiki.loadbalancer.server.port=8080
+      - traefik.http.routers.leafwiki.middlewares=tinyauth-middleware@docker
+      - tinyauth.apps.leafwiki.ldap.groups=admin,user
+    networks: [lefrigo-net]
 networks:
   lefrigo-net:
     external: true
