@@ -88,7 +88,7 @@ services:
     image: filebrowser/filebrowser:v2.63.14-s6
     container_name: filebrowser
     ports: [6789:80]
-    volumes: ['${MEDIA_DATA_DIR}:/srv']
+    volumes: ['${MEDIA_DATA_DIR}:/srv/data', '${APPS_DATA_DIR}:/srv/config']
     tmpfs: [/config, /database]
     environment:
       - TZ=Europe/Paris
