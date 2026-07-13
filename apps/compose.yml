@@ -229,11 +229,12 @@ services:
     environment:
       - LEAFWIKI_JWT_SECRET=${LEAFWIKI_JWT_SECRET}
       - LEAFWIKI_ADMIN_PASSWORD=${LEAFWIKI_ADMIN_PASSWORD}
+      - LEAFWIKI_PUBLIC_ACCESS=true
     volumes:
       - ${APPS_DATA_DIR}/leafwiki:/app/data
     restart: unless-stopped
     labels:
-      - traefik.enable=false
+      - traefik.enable=true
       - traefik.http.routers.leafwiki.rule=Host(`doc.le-frigo.fr`)
       - traefik.http.routers.leafwiki.service=leafwiki
       - traefik.http.routers.leafwiki.entrypoints=websecure
