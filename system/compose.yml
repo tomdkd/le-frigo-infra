@@ -201,7 +201,7 @@ services:
     depends_on:
       tinyauth:
         condition: service_healthy
-    networks: [lefrigo-net]
+    networks: [lefrigo-net,lldap-auth-net]
   error-pages:
     container_name: error-pages
     image: ghcr.io/tarampampam/error-pages:4
