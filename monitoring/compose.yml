@@ -152,7 +152,7 @@ services:
       - DOZZLE_ENABLE_ACTIONS=true
       - DOZZLE_ENABLE_SHELL=true
       - DOZZLE_HOSTNAME=le-frigo.fr
-      - DOZZLE_REMOTE_AGENT=agent:7007
+      - DOZZLE_REMOTE_AGENT=dozzle-agent:7007
     labels:
       - traefik.enable=true
       - traefik.http.routers.dozzle.rule=Host(`dozzle.le-frigo.fr`)
