@@ -187,6 +187,8 @@ services:
         - ${APPS_DATA_DIR}/borg/cache:/home/borg/.cache/borg
         - /etc/localtime:/etc/localtime:ro
         - /home/truenas_admin:/local:rw
+        - ${APPS_DATA_DIR}:/containers
+        - ${MEDIA_DATA_DIR}:/media
       environment:
         - PORT=${PORT:-8081}
         - PUID=${PUID:-1001}
