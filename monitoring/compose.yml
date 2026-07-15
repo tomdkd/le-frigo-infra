@@ -89,6 +89,26 @@ services:
       timeout: 30s
       retries: 5
       start_period: 30s
+  beszel:
+    image: henrygd/beszel
+    container_name: beszel
+    restart: unless-stopped
+    environment:
+      - APP_URL=https://monitoring.le-frigo.fr
+    ports:
+      - 8090:8090
+    volumes:
+      - ${APPS_DATA_DIR}/beszel/hub:/beszel_data
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.beszel.rule=Host(`monitoring.le-frigo.fr`)
+      - traefik.http.routers.beszel.entrypoints=websecure
+      - traefik.http.routers.beszel.tls=true
+      - traefik.http.routers.beszel.tls.certresolver=myresolver
+      - traefik.http.routers.beszel.service=beszel-svc
+      - traefik.http.services.beszel-svc.loadbalancer.server.port=8090
+      - traefik.http.routers.beszel.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
+      - tinyauth.apps.beszel.ldap.groups=admin
 networks:
   lefrigo-net:
     external: true
