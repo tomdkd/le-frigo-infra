@@ -132,16 +132,12 @@ services:
       - ${APPS_DATA_DIR}/beszel/agent:/var/lib/beszel-agent
       - /mnt/LeFrigo-Tank:/extra-filesystems/Stockage:ro
       - /mnt/ssd-apps:/extra-filesystems/Apps:ro
-
-      - /mnt/ssd-apps:/extra-filesystems/nvme0n1:ro
-      - /mnt/LeFrigo-Tank:/extra-filesystems/sda:ro
-      - /mnt/LeFrigo-Tank:/extra-filesystems/sdb:ro
-      - /mnt/LeFrigo-Tank:/extra-filesystems/sdc:ro
     environment:
       LISTEN: 45876
       KEY: ${BESZEL_AGENT_KEY}
       TOKEN: ${BESZEL_AGENT_TOKEN}
       HUB_URL: https://monitoring.le-frigo.fr
+      FILESYSTEM: /dev/nvme0n1
 networks:
   lefrigo-net:
     external: true
