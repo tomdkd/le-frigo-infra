@@ -138,6 +138,8 @@ services:
       TOKEN: ${BESZEL_AGENT_TOKEN}
       HUB_URL: https://monitoring.le-frigo.fr
       FILESYSTEM: /dev/nvme0n1
+      STOCKAGE_DISK: /dev/sda
+      APPS_DISK: /dev/nvme0n1
 networks:
   lefrigo-net:
     external: true
