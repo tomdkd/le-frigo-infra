@@ -108,6 +108,7 @@ services:
       - traefik.http.routers.beszel.service=beszel-svc
       - traefik.http.services.beszel-svc.loadbalancer.server.port=8090
       - traefik.http.routers.beszel.middlewares=error-pages-middleware@docker
+    networks: [lefrigo-net]
     healthcheck:
       test: ['CMD', '/beszel', 'health', '--url', 'http://localhost:8090']
       interval: 120s
