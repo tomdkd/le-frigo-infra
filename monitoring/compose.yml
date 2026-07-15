@@ -107,7 +107,8 @@ services:
       - traefik.http.routers.beszel.tls.certresolver=myresolver
       - traefik.http.routers.beszel.service=beszel-svc
       - traefik.http.services.beszel-svc.loadbalancer.server.port=8090
-      - traefik.http.routers.beszel.middlewares=error-pages-middleware@docker
+      - traefik.http.routers.beszel.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
+      - tinyauth.apps.beszel.ldap.groups=admin
     networks: [lefrigo-net]
     healthcheck:
       test: ['CMD', '/beszel', 'health', '--url', 'http://localhost:8090']
@@ -141,6 +142,43 @@ services:
     healthcheck:
       test: ['CMD', '/agent', 'health']
       interval: 120s
+  dozzle:
+    image: amir20/dozzle:latest
+    volumes:
+      - dozzle_data:/data
+    ports:
+      - 8080:8080
+    environment:
+      - DOZZLE_ENABLE_ACTIONS=true
+      - DOZZLE_ENABLE_SHELL=true
+      - DOZZLE_HOSTNAME=le-frigo.fr
+      - DOZZLE_REMOTE_AGENT=agent:7007
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dozzle.rule=Host(`containers.le-frigo.fr`)
+      - traefik.http.routers.dozzle.entrypoints=websecure
+      - traefik.http.routers.dozzle.tls=true
+      - traefik.http.routers.dozzle.tls.certresolver=myresolver
+      - traefik.http.routers.dozzle.service=dozzle-svc
+      - traefik.http.services.dozzle-svc.loadbalancer.server.port=8080
+      - traefik.http.routers.dozzle.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
+      - tinyauth.apps.dozzle.ldap.groups=admin
+    healthcheck:
+      test: ["CMD", "/dozzle", "healthcheck"]
+      interval: 3s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    networks: [lefrigo-net]
+  dozzle-agent:
+    image: amir20/dozzle:latest
+    command: agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 7007:7007
+volumes:
+  dozzle_data:
 networks:
   lefrigo-net:
     external: true
