@@ -107,8 +107,7 @@ services:
       - traefik.http.routers.beszel.tls.certresolver=myresolver
       - traefik.http.routers.beszel.service=beszel-svc
       - traefik.http.services.beszel-svc.loadbalancer.server.port=8090
-      - traefik.http.routers.beszel.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
-      - tinyauth.apps.beszel.ldap.groups=admin
+      - traefik.http.routers.beszel.middlewares=error-pages-middleware@docker
     healthcheck:
       test: ['CMD', '/beszel', 'health', '--url', 'http://localhost:8090']
       interval: 120s
