@@ -155,7 +155,7 @@ services:
       - DOZZLE_REMOTE_AGENT=agent:7007
     labels:
       - traefik.enable=true
-      - traefik.http.routers.dozzle.rule=Host(`containers.le-frigo.fr`)
+      - traefik.http.routers.dozzle.rule=Host(`dozzle.le-frigo.fr`)
       - traefik.http.routers.dozzle.entrypoints=websecure
       - traefik.http.routers.dozzle.tls=true
       - traefik.http.routers.dozzle.tls.certresolver=myresolver
@@ -177,6 +177,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - 7007:7007
+    networks: [lefrigo-net]
 volumes:
   dozzle_data:
 networks:
