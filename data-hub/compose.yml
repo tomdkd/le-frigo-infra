@@ -111,8 +111,9 @@ services:
     volumes:
       - ${APPS_DATA_DIR}/qbitwebui/data:/data
       - ${MEDIA_DATA_DIR}/downloads:/downloads:ro
-      - qbitwebui-crosseed:/app/data
     restart: unless-stopped
+    tmpfs:
+      - /app/data:uid=3011,gid=568,mode=777
     networks: [lefrigo-net]
     labels:
       - traefik.enable=true
@@ -432,8 +433,6 @@ services:
   #         cpus: '0.25'
   #         memory: 256M
 
-volumes:
-  qbitwebui-crosseed:
 networks:
   lefrigo-net:
     external: true
