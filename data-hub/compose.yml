@@ -104,6 +104,7 @@ services:
     image: ghcr.io/mkbula/qbitwebui:latest
     container_name: qbitwebui
     user: ${PUID}:${PGID}
+    working_dir: /data
     environment:
       - ENCRYPTION_KEY=${QBITWEBUI_ENCRYPTION_KEY}
       - DISABLE_REGISTRATION=true
