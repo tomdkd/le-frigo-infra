@@ -178,55 +178,46 @@ services:
     ports:
       - 7007:7007
     networks: [lefrigo-net]
-  borgui:
-      image: ainullcode/borg-ui:latest
-      container_name: borg-web-ui
-      restart: unless-stopped
-      volumes:
-        - ${APPS_DATA_DIR}/borg/data:/data
-        - ${APPS_DATA_DIR}/borg/cache:/home/borg/.cache/borg
-        - /etc/localtime:/etc/localtime:ro
-        - /home/truenas_admin:/local:rw
-        - ${APPS_DATA_DIR}:/containers
-        - ${MEDIA_DATA_DIR}:/media
-      environment:
-        - PORT=${PORT:-8081}
-        - PUID=${PUID:-1001}
-        - PGID=${PGID:-1001}
-        - TZ=Europe/Paris
-        - LOCAL_MOUNT_POINTS=${LOCAL_MOUNT_POINTS:-/local}
-        - REDIS_HOST=redis
-        - REDIS_PORT=6379
-        - REDIS_DB=0
-      depends_on:
-        redis:
-          condition: service_healthy
-      labels:
-        - traefik.enable=true
-        - traefik.http.routers.borgui.rule=Host(`backup.le-frigo.fr`)
-        - traefik.http.routers.borgui.entrypoints=websecure
-        - traefik.http.routers.borgui.tls=true
-        - traefik.http.routers.borgui.tls.certresolver=myresolver
-        - traefik.http.routers.borgui.service=borg-svc
-        - traefik.http.services.borg-svc.loadbalancer.server.port=8081
-        - traefik.http.routers.borgui.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
-        - tinyauth.apps.borgui.ldap.groups=admin
-      networks: [lefrigo-net]
-  redis:
-    image: redis:7-alpine
-    container_name: borg-redis
+  pluton:
+    image: plutonhq/pluton:latest
+    container_name: pluton-backup
     restart: unless-stopped
-    command: >
-      redis-server
-      --maxmemory 2gb
-      --maxmemory-policy allkeys-lru
-      --save ""
-      --appendonly no
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
+    user: 0:0
+    ports:
+      - 5173:5173
+    volumes:
+      - ${APPS_DATA_DIR}/pluton:/data
+      - ${APPS_DATA_DIR}:/mnt/containers:ro
+      - ${MEDIA_DATA_DIR}:/mnt/media:ro
+    environment:
+      ENCRYPTION_KEY: ${PLUTON_ENCRYPTION_KEY}
+      USER_NAME: ${PLUTON_USER_NAME}
+      USER_PASSWORD: ${PLUTON_USER_PASSWORD}
+      # ===== Application Settings =====
+      APP_TITLE: Pluton
+      APP_URL: https://backup.le-frigo.fr
+      SERVER_PORT: 5173
+      MAX_CONCURRENT_BACKUPS: 2
+      SESSION_DURATION: 1
+      # ===== User Interface Security Settings =====
+      ALLOW_CUSTOM_RESTORE_PATH: true
+      ALLOW_FILE_BROWSER: true
+      DISABLE_EVENT_SCRIPTS: false
+      # ===== Docker-specific (do not change) =====
+      NODE_ENV: production
+      IS_DOCKER: "true"
+    networks: [lefrigo-net]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.pluton.rule=Host(`backup.le-frigo.fr`)
+      - traefik.http.routers.pluton.entrypoints=websecure
+      - traefik.http.routers.pluton.tls=true
+      - traefik.http.routers.pluton.tls.certresolver=myresolver
+      - traefik.http.routers.pluton.service=pluton-svc
+      - traefik.http.services.pluton-svc.loadbalancer.server.port=5173
+      - traefik.http.routers.pluton.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
+      - tinyauth.apps.pluton.ldap.groups=admin
+
 volumes:
   dozzle_data:
 networks:
