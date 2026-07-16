@@ -111,6 +111,7 @@ services:
     volumes:
       - ${APPS_DATA_DIR}/qbitwebui/data:/data
       - ${MEDIA_DATA_DIR}/downloads:/downloads:ro
+      - qbitwebui-crosseed:/app/data
     restart: unless-stopped
     networks: [lefrigo-net]
     labels:
@@ -430,6 +431,9 @@ services:
   #       limits:
   #         cpus: '0.25'
   #         memory: 256M
+
+volumes:
+  qbitwebui-crosseed:
 networks:
   lefrigo-net:
     external: true
