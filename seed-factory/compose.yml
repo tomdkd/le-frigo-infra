@@ -1,0 +1,59 @@
+services:
+  jellypartiefin:
+    image: jellyfin/jellyfin:10.11.11
+    container_name: jellypartiefin
+    restart: unless-stopped
+    user: ${PUID}:${PGID}
+    environment:
+      - TZ=Europe/Paris
+      - JELLYFIN_PublishedServerUrl=https://jellypartiefin.le-frigo.fr
+    volumes:
+      - jellypartiefin:/config
+      - ${MEDIA_DATA_DIR}/porn/movies:/porn/movies
+      - ${MEDIA_DATA_DIR}/porn/series:/porn/series
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jellypartiefin.rule=Host(`jellypartiefin.le-frigo.fr`)
+      - traefik.http.routers.jellypartiefin.entrypoints=websecure
+      - traefik.http.routers.jellypartiefin.tls.certresolver=myresolver
+      - traefik.http.services.jellypartiefin-svc.loadbalancer.server.port=8096
+      - traefik.http.routers.jellypartiefin.middlewares=error-pages-middleware@docker
+    networks: [lefrigo-net]
+    deploy:
+      resources:
+        limits:
+          cpus: '4.00'
+          memory: 4096M
+  qbittorrent-seeder:
+    image: lscr.io/linuxserver/qbittorrent:5.2.1
+    container_name: qbittorrent-seeder
+    network_mode: container:gluetun
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Paris
+      - WEBUI_PORT=8081
+    volumes:
+      - qbittorrent_config:/config
+      - ${MEDIA_DATA_DIR}:/data
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 2G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: [CMD-SHELL, wget -q --spider http://localhost:8081/ || exit 1]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+networks:
+  lefrigo-net:
+    external: true
+volumes:
+  jellypartiefin:
+  qbittorrent_config:
