@@ -49,6 +49,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    networks: [lefrigo-net]
     labels:
       - traefik.enable=true
       - traefik.http.routers.qbittorrent.rule=Host(`qbit.le-frigo.fr`)
