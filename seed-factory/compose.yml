@@ -32,6 +32,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=Europe/Paris
+      - WEBUI_PORT=8081
     volumes:
       - qbittorrent_config:/config
       - ${MEDIA_DATA_DIR}:/data
@@ -44,7 +45,7 @@ services:
         reservations:
           memory: 512M
     healthcheck:
-      test: [CMD-SHELL, wget -q --spider http://localhost:8080/ || exit 1]
+      test: [CMD-SHELL, wget -q --spider http://localhost:8081/ || exit 1]
       interval: 1m
       timeout: 10s
       retries: 3
