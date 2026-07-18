@@ -223,7 +223,7 @@ services:
     networks: [lefrigo-net]
   homarr:
     container_name: homarr
-    image: ghcr.io/homarr-labs/homarr:latest
+    image: ghcr.io/homarr-labs/homarr:v1.71.0
     restart: unless-stopped
     volumes:
       - ${APPS_DATA_DIR}/homarr:/appdata
