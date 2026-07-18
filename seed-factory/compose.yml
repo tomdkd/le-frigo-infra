@@ -37,12 +37,6 @@ services:
       - qbittorrent_config:/config
       - ${MEDIA_DATA_DIR}:/data
     restart: always
-    command: >
-      sh -c "mkdir -p /config/qBittorrent && 
-             touch /config/qBittorrent/qBittorrent.conf && 
-             grep -q 'WebUI\\AuthSubnetWhitelist' /config/qBittorrent/qBittorrent.conf || 
-             printf '\n[Preferences]\nWebUI\\LocalHostAuth=false\nWebUI\\AuthSubnetWhitelist=0.0.0.0/0\n' >> /config/qBittorrent/qBittorrent.conf; 
-             exec /init"
     deploy:
       resources:
         limits:
