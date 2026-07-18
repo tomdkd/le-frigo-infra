@@ -27,8 +27,6 @@ services:
   qbittorrent-seeder:
     image: lscr.io/linuxserver/qbittorrent:4.6.7
     container_name: qbittorrent-seeder
-    ports:
-      - 32100:8080
     #network_mode: container:gluetun
     environment:
       - PUID=${PUID}
@@ -51,6 +49,13 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.qbittorrent.rule=Host(`qbit.le-frigo.fr`)
+      - traefik.http.routers.qbittorrent.entrypoints=websecure
+      - traefik.http.routers.qbittorrent.tls.certresolver=myresolver
+      - traefik.http.services.qbittorrent-svc.loadbalancer.server.port=8080
+      - traefik.http.routers.qbittorrent.middlewares=error-pages-middleware@docker
 
 networks:
   lefrigo-net:
