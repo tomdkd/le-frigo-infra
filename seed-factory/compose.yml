@@ -27,7 +27,9 @@ services:
   qbittorrent-seeder:
     image: lscr.io/linuxserver/qbittorrent:5.2.1
     container_name: qbittorrent-seeder
-    network_mode: container:gluetun
+    ports:
+      - 18081:8081
+    #network_mode: container:gluetun
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
