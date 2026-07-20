@@ -202,7 +202,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
   # --- OLLAMA ---
   ollama:
-    image: ollama/ollama:0.30.10
+    image: ollama/ollama:0.32.1
     container_name: ollama
     restart: unless-stopped
     volumes: ['${APPS_DATA_DIR}/ollama/data:/root/.ollama']
