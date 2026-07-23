@@ -295,6 +295,7 @@ services:
       - ${MEDIA_DATA_DIR}/series:/series
       - ${MEDIA_DATA_DIR}/musique:/musiques
       - ${MEDIA_DATA_DIR}/books:/books
+      - ${MEDIA_DATA_DIR}/stuck_in_yesterday:/stuck_in_yesterday
     labels:
       - traefik.enable=true
       - traefik.http.routers.jellyfin.rule=Host(`stream.le-frigo.fr`)
