@@ -93,12 +93,9 @@ services:
     image: henrygd/beszel
     container_name: beszel
     restart: unless-stopped
-    environment:
-      - APP_URL=https://monitoring.le-frigo.fr
-    ports:
-      - 8090:8090
-    volumes:
-      - ${APPS_DATA_DIR}/beszel/hub:/beszel_data
+    environment: [APP_URL=https://monitoring.le-frigo.fr]
+    ports: [8090:8090]
+    volumes: ['${APPS_DATA_DIR}/beszel/hub:/beszel_data']
     labels:
       - traefik.enable=true
       - traefik.http.routers.beszel.rule=Host(`monitoring.le-frigo.fr`)
@@ -111,7 +108,7 @@ services:
       - tinyauth.apps.beszel.ldap.groups=admin
     networks: [lefrigo-net]
     healthcheck:
-      test: ['CMD', '/beszel', 'health', '--url', 'http://localhost:8090']
+      test: [CMD, /beszel, health, --url, http://localhost:8090]
       interval: 120s
       start_period: 10s
       timeout: 5s
@@ -125,9 +122,7 @@ services:
       - /dev/sdb:/dev/sdb
       - /dev/sdc:/dev/sdc
       - /dev/nvme0n1:/dev/nvme0n1
-    cap_add:
-      - SYS_RAWIO
-      - SYS_ADMIN
+    cap_add: [SYS_RAWIO, SYS_ADMIN]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${APPS_DATA_DIR}/beszel/agent:/var/lib/beszel-agent
@@ -140,13 +135,12 @@ services:
       STOCKAGE_DISK: /dev/sda
       APPS_DISK: /dev/nvme0n1
     healthcheck:
-      test: ['CMD', '/agent', 'health']
+      test: [CMD, /agent, health]
       interval: 120s
   dozzle:
     image: amir20/dozzle:latest
     container_name: dozzle
-    volumes:
-      - dozzle_data:/data
+    volumes: [dozzle_data:/data]
     environment:
       - DOZZLE_ENABLE_ACTIONS=true
       - DOZZLE_ENABLE_SHELL=true
@@ -163,7 +157,7 @@ services:
       - traefik.http.routers.dozzle.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
       - tinyauth.apps.dozzle.ldap.groups=admin
     healthcheck:
-      test: ["CMD", "/dozzle", "healthcheck"]
+      test: [CMD, /dozzle, healthcheck]
       interval: 3s
       timeout: 30s
       retries: 5
@@ -173,18 +167,15 @@ services:
     image: amir20/dozzle:latest
     container_name: dozzle-agent
     command: agent
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    ports:
-      - 7007:7007
+    volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
+    ports: [7007:7007]
     networks: [lefrigo-net]
   pluton:
     image: plutonhq/pluton:latest
     container_name: pluton-backup
     restart: unless-stopped
     user: 0:0
-    ports:
-      - 5173:5173
+    ports: [5173:5173]
     volumes:
       - ${APPS_DATA_DIR}/pluton:/data
       - ${APPS_DATA_DIR}:/mnt/containers:ro
@@ -205,7 +196,7 @@ services:
       DISABLE_EVENT_SCRIPTS: false
       # ===== Docker-specific (do not change) =====
       NODE_ENV: production
-      IS_DOCKER: "true"
+      IS_DOCKER: 'true'
     networks: [lefrigo-net]
     labels:
       - traefik.enable=true
@@ -217,7 +208,6 @@ services:
       - traefik.http.services.pluton-svc.loadbalancer.server.port=5173
       - traefik.http.routers.pluton.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
       - tinyauth.apps.pluton.ldap.groups=admin
-
 volumes:
   dozzle_data:
 networks:

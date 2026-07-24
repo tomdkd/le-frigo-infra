@@ -1,3 +1,4 @@
+---
 services:
   jellypartiefin:
     image: jellyfin/jellyfin:10.11.11
@@ -33,9 +34,7 @@ services:
       - PGID=${PGID}
       - TZ=Europe/Paris
       - WEBUI_PORT=8081
-    volumes:
-      - qbittorrent_config:/config
-      - ${MEDIA_DATA_DIR}:/data
+    volumes: [qbittorrent_config:/config, '${MEDIA_DATA_DIR}:/data']
     restart: always
     deploy:
       resources:
@@ -50,7 +49,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
-
 networks:
   lefrigo-net:
     external: true

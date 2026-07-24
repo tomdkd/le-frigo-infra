@@ -112,8 +112,7 @@ services:
       - ${APPS_DATA_DIR}/qbitwebui/data:/data
       - ${MEDIA_DATA_DIR}/downloads:/downloads:ro
     restart: unless-stopped
-    tmpfs:
-      - /app/data:uid=3011,gid=568,mode=777
+    tmpfs: ['/app/data:uid=3011,gid=568,mode=777']
     networks: [lefrigo-net]
     labels:
       - traefik.enable=true
@@ -433,7 +432,6 @@ services:
   #       limits:
   #         cpus: '0.25'
   #         memory: 256M
-
 networks:
   lefrigo-net:
     external: true

@@ -226,14 +226,12 @@ services:
   leafwiki:
     image: ghcr.io/perber/leafwiki:v0.11.4
     container_name: leafwiki
-    ports:
-      - "7298:8080"
+    ports: [7298:8080]
     environment:
       - LEAFWIKI_JWT_SECRET=${LEAFWIKI_JWT_SECRET}
       - LEAFWIKI_ADMIN_PASSWORD=${LEAFWIKI_ADMIN_PASSWORD}
       - LEAFWIKI_PUBLIC_ACCESS=true
-    volumes:
-      - ${APPS_DATA_DIR}/leafwiki:/app/data
+    volumes: ['${APPS_DATA_DIR}/leafwiki:/app/data']
     restart: unless-stopped
     labels:
       - traefik.enable=true
@@ -249,12 +247,9 @@ services:
     image: gotify/server:2.9.1
     container_name: gotify
     restart: unless-stopped
-    ports:
-      - "6756:80"
-    environment:
-      - TZ=Europe/Paris
-    volumes:
-      - gotify_data:/app/data
+    ports: [6756:80]
+    environment: [TZ=Europe/Paris]
+    volumes: [gotify_data:/app/data]
     networks: [lefrigo-net]
   vaultwarden:
     image: vaultwarden/server:1.36.0
