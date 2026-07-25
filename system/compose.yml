@@ -119,7 +119,7 @@ services:
       - traefik.http.routers.lldap.tls=true
       - traefik.http.services.lldap.loadbalancer.server.port=17170
       - traefik.http.routers.lldap.tls.certresolver=myresolver
-      - traefik.http.routers.lldap.middlewares=error-pages-middleware@docker
+      - traefik.http.routers.lldap.middlewares=error-pages-middleware@docker,my-fail2ban@file
   tinyauth:
     image: ghcr.io/steveiliop56/tinyauth:v5
     container_name: tinyauth
