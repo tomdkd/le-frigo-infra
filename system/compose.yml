@@ -36,7 +36,7 @@ services:
       - --ping=true
       - --api.insecure=true
       - --api.dashboard=true
-      - --log.level=INFO
+      - --log.level=DEBUG
       - --accesslog=true
       - --accesslog.filepath=/logs/access.log
       - --accesslog.format=json
