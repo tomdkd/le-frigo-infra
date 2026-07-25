@@ -164,6 +164,8 @@ services:
       - traefik.http.routers.tinyauth.tls=true
       - traefik.http.services.tinyauth.loadbalancer.server.port=3000
       - traefik.http.middlewares.tinyauth-middleware.forwardauth.address=http://tinyauth:3000/api/auth/traefik
+      - traefik.http.middlewares.tinyauth-middleware.forwardauth.trustForwardHeader=true
+      - traefik.http.middlewares.tinyauth-middleware.forwardauth.maxResponseBodySize=2097152
       - traefik.http.routers.tinyauth.tls.certresolver=myresolver
       - traefik.http.routers.tinyauth.middlewares=error-pages-middleware@docker
     depends_on:
