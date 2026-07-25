@@ -34,6 +34,9 @@ services:
       - --api.insecure=true
       - --api.dashboard=true
       - --log.level=INFO
+      - --accesslog=true
+      - --accesslog.filepath=/logs/access.log
+      - --accesslog.format=json
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --providers.docker.endpoint=tcp://docker-proxy-traefik:2375
