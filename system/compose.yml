@@ -36,7 +36,7 @@ services:
       - --ping=true
       - --api.insecure=true
       - --api.dashboard=true
-      - --log.level=DEBUG
+      - --log.level=INFO
       - --accesslog=true
       - --accesslog.filepath=/logs/access.log
       - --accesslog.format=json
@@ -56,6 +56,7 @@ services:
       - --providers.docker.network=lefrigo-net
       - --experimental.plugins.fail2ban.modulename=github.com/tomMoulard/fail2ban
       - --experimental.plugins.fail2ban.version=v0.9.0
+      - --entrypoints.websecure.http.middlewares=my-fail2ban@file
     labels:
       - traefik.enable=true
       - traefik.http.routers.dashboard.rule=Host(`traefik.le-frigo.fr`)
@@ -119,7 +120,7 @@ services:
       - traefik.http.routers.lldap.tls=true
       - traefik.http.services.lldap.loadbalancer.server.port=17170
       - traefik.http.routers.lldap.tls.certresolver=myresolver
-      - traefik.http.routers.lldap.middlewares=error-pages-middleware@docker,my-fail2ban@file
+      - traefik.http.routers.lldap.middlewares=error-pages-middleware@docker
   tinyauth:
     image: ghcr.io/steveiliop56/tinyauth:v5
     container_name: tinyauth
