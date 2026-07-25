@@ -30,6 +30,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${APPS_DATA_DIR}/traefik/acme.json:/acme.json
       - ${APPS_DATA_DIR}/traefik/logs:/logs
+      - ${APPS_DATA_DIR}/traefik/dynamic:/dynamic:ro
     command:
       - --ping=true
       - --api.insecure=true
@@ -41,6 +42,8 @@ services:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --providers.docker.endpoint=tcp://docker-proxy-traefik:2375
+      - --providers.file.directory=/dynamic
+      - --providers.file.watch=true
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --entrypoints.web.http.redirections.entryPoint.to=websecure
@@ -50,6 +53,8 @@ services:
       - --certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}
       - --certificatesresolvers.myresolver.acme.storage=/acme.json
       - --providers.docker.network=lefrigo-net
+      - --experimental.plugins.fail2ban.modulename=github.com/tomMoulard/fail2ban
+      - --experimental.plugins.fail2ban.version=v0.9.0
     labels:
       - traefik.enable=true
       - traefik.http.routers.dashboard.rule=Host(`traefik.le-frigo.fr`)
