@@ -31,6 +31,7 @@ services:
       - ${APPS_DATA_DIR}/traefik/acme.json:/acme.json
       - ${APPS_DATA_DIR}/traefik/logs:/logs
       - ${APPS_DATA_DIR}/traefik/dynamic:/dynamic:ro
+      - ${APPS_DATA_DIR}/traefik/plugins-storage:/plugins-storage
     command:
       - --ping=true
       - --api.insecure=true
