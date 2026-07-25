@@ -26,9 +26,13 @@ services:
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     ports: [81:80, 444:443]
+    configs:
+      - source: dynamic_conf
+        target: /dynamic_conf.yml
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${APPS_DATA_DIR}/traefik/acme.json:/acme.json
+      - ${APPS_DATA_DIR}/traefik/logs:/logs
     command:
       - --ping=true
       - --api.insecure=true
@@ -40,9 +44,10 @@ services:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --providers.docker.endpoint=tcp://docker-proxy-traefik:2375
+      - --providers.file.filename=/dynamic_conf.yml
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
-      - --entrypoints.websecure.http.middlewares=my-fail2ban@docker
+      - --entrypoints.websecure.http.middlewares=my-fail2ban@file
       - --entrypoints.web.http.redirections.entryPoint.to=websecure
       - --entrypoints.web.http.redirections.entryPoint.scheme=https
       - --certificatesresolvers.myresolver.acme.httpchallenge=true
@@ -54,12 +59,6 @@ services:
       - --experimental.plugins.fail2ban.version=v0.9.0
     labels:
       - traefik.enable=true
-      - traefik.http.middlewares.my-fail2ban.plugin.fail2ban.rules.enabled=true
-      - traefik.http.middlewares.my-fail2ban.plugin.fail2ban.rules.findtime=10m
-      - traefik.http.middlewares.my-fail2ban.plugin.fail2ban.rules.maxretry=4
-      - traefik.http.middlewares.my-fail2ban.plugin.fail2ban.rules.bantime=3h
-      - traefik.http.middlewares.my-fail2ban.plugin.fail2ban.rules.statuscode=400,401,403-499
-      - traefik.http.middlewares.my-fail2ban.plugin.fail2ban.allowlist.ip=127.0.0.1/32,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       - traefik.http.routers.dashboard.rule=Host(`traefik.le-frigo.fr`)
       - traefik.http.routers.dashboard.service=api@internal
       - traefik.http.routers.dashboard.entrypoints=websecure
@@ -276,3 +275,23 @@ networks:
     name: lldap-auth-net
   lefrigo-net:
     external: true
+
+configs:
+  dynamic_conf:
+    content: |
+      http:
+        middlewares:
+          my-fail2ban:
+            plugin:
+              fail2ban:
+                enabled: true
+                findtime: 10m
+                maxretry: 4
+                bantime: 3h
+                statuscode: 400,401,403-499
+                allowlist:
+                  ip:
+                    - 127.0.0.1/32
+                    - 10.0.0.0/8
+                    - 172.16.0.0/12
+                    - 192.168.0.0/16
