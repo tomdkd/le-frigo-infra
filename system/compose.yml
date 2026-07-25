@@ -58,7 +58,7 @@ services:
       - --experimental.plugins.fail2ban.version=v0.9.0
       - --entrypoints.websecure.http.middlewares=my-fail2ban@file
     labels:
-      - traefik.enable=true
+      - traefik.enable=false
       - traefik.http.routers.dashboard.rule=Host(`traefik.le-frigo.fr`)
       - traefik.http.routers.dashboard.service=api@internal
       - traefik.http.routers.dashboard.entrypoints=websecure
@@ -79,7 +79,6 @@ services:
     user: ${PUID}:${PGID}
     restart: unless-stopped
     volumes:
-      # On monte le dossier où Traefik écrit ses logs
       - ${APPS_DATA_DIR}/traefik/logs:/logs:ro
       - ${APPS_DATA_DIR}/traefik-dashboard/positions:/data
     environment:
@@ -96,7 +95,6 @@ services:
       start_period: 30s
     networks:
       - lefrigo-net
-
   traefik-dashboard:
     image: hhftechnology/traefik-log-dashboard:latest
     container_name: traefik-log-dashboard
@@ -118,6 +116,7 @@ services:
       - traefik.http.routers.traefik-dashboard.entrypoints=websecure
       - traefik.http.routers.traefik-dashboard.tls.certresolver=myresolver
       - traefik.http.routers.traefik-dashboard.middlewares=tinyauth-middleware@docker
+      - tinyauth.apps.traefik-dashboard.ldap.groups=admin
     depends_on:
       traefik-agent:
         condition: service_healthy
