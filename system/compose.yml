@@ -73,6 +73,56 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+  traefik-agent:
+    image: hhftechnology/traefik-log-dashboard-agent:latest
+    container_name: traefik-log-dashboard-agent
+    user: ${PUID}:${PGID}
+    restart: unless-stopped
+    volumes:
+      # On monte le dossier où Traefik écrit ses logs
+      - ${APPS_DATA_DIR}/traefik/logs:/logs:ro
+      - ${APPS_DATA_DIR}/traefik-dashboard/positions:/data
+    environment:
+      - TRAEFIK_LOG_DASHBOARD_ACCESS_PATH=/logs/access.log
+      - TRAEFIK_LOG_DASHBOARD_ERROR_PATH=/logs/traefik.log
+      - TRAEFIK_LOG_DASHBOARD_AUTH_TOKEN=${TRAEFIK_LOG_DASHBOARD_AUTH_TOKEN}
+      - TRAEFIK_LOG_DASHBOARD_SYSTEM_MONITORING=true
+      - TRAEFIK_LOG_DASHBOARD_LOG_FORMAT=json
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/api/logs/status"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - lefrigo-net
+
+  traefik-dashboard:
+    image: hhftechnology/traefik-log-dashboard:latest
+    container_name: traefik-log-dashboard
+    restart: unless-stopped
+    volumes:
+      - traefik-dashboard-data:/app/data
+      - traefik-dashboard-positions:/data
+    environment:
+      - AGENT_API_URL=http://traefik-agent:5000
+      - AGENT_API_TOKEN=${TRAEFIK_LOG_DASHBOARD_AUTH_TOKEN}
+      - AGENT_NAME=Le-Frigo
+      - NODE_ENV=production
+      - PORT=3000
+      - NEXT_PUBLIC_SHOW_DEMO_PAGE=false
+      - NEXT_PUBLIC_MAX_LOGS_DISPLAY=500
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik-dashboard.rule=Host(`logs.le-frigo.fr`)
+      - traefik.http.routers.traefik-dashboard.entrypoints=websecure
+      - traefik.http.routers.traefik-dashboard.tls.certresolver=myresolver
+      - traefik.http.routers.traefik-dashboard.middlewares=tinyauth-middleware@docker
+    depends_on:
+      traefik-agent:
+        condition: service_healthy
+    networks:
+      - lefrigo-net
   ldap-db:
     image: postgres:16-alpine
     container_name: ldap-db
@@ -275,3 +325,7 @@ networks:
     name: lldap-auth-net
   lefrigo-net:
     external: true
+
+volumes:
+  traefik-dashboard-data:
+  traefik-dashboard-positions:
