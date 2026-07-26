@@ -216,6 +216,8 @@ services:
     environment:
       - GID=568
       - COLLECTIONS=crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/base-http-scenarios
+      - CUSTOM_HOSTNAME=traefik
+      - FILES_PATH=/var/log/traefik/*.log
     volumes:
       - ${APPS_DATA_DIR}/traefik/logs:/var/log/traefik:ro
       - ${APPS_DATA_DIR}/crowdsec/data:/var/lib/crowdsec/data
