@@ -320,6 +320,35 @@ services:
     depends_on:
       tinyauth:
         condition: service_healthy
+  crowdsec:
+    image: crowdsecurity/crowdsec:v1.7.8
+    container_name: crowdsec
+    restart: unless-stopped
+    user: ${PUID}:${PGID}
+    environment:
+      - GID=568
+      - COLLECTIONS=crowdsecurity/traefik crowdsecurity/http-crawlers crowdsecurity/base-http-scenarios
+    volumes:
+      - ${APPS_DATA_DIR}/traefik/logs:/var/log/traefik:ro
+      - crowdsec-data:/var/lib/crowdsec/data
+      - crowdsec-config:/etc/crowdsec
+    networks:
+      - lefrigo-net
+  crowdsec-dashboard:
+    image: crowdsecurity/metabase-prerequisites:latest
+    container_name: crowdsec-dashboard
+    restart: unless-stopped
+    volumes:
+      - crowdsec-data:/var/lib/crowdsec/data:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.crowdsec-dash.rule=Host(`security.le-frigo.fr`)
+      - traefik.http.routers.crowdsec-dash.entrypoints=websecure
+      - traefik.http.routers.crowdsec-dash.tls.certresolver=myresolver
+      - traefik.http.routers.crowdsec-dash.middlewares=tinyauth-middleware@docker,error-pages-middleware
+      - traefik.http.services.crowdsec-dash.loadbalancer.server.port=3000
+    networks:
+      - lefrigo-net
 networks:
   traefik-proxy-net:
     name: traefik-proxy-net
@@ -333,3 +362,5 @@ networks:
 volumes:
   traefik-dashboard-data:
   traefik-dashboard-positions:
+  crowdsec-data:
+  crowdsec-config:
