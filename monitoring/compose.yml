@@ -212,10 +212,10 @@ services:
     image: crowdsecurity/crowdsec:v1.7.8
     container_name: crowdsec
     restart: unless-stopped
-    user: ${PUID}:${PGID}
+    #user: ${PUID}:${PGID}
     environment:
       - GID=568
-      - COLLECTIONS=crowdsecurity/traefik crowdsecurity/http-crawlers crowdsecurity/base-http-scenarios
+      - COLLECTIONS=crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/base-http-scenarios
     volumes:
       - ${APPS_DATA_DIR}/traefik/logs:/var/log/traefik:ro
       - ${APPS_DATA_DIR}/crowdsec/data:/var/lib/crowdsec/data
