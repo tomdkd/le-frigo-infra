@@ -54,9 +54,14 @@ services:
       - --certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}
       - --certificatesresolvers.myresolver.acme.storage=/acme.json
       - --providers.docker.network=lefrigo-net
-      - --experimental.plugins.fail2ban.modulename=github.com/tomMoulard/fail2ban
-      - --experimental.plugins.fail2ban.version=v0.9.0
-      - --entrypoints.websecure.http.middlewares=my-fail2ban@file
+      ## FAIL2BAN PLUGIN
+      # - --experimental.plugins.fail2ban.modulename=github.com/tomMoulard/fail2ban
+      # - --experimental.plugins.fail2ban.version=v0.9.0
+      # - --entrypoints.websecure.http.middlewares=my-fail2ban@file
+      ## CROWDSEC PLUGIN
+      - --experimental.plugins.crowdsec-bouncer-traefik-plugin.modulename=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+      - --experimental.plugins.crowdsec-bouncer-traefik-plugin.version=v1.7.0-alpha
+      - --entrypoints.websecure.http.middlewares=crowdsec-bouncer-traefik-plugin@file
     labels:
       - traefik.enable=false
       - traefik.http.routers.dashboard.rule=Host(`traefik.le-frigo.fr`)
