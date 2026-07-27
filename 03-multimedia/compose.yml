@@ -98,7 +98,7 @@ services:
       - lefrigo-net
   # --- AUDIOBOOKSHELF ---
   audiobookshelf:
-    image: ghcr.io/advplyr/audiobookshelf:2.35.1
+    image: ghcr.io/advplyr/audiobookshelf:2.36.0
     container_name: audiobookshelf
     ports: [8085:80]
     user: ${PUID}:${PGID}
