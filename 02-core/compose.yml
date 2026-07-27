@@ -38,7 +38,7 @@ services:
       - IMAGES=1
       - INFO=1
       - PING=1
-    image: tecnativa/docker-socket-proxy:v0.4.2
+    image: tecnativa/docker-socket-proxy:v0.5.0
     networks: [core-docker-proxy]
     privileged: true
     volumes:
