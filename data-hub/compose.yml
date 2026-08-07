@@ -33,7 +33,7 @@ services:
   #  NETWORK & DOWNLOAD
   # ==========================================
   gluetun:
-    image: qmcgaw/gluetun:pr-3361
+    image: qmcgaw/gluetun:v3.41.3
     container_name: gluetun
     user: 0:0
     cap_add: [NET_ADMIN]
@@ -43,7 +43,7 @@ services:
       - VPN_TYPE=wireguard
       - WIREGUARD_PRIVATE_KEY=${VPN_WG_PRIVATE_KEY}
       - WIREGUARD_ADDRESSES=${VPN_WG_ADDRESS}
-      - SERVER_NAMES=LT#38
+      - SERVER_NAMES=BG#26
       - OPENVPN_USER=${OPENVPN_USER}
       - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
       - VPN_PORT_FORWARDING=on
