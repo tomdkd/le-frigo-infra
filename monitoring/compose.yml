@@ -89,54 +89,6 @@ services:
       timeout: 30s
       retries: 5
       start_period: 30s
-  beszel:
-    image: henrygd/beszel
-    container_name: beszel
-    restart: unless-stopped
-    environment: [APP_URL=https://monitoring.le-frigo.fr]
-    ports: [8090:8090]
-    volumes: ['${APPS_DATA_DIR}/beszel/hub:/beszel_data']
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.beszel.rule=Host(`monitoring.le-frigo.fr`)
-      - traefik.http.routers.beszel.entrypoints=websecure
-      - traefik.http.routers.beszel.tls=true
-      - traefik.http.routers.beszel.tls.certresolver=myresolver
-      - traefik.http.routers.beszel.service=beszel-svc
-      - traefik.http.services.beszel-svc.loadbalancer.server.port=8090
-      - traefik.http.routers.beszel.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
-      - tinyauth.apps.beszel.ldap.groups=admin
-    networks: [lefrigo-net]
-    healthcheck:
-      test: [CMD, /beszel, health, --url, http://localhost:8090]
-      interval: 120s
-      start_period: 10s
-      timeout: 5s
-  beszel-agent:
-    image: henrygd/beszel-agent
-    container_name: beszel-agent
-    restart: unless-stopped
-    network_mode: host
-    devices:
-      - /dev/sda:/dev/sda
-      - /dev/sdb:/dev/sdb
-      - /dev/sdc:/dev/sdc
-      - /dev/nvme0n1:/dev/nvme0n1
-    cap_add: [SYS_RAWIO, SYS_ADMIN]
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ${APPS_DATA_DIR}/beszel/agent:/var/lib/beszel-agent
-    environment:
-      LISTEN: 45876
-      KEY: ${BESZEL_AGENT_KEY}
-      TOKEN: ${BESZEL_AGENT_TOKEN}
-      HUB_URL: https://monitoring.le-frigo.fr
-      FILESYSTEM: /dev/nvme0n1
-      STOCKAGE_DISK: /dev/sda
-      APPS_DISK: /dev/nvme0n1
-    healthcheck:
-      test: [CMD, /agent, health]
-      interval: 120s
   dozzle:
     image: amir20/dozzle:latest
     container_name: dozzle
@@ -170,44 +122,6 @@ services:
     volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
     ports: [7007:7007]
     networks: [lefrigo-net]
-  pluton:
-    image: plutonhq/pluton:latest
-    container_name: pluton-backup
-    restart: unless-stopped
-    user: 0:0
-    ports: [5173:5173]
-    volumes:
-      - ${APPS_DATA_DIR}/pluton:/data
-      - ${APPS_DATA_DIR}:/mnt/containers:ro
-      - ${MEDIA_DATA_DIR}:/mnt/media:ro
-    environment:
-      ENCRYPTION_KEY: ${PLUTON_ENCRYPTION_KEY}
-      USER_NAME: ${PLUTON_USER_NAME}
-      USER_PASSWORD: ${PLUTON_USER_PASSWORD}
-      # ===== Application Settings =====
-      APP_TITLE: Pluton
-      APP_URL: https://backup.le-frigo.fr
-      SERVER_PORT: 5173
-      MAX_CONCURRENT_BACKUPS: 2
-      SESSION_DURATION: 1
-      # ===== User Interface Security Settings =====
-      ALLOW_CUSTOM_RESTORE_PATH: true
-      ALLOW_FILE_BROWSER: true
-      DISABLE_EVENT_SCRIPTS: false
-      # ===== Docker-specific (do not change) =====
-      NODE_ENV: production
-      IS_DOCKER: 'true'
-    networks: [lefrigo-net]
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.pluton.rule=Host(`backup.le-frigo.fr`)
-      - traefik.http.routers.pluton.entrypoints=websecure
-      - traefik.http.routers.pluton.tls=true
-      - traefik.http.routers.pluton.tls.certresolver=myresolver
-      - traefik.http.routers.pluton.service=pluton-svc
-      - traefik.http.services.pluton-svc.loadbalancer.server.port=5173
-      - traefik.http.routers.pluton.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
-      - tinyauth.apps.pluton.ldap.groups=admin
   crowdsec:
     image: crowdsecurity/crowdsec:v1.7.8
     container_name: crowdsec
@@ -223,36 +137,8 @@ services:
       - ${APPS_DATA_DIR}/crowdsec/config:/etc/crowdsec
     networks:
       - lefrigo-net
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: crowdsec-prometheus
-    restart: unless-stopped
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    volumes:
-      - ${APPS_DATA_DIR}/crowdsec/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus-data:/prometheus
-    networks:
-      - lefrigo-net
-  grafana:
-    image: grafana/grafana:latest
-    container_name: crowdsec-grafana
-    restart: unless-stopped
-    volumes:
-      - grafana-data:/var/lib/grafana
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.crowdsec-dash.rule=Host(`security.le-frigo.fr`)
-      - traefik.http.routers.crowdsec-dash.entrypoints=websecure
-      - traefik.http.routers.crowdsec-dash.tls.certresolver=myresolver
-      - traefik.http.routers.crowdsec-dash.middlewares=tinyauth-middleware@docker,error-pages-middleware
-      - traefik.http.services.crowdsec-dash.loadbalancer.server.port=3000
-    networks:
-      - lefrigo-net
 volumes:
   dozzle_data:
-  prometheus-data:
-  grafana-data:
 networks:
   lefrigo-net:
     external: true
