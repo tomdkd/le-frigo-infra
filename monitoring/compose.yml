@@ -137,6 +137,37 @@ services:
       - ${APPS_DATA_DIR}/crowdsec/config:/etc/crowdsec
     networks:
       - lefrigo-net
+  backrest:
+    image: ghcr.io/garethgeorge/backrest:latest
+    container_name: backrest
+    hostname: backrest
+    user: ${PUID}:${PGID}
+    volumes:
+      - ${APPS_DATA_DIR}/backrest/data:/data
+      - ${APPS_DATA_DIR}/backrest/config:/config
+      - ${APPS_DATA_DIR}/backrest/cache:/cache
+      - ${APPS_DATA_DIR}/backrest/tmp:/tmp
+      - ${APPS_DATA_DIR}/backrest/rclone:/root/.config/rclone
+      - ${MEDIA_DATA_DIR}:/userdata
+    environment:
+      - BACKREST_DATA=/data
+      - BACKREST_CONFIG=/config/config.json
+      - XDG_CACHE_HOME=/cache
+      - TMPDIR=/tmp
+      - TZ=Europe/Paris
+    ports:
+      - "9898:9898"
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.backrest.rule=Host(`backup.le-frigo.fr`)
+      - traefik.http.routers.backrest.entrypoints=websecure
+      - traefik.http.routers.backrest.tls=true
+      - traefik.http.routers.backrest.tls.certresolver=myresolver
+      - traefik.http.routers.backrest.service=backrest-svc
+      - traefik.http.services.backrest-svc.loadbalancer.server.port=9898
+      - traefik.http.routers.backrest.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
+      - tinyauth.apps.backrest.ldap.groups=admin
 volumes:
   dozzle_data:
 networks:
