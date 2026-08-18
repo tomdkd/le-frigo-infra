@@ -93,13 +93,18 @@ services:
       - TRAEFIK_LOG_DASHBOARD_SYSTEM_MONITORING=true
       - TRAEFIK_LOG_DASHBOARD_LOG_FORMAT=json
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/api/logs/status"]
+      test:
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://localhost:5000/api/logs/status
       interval: 2m
       timeout: 10s
       retries: 3
       start_period: 30s
-    networks:
-      - lefrigo-net
+    networks: [lefrigo-net]
   traefik-dashboard:
     image: hhftechnology/traefik-log-dashboard:latest
     container_name: traefik-log-dashboard
@@ -125,8 +130,7 @@ services:
     depends_on:
       traefik-agent:
         condition: service_healthy
-    networks:
-      - lefrigo-net
+    networks: [lefrigo-net]
   ldap-db:
     image: postgres:16-alpine
     container_name: ldap-db
@@ -329,7 +333,6 @@ networks:
     name: lldap-auth-net
   lefrigo-net:
     external: true
-
 volumes:
   traefik-dashboard-data:
   traefik-dashboard-positions:

@@ -126,7 +126,7 @@ services:
     image: crowdsecurity/crowdsec:v1.7.8
     container_name: crowdsec
     restart: unless-stopped
-    #user: ${PUID}:${PGID}
+    # user: ${PUID}:${PGID}
     environment:
       - GID=568
       - COLLECTIONS=crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/base-http-scenarios
@@ -135,8 +135,7 @@ services:
       - ${APPS_DATA_DIR}/traefik/logs:/var/log/traefik:ro
       - ${APPS_DATA_DIR}/crowdsec/data:/var/lib/crowdsec/data
       - ${APPS_DATA_DIR}/crowdsec/config:/etc/crowdsec
-    networks:
-      - lefrigo-net
+    networks: [lefrigo-net]
   backrest:
     image: ghcr.io/garethgeorge/backrest:latest
     container_name: backrest
@@ -155,8 +154,7 @@ services:
       - XDG_CACHE_HOME=/cache
       - TMPDIR=/tmp
       - TZ=Europe/Paris
-    ports:
-      - "9898:9898"
+    ports: [9898:9898]
     restart: unless-stopped
     labels:
       - traefik.enable=true
@@ -168,6 +166,12 @@ services:
       - traefik.http.services.backrest-svc.loadbalancer.server.port=9898
       - traefik.http.routers.backrest.middlewares=tinyauth-middleware@docker,error-pages-middleware@docker
       - tinyauth.apps.backrest.ldap.groups=admin
+  uptime-kuma:
+    image: louislam/uptime-kuma:2
+    restart: unless-stopped
+    volumes: ['${APPS_DATA_DIR}/uptime-kuma:/app/data']
+    ports: [3001:3001]
+    networks: [lefrigo-net]
 volumes:
   dozzle_data:
 networks:
