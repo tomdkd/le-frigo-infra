@@ -171,10 +171,12 @@ services:
     restart: unless-stopped
     volumes: ['${APPS_DATA_DIR}/uptime-kuma:/app/data']
     ports: [3001:3001]
-    networks: [lefrigo-net]
+    networks: [lefrigo-net, traefik-proxy-net]
 volumes:
   dozzle_data:
 networks:
   lefrigo-net:
+    external: true
+  traefik-proxy-net:
     external: true
   jellystat-net:
