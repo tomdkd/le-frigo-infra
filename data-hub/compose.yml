@@ -262,7 +262,7 @@ services:
       prowlarr:
         condition: service_healthy
   metube:
-    image: alexta69/metube:2026.06.06
+    image: alexta69/metube:2026.08.21
     user: ${PUID}:${PGID}
     container_name: metube
     restart: unless-stopped
@@ -406,32 +406,6 @@ services:
         limits:
           cpus: '0.50'
           memory: 512M
-  # vibrdrome-web-preprod:
-  #   image: ddmoney420/vibrdrome-web:v1.8.1-beta.2
-  #   container_name: vibrdrome-web-preprod
-  #   environment:
-  #     - VIBRDROME_DEFAULT_SERVER=https://music.api.preprod.le-frigo.fr
-  #   restart: unless-stopped
-  #   labels:
-  #     - traefik.enable=true
-  #     - traefik.http.routers.vibrdrome-preprod.rule=Host(`music.preprod.le-frigo.fr`)
-  #     - traefik.http.routers.vibrdrome-preprod.entrypoints=websecure
-  #     - traefik.http.routers.vibrdrome-preprod.tls.true
-  #     - traefik.http.routers.vibrdrome-preprod.tls.certresolver=myresolver
-  #     - traefik.http.routers.vibrdrome-preprod.service=vibrdrome-preprod-svc
-  #     - traefik.http.services.vibrdrome-preprod-svc.loadbalancer.server.port=80
-  #     - traefik.http.routers.vibrdrome-preprod.middlewares=tinyauth-preprod-middleware@docker,error-pages-preprod-middleware@docker
-  #     - tinyauth.apps.vibrdrome-preprod.ldap.groups=user,admin
-  #   security_opt: [no-new-privileges:true]
-  #   depends_on:
-  #     gonic-preprod:
-  #       condition: service_started
-  #   networks: [lefrigo-net]
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '0.25'
-  #         memory: 256M
 networks:
   lefrigo-net:
     external: true
