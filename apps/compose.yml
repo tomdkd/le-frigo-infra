@@ -134,7 +134,7 @@ services:
     networks: [lefrigo-net]
   # --- PICARD ---
   picard:
-    image: jlesage/musicbrainz-picard:v26.05.2
+    image: jlesage/musicbrainz-picard:v26.08.2
     container_name: picard
     ports: [5800:5800]
     environment: ['USER_ID=${PUID}', 'GROUP_ID=${PGID}']
