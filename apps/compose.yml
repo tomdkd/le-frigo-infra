@@ -252,7 +252,7 @@ services:
     volumes: [gotify_data:/app/data]
     networks: [lefrigo-net]
   vaultwarden:
-    image: vaultwarden/server:1.36.0
+    image: vaultwarden/server:1.37.2
     container_name: vaultwarden
     restart: unless-stopped
     environment:
