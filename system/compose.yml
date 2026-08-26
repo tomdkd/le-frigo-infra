@@ -25,7 +25,9 @@ services:
     user: ${PUID}:${PGID}
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
-    ports: [81:80, 444:443]
+    ports:
+      - 81:80
+      - 444:443
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${APPS_DATA_DIR}/traefik/acme.json:/acme.json
