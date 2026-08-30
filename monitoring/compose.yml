@@ -24,12 +24,6 @@ services:
           memory: 512M
         reservations:
           memory: 256M
-    healthcheck:
-      test: [CMD, curl, -f, http://localhost:8978/]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
   jellystat-db:
     image: postgres:18.1
     shm_size: 1gb
