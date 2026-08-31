@@ -225,6 +225,7 @@ services:
       - TINYAUTH_OIDC_CLIENTS_JELLYSWEEP_NAME=Jellysweep
       - TINYAUTH_OIDC_CLIENTS_JELLYSWEEP_TRUSTEDREDIRECTURIS=https://jellysweep.le-frigo.fr/auth/oidc/callback
       - DISABLE_CONTINUE=true
+      - DISABLE_CONSENT=true
       - TINYAUTH_LDAP_GROUPCACHETTL=0
     labels:
       - traefik.enable=true
